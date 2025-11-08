@@ -1,15 +1,15 @@
 import { fileURLToPath } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: "2024-04-03",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
   },
   runtimeConfig: {
     public: {
@@ -20,7 +20,6 @@ export default defineNuxtConfig({
     '@': fileURLToPath(new URL('./app', import.meta.url)),
   },
   modules: [
-    "shadcn-nuxt",
     "@nuxtjs/color-mode",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
@@ -40,16 +39,4 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: "",
   },
-  shadcn: {
-    /**
-     * Prefix for all the imported component
-     */
-    prefix: "",
-    /**
-     * Directory that the component lives in.
-     * @default "./components/ui"
-     */
-    componentDir: "./app/components/ui",
-  },
-  plugins: ["~/plugins/auto-animate.ts"],
 });
