@@ -1,10 +1,10 @@
-import { defineNuxtConfig } from "nuxt/config";
+import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: "2024-04-03",
   devtools: { enabled: true },
-  css: ["@/assets/css/main.css"],
+  css: ["~/assets/css/main.css"],
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -16,15 +16,10 @@ export default defineNuxtConfig({
       apiUrl: process.env.API_URL,
     },
   },
-  vite: {
-    resolve: {
-      alias: {
-        '@vue/devtools-api': '@vue/devtools-api/lib/esm/index.js'
-      }
-    }
+  alias: {
+    '@': fileURLToPath(new URL('./app', import.meta.url)),
   },
   modules: [
-    "@nuxtjs/tailwindcss",
     "shadcn-nuxt",
     "@nuxtjs/color-mode",
     "@nuxtjs/i18n",
@@ -32,7 +27,7 @@ export default defineNuxtConfig({
   ],
   i18n: {
     strategy: "prefix_and_default",
-    langDir: "locales",
+    langDir: "./locales",
     defaultLocale: "fr",
     lazy: true,
     locales: [
@@ -54,7 +49,7 @@ export default defineNuxtConfig({
      * Directory that the component lives in.
      * @default "./components/ui"
      */
-    componentDir: "./components/ui",
+    componentDir: "./app/components/ui",
   },
   plugins: ["~/plugins/auto-animate.ts"],
-} as any);
+});
