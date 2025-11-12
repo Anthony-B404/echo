@@ -1,0 +1,221 @@
+{
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "testimonials": "Testimonials",
+    "downloadApp": "Download App",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "footer": {
+    "resources": {
+      "title": "Resources",
+      "helpCenter": "Help center",
+      "docs": "Docs",
+      "roadmap": "Roadmap",
+      "changelog": "Changelog"
+    },
+    "features": {
+      "title": "Features",
+      "affiliates": "Affiliates",
+      "portal": "Portal",
+      "jobs": "Jobs",
+      "sponsors": "Sponsors"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "pricing": "Pricing",
+      "careers": "Careers",
+      "blog": "Blog"
+    },
+    "newsletter": {
+      "label": "Subscribe to our newsletter",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe",
+      "subscribed": "Subscribed!",
+      "subscribedMessage": "You've been subscribed to our newsletter."
+    },
+    "builtWith": "Built with Nuxt UI"
+  },
+  "home": {
+    "seo": {
+      "title": "Nuxt Landing Template",
+      "description": "Boost your coding productivity with AI-driven insights that tell you when and how to code most efficiently."
+    },
+    "hero": {
+      "title": "AI-Powered Developer Productivity Platform",
+      "description": "Boost your coding productivity with AI-driven insights that tell you when and how to code most efficiently.",
+      "getStarted": "Get started",
+      "cloneGithub": "Clone on GitHub"
+    },
+    "section": {
+      "title": "***Revolutionize*** your coding experience",
+      "description": "Transform your development workflow with AI-powered insights and personalized productivity optimization.",
+      "features": {
+        "optimizeFocus": {
+          "title": "Optimize your focus time",
+          "description": "Let AI identify your peak coding hours and adapt to your natural rhythm. Focus on what matters most - writing great code, while our system optimizes your productivity patterns."
+        },
+        "trackHours": {
+          "title": "Track your best coding hours",
+          "description": "Track when you code best with smart analytics. Get actionable insights to tackle challenging tasks during your peak performance hours."
+        },
+        "improveWorkflow": {
+          "title": "Improve workflow efficiency",
+          "description": "Automate your workflow optimization from code snippets to focus management. Ship better code faster with a streamlined development process."
+        }
+      }
+    },
+    "features": {
+      "title": "Take control of your ***productivity***",
+      "description": "Make every coding session count with smart analytics and workflow optimization.",
+      "items": {
+        "aiTracking": {
+          "title": "AI-Powered Focus Tracking",
+          "description": "Discover your optimal coding hours with real-time AI analysis of your productivity patterns."
+        },
+        "distractionAlerts": {
+          "title": "Distraction Alerts",
+          "description": "Get notified when your focus drifts and bring your attention back."
+        },
+        "codeSnippets": {
+          "title": "Smart Code Snippets",
+          "description": "Save and reuse frequently used code blocks for efficiency."
+        },
+        "deepWork": {
+          "title": "Deep Work Mode",
+          "description": "Block distractions and set structured coding sessions with built-in Pomodoro timers."
+        },
+        "collaborative": {
+          "title": "Collaborative Insights",
+          "description": "Sync your workflow with teammates and see when they are most productive."
+        },
+        "analytics": {
+          "title": "Performance Analytics",
+          "description": "Track your coding metrics and get insights to boost your speed and code quality."
+        }
+      }
+    },
+    "steps": {
+      "title": "Start coding smarter in ***3*** ***steps***",
+      "description": "Transform your development workflow with our AI-powered assistant.",
+      "items": {
+        "connect": {
+          "title": "Connect Your IDE",
+          "description": "Seamlessly integrate with VS Code, JetBrains, or your preferred editor. Get started in under 2 minutes with zero configuration needed."
+        },
+        "track": {
+          "title": "Track & Analyze",
+          "description": "Our AI silently monitors your coding patterns to identify your peak productivity hours and potential workflow bottlenecks."
+        },
+        "optimize": {
+          "title": "Optimize & Code Smarter",
+          "description": "Receive personalized recommendations to enhance your coding efficiency. Watch your productivity soar with data-driven insights."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Choose your ***productivity*** path",
+      "description": "Unlock AI-powered coding efficiency with our flexible plans. Whether you're a solo developer or part of a team, we have the perfect toolset to maximize your development workflow.",
+      "month": "month",
+      "buyNow": "Buy now",
+      "plans": {
+        "pro": {
+          "title": "Pro Developer",
+          "description": "Perfect for individual developers focused on maximizing productivity.",
+          "features": {
+            "tracking": "AI productivity tracking to optimize your peak coding hours",
+            "alerts": "Smart distraction alerts to maintain deep focus",
+            "library": "Personal code snippet library for faster development",
+            "deepWork": "Deep Work Mode with Pomodoro timer integration",
+            "dashboard": "Performance analytics dashboard",
+            "support": "Priority email support"
+          }
+        },
+        "team": {
+          "title": "Team Developer",
+          "description": "For bootstrappers and indie hackers.",
+          "features": {
+            "everything": "Everything in Pro Developer",
+            "teamAnalytics": "Team productivity analytics and insights",
+            "sharing": "Collaborative code snippet sharing",
+            "crossTeam": "Cross-team performance tracking",
+            "synchronized": "Synchronized deep work sessions",
+            "teamSupport": "Priority team support with dedicated manager"
+          }
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Join thousands of productive ***developers***",
+      "description": "See how developers are transforming their coding workflow and achieving more with our AI-powered platform.",
+      "items": {
+        "sarah": {
+          "quote": "Since using this tool, my productivity has doubled. The AI insights helped me find my perfect coding rhythm and now I ship features twice as fast.",
+          "name": "Sarah Moriceau",
+          "role": "Brand Designer"
+        },
+        "sebastien": {
+          "quote": "Game-changer for our team. The focus tracking and smart alerts helped us reduce meeting interruptions by 40% and increased our sprint velocity.",
+          "name": "Sébastien Chopin",
+          "role": "Lead Software Engineer"
+        },
+        "benjamin": {
+          "quote": "Finally, a productivity tool that understands developers. The AI features helped me identify my peak coding hours and now I accomplish more in less time.",
+          "name": "Benjamin Canac",
+          "role": "Senior Frontend Developer"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to build an amazing landing page?",
+      "description": "Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today.",
+      "startBuilding": "Start building",
+      "viewGithub": "View on GitHub"
+    },
+    "pricing": {
+      "title": "Choose your productivity path",
+      "description": "Unlock AI-powered coding efficiency with our flexible plans. Whether you're a solo developer or part of a team, we have the perfect toolset to maximize your development workflow.",
+      "month": "month",
+      "buyNow": "Buy now",
+      "plans": {
+        "pro": {
+          "title": "Pro Developer",
+          "description": "Perfect for individual developers focused on maximizing productivity.",
+          "features": {
+            "tracking": "AI productivity tracking to optimize your peak coding hours",
+            "alerts": "Smart distraction alerts to maintain deep focus",
+            "library": "Personal code snippet library for faster development",
+            "deepWork": "Deep Work Mode with Pomodoro timer integration",
+            "dashboard": "Performance analytics dashboard",
+            "support": "Priority email support"
+          }
+        },
+        "team": {
+          "title": "Team Developer",
+          "description": "For bootstrappers and indie hackers.",
+          "features": {
+            "everything": "Everything in Pro Developer",
+            "teamAnalytics": "Team productivity analytics and insights",
+            "sharing": "Collaborative code snippet sharing",
+            "crossTeam": "Cross-team performance tracking",
+            "synchronized": "Synchronized deep work sessions",
+            "teamSupport": "Priority team support with dedicated manager"
+          }
+        }
+      }
+    }
+  },
+  "templates": {
+    "starter": "Starter",
+    "landing": "Landing",
+    "docs": "Docs",
+    "saas": "SaaS",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "portfolio": "Portfolio",
+    "changelog": "Changelog"
+  }
+}

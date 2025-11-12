@@ -1,26 +1,29 @@
 <script setup lang="ts">
+const { t } = useI18n();
+
 definePageMeta({
   layout: "default",
 });
 
-// Helper to parse [text]{.class} syntax into HTML
+// Helper to parse ***text*** syntax into HTML with text-primary class
 const parseStyledText = (text: string) => {
-  return text.replace(/\[([^\]]+)\]\{\.([^\}]+)\}/g, '<span class="$2">$1</span>');
+  return text.replace(
+    /\*\*\*([^*]+)\*\*\*/g,
+    '<span class="text-primary">$1</span>',
+  );
 };
 
-const page = {
+const page = computed(() => ({
   seo: {
-    title: "Nuxt Landing Template",
-    description:
-      "Boost your coding productivity with AI-driven insights that tell you when and how to code most efficiently.",
+    title: t("home.seo.title"),
+    description: t("home.seo.description"),
   },
-  title: "AI-Powered Developer Productivity Platform",
-  description:
-    "Boost your coding productivity with AI-driven insights that tell you when and how to code most efficiently.",
+  title: t("home.hero.title"),
+  description: t("home.hero.description"),
   hero: {
     links: [
       {
-        label: "Get started",
+        label: t("home.hero.getStarted"),
         icon: "i-lucide-arrow-right",
         trailing: true,
         color: "primary",
@@ -29,7 +32,7 @@ const page = {
         size: "xl",
       },
       {
-        label: "Clone on GitHub",
+        label: t("home.hero.cloneGithub"),
         icon: "i-simple-icons-github",
         size: "xl",
         color: "neutral",
@@ -40,120 +43,113 @@ const page = {
     ],
   },
   section: {
-    title: "[Revolutionize]{.text-primary} your coding experience",
-    description:
-      "Transform your development workflow with AI-powered insights and personalized productivity optimization.",
+    title: t("home.section.title"),
+    description: t("home.section.description"),
     images: {
       mobile: "/images/macbook-mobile.svg",
       desktop: "/images/macbook.svg",
     },
     features: [
       {
-        title: "Optimize your focus time",
-        description:
-          "Let AI identify your peak coding hours and adapt to your natural rhythm. Focus on what matters most - writing great code, while our system optimizes your productivity patterns.",
+        title: t("home.section.features.optimizeFocus.title"),
+        description: t("home.section.features.optimizeFocus.description"),
         class: "border-l border-primary pl-4",
       },
       {
-        title: "Track your best coding hours",
-        description:
-          "Track when you code best with smart analytics. Get actionable insights to tackle challenging tasks during your peak performance hours.",
+        title: t("home.section.features.trackHours.title"),
+        description: t("home.section.features.trackHours.description"),
         class: "border-l border-default pt-4 pl-4",
       },
       {
-        title: "Improve workflow efficiency",
-        description:
-          "Automate your workflow optimization from code snippets to focus management. Ship better code faster with a streamlined development process.",
+        title: t("home.section.features.improveWorkflow.title"),
+        description: t("home.section.features.improveWorkflow.description"),
         class: "border-l border-default pt-4 pl-4",
       },
     ],
   },
   features: {
-    title: "Take control of your [productivity]{.text-primary}",
-    description:
-      "Make every coding session count with smart analytics and workflow optimization.",
+    title: t("home.features.title"),
+    description: t("home.features.description"),
     features: [
       {
-        title: "AI-Powered Focus Tracking",
-        description:
-          "Discover your optimal coding hours with real-time AI analysis of your productivity patterns.",
+        title: t("home.features.items.aiTracking.title"),
+        description: t("home.features.items.aiTracking.description"),
         icon: "i-lucide-wand-sparkles",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
       {
-        title: "Distraction Alerts",
-        description:
-          "Get notified when your focus drifts and bring your attention back.",
+        title: t("home.features.items.distractionAlerts.title"),
+        description: t("home.features.items.distractionAlerts.description"),
         icon: "i-lucide-bell-ring",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
       {
-        title: "Smart Code Snippets",
-        description: "Save and reuse frequently used code blocks for efficiency.",
+        title: t("home.features.items.codeSnippets.title"),
+        description: t("home.features.items.codeSnippets.description"),
         icon: "i-lucide-code-xml",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
       {
-        title: "Deep Work Mode",
-        description:
-          "Block distractions and set structured coding sessions with built-in Pomodoro timers.",
+        title: t("home.features.items.deepWork.title"),
+        description: t("home.features.items.deepWork.description"),
         icon: "i-lucide-moon",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
       {
-        title: "Collaborative Insights",
-        description:
-          "Sync your workflow with teammates and see when they are most productive.",
+        title: t("home.features.items.collaborative.title"),
+        description: t("home.features.items.collaborative.description"),
         icon: "i-lucide-mouse-pointer-2",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
       {
-        title: "Performance Analytics",
-        description:
-          "Track your coding metrics and get insights to boost your speed and code quality.",
+        title: t("home.features.items.analytics.title"),
+        description: t("home.features.items.analytics.description"),
         icon: "i-lucide-chart-line",
         ui: {
-          leading: "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
+          leading:
+            "bg-accented/50 p-2 rounded-md border border-muted border-dashed",
         },
       },
     ],
   },
   steps: {
-    title: "Start coding smarter in [3 steps]{.text-primary}",
-    description: "Transform your development workflow with our AI-powered assistant.",
+    title: t("home.steps.title"),
+    description: t("home.steps.description"),
     items: [
       {
-        title: "Connect Your IDE",
-        description:
-          "Seamlessly integrate with VS Code, JetBrains, or your preferred editor. Get started in under 2 minutes with zero configuration needed.",
+        title: t("home.steps.items.connect.title"),
+        description: t("home.steps.items.connect.description"),
         image: {
           light: "/images/light/connect.svg",
           dark: "/images/dark/connect.svg",
         },
       },
       {
-        title: "Track & Analyze",
-        description:
-          "Our AI silently monitors your coding patterns to identify your peak productivity hours and potential workflow bottlenecks.",
+        title: t("home.steps.items.track.title"),
+        description: t("home.steps.items.track.description"),
         image: {
           light: "/images/light/optimize.svg",
           dark: "/images/dark/optimize.svg",
         },
       },
       {
-        title: "Optimize & Code Smarter",
-        description:
-          "Receive personalized recommendations to enhance your coding efficiency. Watch your productivity soar with data-driven insights.",
+        title: t("home.steps.items.optimize.title"),
+        description: t("home.steps.items.optimize.description"),
         image: {
           light: "/images/light/track.svg",
           dark: "/images/dark/track.svg",
@@ -162,49 +158,48 @@ const page = {
     ],
   },
   pricing: {
-    title: "Choose your [productivity]{.text-primary} path",
-    description:
-      "Unlock AI-powered coding efficiency with our flexible plans. Whether you're a solo developer or part of a team, we have the perfect toolset to maximize your development workflow.",
+    title: t("home.pricing.title"),
+    description: t("home.pricing.description"),
     plans: [
       {
-        title: "Pro Developer",
-        description: "Perfect for individual developers focused on maximizing productivity.",
+        title: t("home.pricing.plans.pro.title"),
+        description: t("home.pricing.plans.pro.description"),
         price: "$199",
-        billing_period: "month",
+        billing_period: t("home.pricing.month"),
         billing_cycle: "",
         highlight: false,
         features: [
-          "AI productivity tracking to optimize your peak coding hours",
-          "Smart distraction alerts to maintain deep focus",
-          "Personal code snippet library for faster development",
-          "Deep Work Mode with Pomodoro timer integration",
-          "Performance analytics dashboard",
-          "Priority email support",
+          t("home.pricing.plans.pro.features.tracking"),
+          t("home.pricing.plans.pro.features.alerts"),
+          t("home.pricing.plans.pro.features.library"),
+          t("home.pricing.plans.pro.features.deepWork"),
+          t("home.pricing.plans.pro.features.dashboard"),
+          t("home.pricing.plans.pro.features.support"),
         ],
         button: {
-          label: "Buy now",
+          label: t("home.pricing.buyNow"),
           color: "neutral",
           variant: "outline",
           to: "#",
         },
       },
       {
-        title: "Team Developer",
-        description: "For bootstrappers and indie hackers.",
+        title: t("home.pricing.plans.team.title"),
+        description: t("home.pricing.plans.team.description"),
         price: "$199",
-        billing_period: "month",
+        billing_period: t("home.pricing.month"),
         billing_cycle: "",
         highlight: true,
         features: [
-          "Everything in Pro Developer",
-          "Team productivity analytics and insights",
-          "Collaborative code snippet sharing",
-          "Cross-team performance tracking",
-          "Synchronized deep work sessions",
-          "Priority team support with dedicated manager",
+          t("home.pricing.plans.team.features.everything"),
+          t("home.pricing.plans.team.features.teamAnalytics"),
+          t("home.pricing.plans.team.features.sharing"),
+          t("home.pricing.plans.team.features.crossTeam"),
+          t("home.pricing.plans.team.features.synchronized"),
+          t("home.pricing.plans.team.features.teamSupport"),
         ],
         button: {
-          label: "Buy now",
+          label: t("home.pricing.buyNow"),
           variant: "subtle",
           to: "#",
         },
@@ -212,16 +207,14 @@ const page = {
     ],
   },
   testimonials: {
-    title: "Join thousands of productive [developers]{.text-primary}",
-    description:
-      "See how developers are transforming their coding workflow and achieving more with our AI-powered platform.",
+    title: t("home.testimonials.title"),
+    description: t("home.testimonials.description"),
     items: [
       {
-        quote:
-          "Since using this tool, my productivity has doubled. The AI insights helped me find my perfect coding rhythm and now I ship features twice as fast.",
+        quote: t("home.testimonials.items.sarah.quote"),
         user: {
-          name: "Sarah Moriceau",
-          description: "Brand Designer",
+          name: t("home.testimonials.items.sarah.name"),
+          description: t("home.testimonials.items.sarah.role"),
           target: "_blank",
           avatar: {
             src: "https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/SarahM19",
@@ -229,11 +222,10 @@ const page = {
         },
       },
       {
-        quote:
-          "Game-changer for our team. The focus tracking and smart alerts helped us reduce meeting interruptions by 40% and increased our sprint velocity.",
+        quote: t("home.testimonials.items.sebastien.quote"),
         user: {
-          name: "Sébastien Chopin",
-          description: "Lead Software Engineer",
+          name: t("home.testimonials.items.sebastien.name"),
+          description: t("home.testimonials.items.sebastien.role"),
           target: "_blank",
           avatar: {
             src: "https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/atinux",
@@ -241,11 +233,10 @@ const page = {
         },
       },
       {
-        quote:
-          "Finally, a productivity tool that understands developers. The AI features helped me identify my peak coding hours and now I accomplish more in less time.",
+        quote: t("home.testimonials.items.benjamin.quote"),
         user: {
-          name: "Benjamin Canac",
-          description: "Senior Frontend Developer",
+          name: t("home.testimonials.items.benjamin.name"),
+          description: t("home.testimonials.items.benjamin.role"),
           target: "_blank",
           avatar: {
             src: "https://ipx.nuxt.com/f_auto,s_192x192/gh_avatar/benjamincanac",
@@ -255,18 +246,17 @@ const page = {
     ],
   },
   cta: {
-    title: "Ready to build an amazing landing page?",
-    description:
-      "Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today.",
+    title: t("home.cta.title"),
+    description: t("home.cta.description"),
     links: [
       {
-        label: "Start building",
+        label: t("home.cta.startBuilding"),
         to: "https://ui.nuxt.com/docs/getting-started/installation/nuxt",
         target: "_blank",
         trailingIcon: "i-lucide-arrow-right",
       },
       {
-        label: "View on GitHub",
+        label: t("home.cta.viewGithub"),
         to: "https://github.com/nuxt-ui-templates/landing",
         target: "_blank",
         variant: "subtle",
@@ -274,13 +264,13 @@ const page = {
       },
     ],
   },
-};
+}));
 
 useSeoMeta({
-  title: page.seo?.title || page.title,
-  ogTitle: page.seo?.title || page.title,
-  description: page.seo?.description || page.description,
-  ogDescription: page.seo?.description || page.description,
+  title: page.value.seo?.title || page.value.title,
+  ogTitle: page.value.seo?.title || page.value.title,
+  description: page.value.seo?.description || page.value.description,
+  ogDescription: page.value.seo?.description || page.value.description,
 });
 </script>
 
@@ -319,7 +309,10 @@ useSeoMeta({
       reverse
     >
       <template #title>
-        <h2 class="sm:leading-11" v-html="parseStyledText(page.section.title)" />
+        <h2
+          class="sm:leading-11"
+          v-html="parseStyledText(page.section.title)"
+        />
       </template>
       <img
         :src="page.section.images.desktop"
@@ -347,7 +340,7 @@ useSeoMeta({
     >
       <template #title>
         <h2 class="leading-9" v-html="parseStyledText(page.features.title)" />
-        <div class="hidden @min-[1020px]:block">
+        <div class="hidden @min-[1150px]:block">
           <UColorModeImage
             light="/images/light/line-2.svg"
             dark="/images/dark/line-2.svg"
@@ -418,13 +411,6 @@ useSeoMeta({
     >
       <template #title>
         <h2 v-html="parseStyledText(page.pricing.title)" />
-        <div class="hidden @min-[1120px]:block">
-          <UColorModeImage
-            light="/images/light/line-4.svg"
-            dark="/images/dark/line-4.svg"
-            class="absolute top-0 right-0 size-full translate-x-[60%] transform"
-          />
-        </div>
       </template>
 
       <UPricingPlans scale>

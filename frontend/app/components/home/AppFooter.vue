@@ -1,57 +1,59 @@
 <script setup lang="ts">
-const columns = [
+const { t } = useI18n();
+
+const columns = computed(() => [
   {
-    label: "Resources",
+    label: t('footer.resources.title'),
     children: [
       {
-        label: "Help center",
+        label: t('footer.resources.helpCenter'),
       },
       {
-        label: "Docs",
+        label: t('footer.resources.docs'),
       },
       {
-        label: "Roadmap",
+        label: t('footer.resources.roadmap'),
       },
       {
-        label: "Changelog",
+        label: t('footer.resources.changelog'),
       },
     ],
   },
   {
-    label: "Features",
+    label: t('footer.features.title'),
     children: [
       {
-        label: "Affiliates",
+        label: t('footer.features.affiliates'),
       },
       {
-        label: "Portal",
+        label: t('footer.features.portal'),
       },
       {
-        label: "Jobs",
+        label: t('footer.features.jobs'),
       },
       {
-        label: "Sponsors",
+        label: t('footer.features.sponsors'),
       },
     ],
   },
   {
-    label: "Company",
+    label: t('footer.company.title'),
     children: [
       {
-        label: "About",
+        label: t('footer.company.about'),
       },
       {
-        label: "Pricing",
+        label: t('footer.company.pricing'),
       },
       {
-        label: "Careers",
+        label: t('footer.company.careers'),
       },
       {
-        label: "Blog",
+        label: t('footer.company.blog'),
       },
     ],
   },
-];
+]);
 
 const toast = useToast();
 
@@ -62,8 +64,8 @@ function onSubmit() {
   loading.value = true;
 
   toast.add({
-    title: "Subscribed!",
-    description: "You've been subscribed to our newsletter.",
+    title: t('footer.newsletter.subscribed'),
+    description: t('footer.newsletter.subscribedMessage'),
   });
 }
 </script>
@@ -79,17 +81,17 @@ function onSubmit() {
             <form @submit.prevent="onSubmit">
               <UFormField
                 name="email"
-                label="Subscribe to our newsletter"
+                :label="$t('footer.newsletter.label')"
                 size="lg"
               >
                 <UInput
                   v-model="email"
                   type="email"
                   class="w-full"
-                  placeholder="Enter your email"
+                  :placeholder="$t('footer.newsletter.placeholder')"
                 >
                   <template #trailing>
-                    <UButton type="submit" size="xs" label="Subscribe" />
+                    <UButton type="submit" size="xs" :label="$t('footer.newsletter.subscribe')" />
                   </template>
                 </UInput>
               </UFormField>
@@ -101,7 +103,7 @@ function onSubmit() {
 
     <template #left>
       <p class="text-muted text-sm">
-        Built with Nuxt UI • © {{ new Date().getFullYear() }}
+        {{ $t('footer.builtWith') }} • © {{ new Date().getFullYear() }}
       </p>
     </template>
 

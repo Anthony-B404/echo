@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'node:url'
-import tailwindcss from '@tailwindcss/vite'
+import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   ssr: false,
@@ -7,9 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
   runtimeConfig: {
     public: {
@@ -17,7 +15,7 @@ export default defineNuxtConfig({
     },
   },
   alias: {
-    '@': fileURLToPath(new URL('./app', import.meta.url)),
+    "@": fileURLToPath(new URL("./app", import.meta.url)),
   },
   modules: [
     "@nuxt/ui",
@@ -27,7 +25,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
   ],
   routeRules: {
-    '/': { prerender: true }
+    "/": { prerender: true },
   },
   i18n: {
     strategy: "prefix_and_default",
@@ -38,6 +36,10 @@ export default defineNuxtConfig({
       {
         code: "fr",
         file: "fr.json",
+      },
+      {
+        code: "en",
+        file: "en.json",
       },
     ],
   },

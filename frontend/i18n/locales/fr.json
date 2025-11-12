@@ -1,7 +1,10 @@
 {
   "nav": {
     "home": "Accueil",
+    "features": "Fonctionnalités",
     "pricing": "Tarifs",
+    "testimonials": "Témoignages",
+    "downloadApp": "Télécharger l'application",
     "signIn": "Se connecter",
     "signUp": "S'inscrire"
   },
@@ -10,24 +13,139 @@
     "description": "Un template SaaS moderne construit avec Nuxt UI",
     "getStarted": "Commencer",
     "viewPricing": "Voir les tarifs",
+    "seo": {
+      "title": "Modèle de landing Nuxt",
+      "description": "Boostez votre productivité de codage avec des informations basées sur l'IA qui vous indiquent quand et comment coder de la manière la plus efficace."
+    },
+    "hero": {
+      "title": "Plateforme de productivité pour développeurs alimentée par l'IA",
+      "description": "Boostez votre productivité de codage avec des informations basées sur l'IA qui vous indiquent quand et comment coder de la manière la plus efficace.",
+      "getStarted": "Commencer",
+      "cloneGithub": "Cloner sur GitHub"
+    },
+    "section": {
+      "title": "***Révolutionnez*** votre expérience de codage",
+      "description": "Transformez votre flux de travail de développement avec des informations alimentées par l'IA et une optimisation de productivité personnalisée.",
+      "features": {
+        "optimizeFocus": {
+          "title": "Optimisez votre temps de concentration",
+          "description": "Laissez l'IA identifier vos heures de codage optimales et s'adapter à votre rythme naturel. Concentrez-vous sur ce qui compte le plus - écrire du bon code, pendant que notre système optimise vos schémas de productivité."
+        },
+        "trackHours": {
+          "title": "Suivez vos meilleures heures de codage",
+          "description": "Suivez quand vous codez le mieux avec des analyses intelligentes. Obtenez des informations exploitables pour aborder les tâches difficiles pendant vos heures de performance maximale."
+        },
+        "improveWorkflow": {
+          "title": "Améliorez l'efficacité du flux de travail",
+          "description": "Automatisez l'optimisation de votre flux de travail, des extraits de code à la gestion de la concentration. Livrez un meilleur code plus rapidement avec un processus de développement rationalisé."
+        }
+      }
+    },
     "features": {
-      "title": "Tout ce dont vous avez besoin",
-      "description": "Toutes les fonctionnalités nécessaires pour créer votre SaaS",
-      "fastDevelopment": {
-        "title": "Développement rapide",
-        "description": "Construisez votre application rapidement avec notre stack moderne"
-      },
-      "responsive": {
-        "title": "Entièrement responsive",
-        "description": "Fonctionne parfaitement sur tous les appareils et tailles d'écran"
-      },
-      "seo": {
-        "title": "Optimisé SEO",
-        "description": "Construit avec les meilleures pratiques SEO"
-      },
-      "customization": {
-        "title": "Personnalisation facile",
-        "description": "Personnalisez chaque aspect pour correspondre à votre marque"
+      "title": "Prenez le contrôle de votre ***productivité***",
+      "description": "Faites en sorte que chaque session de codage compte avec des analyses intelligentes et une optimisation du flux de travail.",
+      "items": {
+        "aiTracking": {
+          "title": "Suivi de concentration alimenté par l'IA",
+          "description": "Découvrez vos heures de codage optimales avec une analyse en temps réel de vos schémas de productivité par l'IA."
+        },
+        "distractionAlerts": {
+          "title": "Alertes de distraction",
+          "description": "Soyez averti lorsque votre concentration dérive et ramenez votre attention."
+        },
+        "codeSnippets": {
+          "title": "Extraits de code intelligents",
+          "description": "Enregistrez et réutilisez les blocs de code fréquemment utilisés pour plus d'efficacité."
+        },
+        "deepWork": {
+          "title": "Mode travail profond",
+          "description": "Bloquez les distractions et définissez des sessions de codage structurées avec des minuteurs Pomodoro intégrés."
+        },
+        "collaborative": {
+          "title": "Informations collaboratives",
+          "description": "Synchronisez votre flux de travail avec vos coéquipiers et voyez quand ils sont les plus productifs."
+        },
+        "analytics": {
+          "title": "Analyses de performance",
+          "description": "Suivez vos métriques de codage et obtenez des informations pour améliorer votre vitesse et la qualité de votre code."
+        }
+      }
+    },
+    "steps": {
+      "title": "Commencez à coder plus intelligemment en ***3*** ***étapes***",
+      "description": "Transformez votre flux de travail de développement avec notre assistant alimenté par l'IA.",
+      "items": {
+        "connect": {
+          "title": "Connectez votre IDE",
+          "description": "Intégrez-vous facilement avec VS Code, JetBrains ou votre éditeur préféré. Commencez en moins de 2 minutes sans aucune configuration nécessaire."
+        },
+        "track": {
+          "title": "Suivez et analysez",
+          "description": "Notre IA surveille silencieusement vos schémas de codage pour identifier vos heures de productivité maximale et les goulots d'étranglement potentiels du flux de travail."
+        },
+        "optimize": {
+          "title": "Optimisez et codez plus intelligemment",
+          "description": "Recevez des recommandations personnalisées pour améliorer votre efficacité de codage. Regardez votre productivité s'envoler avec des informations basées sur les données."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Rejoignez des milliers de ***développeurs*** productifs",
+      "description": "Découvrez comment les développeurs transforment leur flux de travail de codage et réalisent plus avec notre plateforme alimentée par l'IA.",
+      "items": {
+        "sarah": {
+          "quote": "Depuis que j'utilise cet outil, ma productivité a doublé. Les informations de l'IA m'ont aidé à trouver mon rythme de codage parfait et maintenant je livre des fonctionnalités deux fois plus vite.",
+          "name": "Sarah Moriceau",
+          "role": "Designer de marque"
+        },
+        "sebastien": {
+          "quote": "Un changement de jeu pour notre équipe. Le suivi de concentration et les alertes intelligentes nous ont aidés à réduire les interruptions de réunion de 40% et augmenté notre vélocité de sprint.",
+          "name": "Sébastien Chopin",
+          "role": "Ingénieur logiciel principal"
+        },
+        "benjamin": {
+          "quote": "Enfin, un outil de productivité qui comprend les développeurs. Les fonctionnalités IA m'ont aidé à identifier mes heures de codage optimales et maintenant j'accomplis plus en moins de temps.",
+          "name": "Benjamin Canac",
+          "role": "Développeur frontend senior"
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à construire une page d'accueil incroyable ?",
+      "description": "Rejoignez des milliers de développeurs qui construisent avec Nuxt et Nuxt UI. Obtenez ce modèle et commencez à livrer aujourd'hui.",
+      "startBuilding": "Commencer à construire",
+      "viewGithub": "Voir sur GitHub"
+    },
+    "pricing": {
+      "title": "Choisissez votre chemin de ***productivité***",
+      "description": "Débloquez l'efficacité de codage alimentée par l'IA avec nos plans flexibles. Que vous soyez un développeur solo ou membre d'une équipe, nous avons l'ensemble d'outils parfait pour maximiser votre flux de travail de développement.",
+      "month": "mois",
+      "buyNow": "Acheter maintenant",
+      "plans": {
+        "pro": {
+          "title": "Développeur Pro",
+          "description": "Parfait pour les développeurs individuels axés sur la maximisation de la productivité.",
+          "features": {
+            "tracking": "Suivi de productivité IA pour optimiser vos heures de codage optimales",
+            "alerts": "Alertes de distraction intelligentes pour maintenir une concentration profonde",
+            "library": "Bibliothèque personnelle d'extraits de code pour un développement plus rapide",
+            "deepWork": "Mode travail profond avec intégration de minuteur Pomodoro",
+            "dashboard": "Tableau de bord d'analyses de performance",
+            "support": "Support email prioritaire"
+          }
+        },
+        "team": {
+          "title": "Développeur Équipe",
+          "description": "Pour les bootstrappers et les hackers indépendants.",
+          "features": {
+            "everything": "Tout dans Développeur Pro",
+            "teamAnalytics": "Analyses et informations de productivité d'équipe",
+            "sharing": "Partage collaboratif d'extraits de code",
+            "crossTeam": "Suivi de performance inter-équipes",
+            "synchronized": "Sessions de travail profond synchronisées",
+            "teamSupport": "Support d'équipe prioritaire avec gestionnaire dédié"
+          }
+        }
       }
     }
   },
@@ -38,6 +156,8 @@
     "yearly": "Annuel",
     "perMonth": "/mois",
     "perYear": "/an",
+    "month": "mois",
+    "buyNow": "Acheter maintenant",
     "plans": {
       "starter": {
         "name": "Starter",
@@ -51,14 +171,29 @@
       },
       "pro": {
         "name": "Pro",
-        "description": "Pour les entreprises en croissance",
-        "features": [
-          "Tout ce qui est dans Starter",
-          "Fonctionnalité 4",
-          "Fonctionnalité 5",
-          "Fonctionnalité 6"
-        ],
+        "title": "Développeur Pro",
+        "description": "Parfait pour les développeurs individuels axés sur la maximisation de la productivité.",
+        "features": {
+          "tracking": "Suivi de productivité IA pour optimiser vos heures de codage optimales",
+          "alerts": "Alertes de distraction intelligentes pour maintenir une concentration profonde",
+          "library": "Bibliothèque personnelle d'extraits de code pour un développement plus rapide",
+          "deepWork": "Mode travail profond avec intégration de minuteur Pomodoro",
+          "dashboard": "Tableau de bord d'analyses de performance",
+          "support": "Support email prioritaire"
+        },
         "button": "Commencer"
+      },
+      "team": {
+        "title": "Développeur Équipe",
+        "description": "Pour les bootstrappers et les hackers indépendants.",
+        "features": {
+          "everything": "Tout dans Développeur Pro",
+          "teamAnalytics": "Analyses et informations de productivité d'équipe",
+          "sharing": "Partage collaboratif d'extraits de code",
+          "crossTeam": "Suivi de performance inter-équipes",
+          "synchronized": "Sessions de travail profond synchronisées",
+          "teamSupport": "Support d'équipe prioritaire avec gestionnaire dédié"
+        }
       },
       "enterprise": {
         "name": "Enterprise",
@@ -139,21 +274,48 @@
     }
   },
   "footer": {
-    "resources": "Ressources",
-    "helpCenter": "Centre d'aide",
-    "docs": "Documentation",
-    "roadmap": "Feuille de route",
-    "company": "Entreprise",
-    "about": "À propos",
-    "blog": "Blog",
+    "resources": {
+      "title": "Ressources",
+      "helpCenter": "Centre d'aide",
+      "docs": "Documentation",
+      "roadmap": "Feuille de route",
+      "changelog": "Journal des modifications"
+    },
+    "features": {
+      "title": "Fonctionnalités",
+      "affiliates": "Affiliation",
+      "portal": "Portail",
+      "jobs": "Emplois",
+      "sponsors": "Sponsors"
+    },
+    "company": {
+      "title": "Entreprise",
+      "about": "À propos",
+      "pricing": "Tarifs",
+      "careers": "Carrières",
+      "blog": "Blog"
+    },
     "newsletter": {
       "label": "Abonnez-vous à notre newsletter",
       "placeholder": "Entrez votre email",
       "subscribe": "S'abonner",
       "success": "Abonné !",
-      "successDescription": "Vous avez été abonné à notre newsletter."
+      "subscribed": "Abonné !",
+      "successDescription": "Vous avez été abonné à notre newsletter.",
+      "subscribedMessage": "Vous êtes maintenant abonné à notre newsletter."
     },
+    "builtWith": "Créé avec Nuxt UI",
     "copyright": "Copyright ©"
+  },
+  "templates": {
+    "starter": "Starter",
+    "landing": "Landing",
+    "docs": "Docs",
+    "saas": "SaaS",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "portfolio": "Portfolio",
+    "changelog": "Changelog"
   },
   "seo": {
     "login": {
