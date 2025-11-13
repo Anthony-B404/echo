@@ -328,6 +328,272 @@
     "dashboard": {
       "title": "Tableau de bord",
       "description": "Votre tableau de bord d'application"
+    },
+    "error": {
+      "title": "Page introuvable",
+      "description": "Nous sommes désolés mais cette page est introuvable."
+    }
+  },
+  "common": {
+    "buttons": {
+      "cancel": "Annuler",
+      "create": "Créer",
+      "delete": "Supprimer",
+      "save": "Enregistrer",
+      "saveChanges": "Enregistrer les modifications",
+      "send": "Envoyer",
+      "choose": "Choisir",
+      "invitePeople": "Inviter des personnes",
+      "display": "Afficher",
+      "saveDraft": "Enregistrer le brouillon",
+      "buyNow": "Acheter maintenant",
+      "deleteAccount": "Supprimer le compte"
+    },
+    "actions": {
+      "copy": "Copier",
+      "edit": "Modifier",
+      "remove": "Retirer",
+      "archive": "Archiver",
+      "reply": "Répondre",
+      "attachFile": "Joindre un fichier",
+      "viewDetails": "Voir les détails",
+      "viewPayments": "Voir les paiements"
+    },
+    "status": {
+      "paid": "Payé",
+      "failed": "Échoué",
+      "refunded": "Remboursé",
+      "subscribed": "Abonné",
+      "unsubscribed": "Désabonné",
+      "bounced": "Rejeté"
+    },
+    "roles": {
+      "member": "Membre",
+      "owner": "Propriétaire"
+    },
+    "periods": {
+      "daily": "Quotidien",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel"
+    },
+    "labels": {
+      "name": "Nom",
+      "email": "Email",
+      "username": "Nom d'utilisateur",
+      "avatar": "Avatar",
+      "bio": "Bio",
+      "location": "Localisation",
+      "id": "ID",
+      "date": "Date",
+      "amount": "Montant",
+      "actions": "Actions"
+    },
+    "placeholders": {
+      "searchMembers": "Rechercher des membres",
+      "filterEmails": "Filtrer les emails...",
+      "writeReply": "Écrivez votre réponse...",
+      "pickDate": "Choisir une date"
+    },
+    "messages": {
+      "success": "Succès",
+      "error": "Erreur",
+      "copiedToClipboard": "Copié dans le presse-papier",
+      "rowsSelected": "{count} sur {total} ligne(s) sélectionnée(s)."
+    }
+  },
+  "components": {
+    "notifications": {
+      "title": "Notifications"
+    },
+    "teams": {
+      "createTeam": "Créer une équipe",
+      "manageTeams": "Gérer les équipes"
+    },
+    "user": {
+      "profile": "Profil",
+      "billing": "Facturation",
+      "settings": "Paramètres",
+      "theme": "Thème",
+      "primary": "Primaire",
+      "neutral": "Neutre",
+      "appearance": "Apparence",
+      "light": "Clair",
+      "dark": "Sombre",
+      "templates": "Modèles",
+      "documentation": "Documentation",
+      "githubRepository": "Dépôt GitHub",
+      "logOut": "Se déconnecter"
+    },
+    "customers": {
+      "addModal": {
+        "title": "Nouveau client",
+        "description": "Ajouter un nouveau client à la base de données",
+        "button": "Nouveau client",
+        "namePlaceholder": "Jean Dupont",
+        "emailPlaceholder": "jean.dupont[at]exemple.com",
+        "successTitle": "Succès",
+        "successDescription": "Nouveau client {name} ajouté",
+        "validation": {
+          "nameTooShort": "Trop court",
+          "invalidEmail": "Email invalide"
+        }
+      },
+      "deleteModal": {
+        "title": "Supprimer {count} client",
+        "titlePlural": "Supprimer {count} clients",
+        "description": "Êtes-vous sûr ? Cette action ne peut pas être annulée."
+      }
+    },
+    "home": {
+      "revenue": "Revenu",
+      "stats": {
+        "customers": "Clients",
+        "conversions": "Conversions",
+        "orders": "Commandes"
+      },
+      "dateRanges": {
+        "last7Days": "7 derniers jours",
+        "last14Days": "14 derniers jours",
+        "last30Days": "30 derniers jours",
+        "last3Months": "3 derniers mois",
+        "last6Months": "6 derniers mois",
+        "lastYear": "Dernière année"
+      },
+      "tableHeaders": {
+        "status": "Statut"
+      }
+    },
+    "inbox": {
+      "markAsUnread": "Marquer comme non lu",
+      "markAsImportant": "Marquer comme important",
+      "starThread": "Mettre en favoris",
+      "muteThread": "Masquer la conversation",
+      "emailSent": "Email envoyé",
+      "emailSentDescription": "Votre email a été envoyé avec succès",
+      "replyTo": "Répondre à {name} ({email})"
+    },
+    "settings": {
+      "members": {
+        "editMember": "Modifier le membre",
+        "removeMember": "Retirer le membre"
+      }
+    }
+  },
+  "layouts": {
+    "default": {
+      "navigation": {
+        "home": "Accueil",
+        "inbox": "Boîte de réception",
+        "customers": "Clients",
+        "settings": "Paramètres",
+        "feedback": "Commentaires",
+        "helpSupport": "Aide & Support"
+      },
+      "search": {
+        "goTo": "Aller à",
+        "code": "Code",
+        "viewPageSource": "Voir le code source de la page"
+      },
+      "cookies": {
+        "title": "Nous utilisons des cookies propriétaires pour améliorer votre expérience sur notre site web.",
+        "accept": "Accepter",
+        "optOut": "Refuser"
+      }
+    }
+  },
+  "pages": {
+    "dashboard": {
+      "home": {
+        "title": "Accueil",
+        "notifications": "Notifications",
+        "newMail": "Nouveau message",
+        "newCustomer": "Nouveau client"
+      },
+      "customers": {
+        "title": "Clients",
+        "copyCustomerId": "Copier l'ID client",
+        "customerIdCopied": "ID client copié dans le presse-papier",
+        "viewCustomerDetails": "Voir les détails du client",
+        "viewCustomerPayments": "Voir les paiements du client",
+        "deleteCustomer": "Supprimer le client",
+        "customerDeleted": "Client supprimé",
+        "customerDeletedDescription": "Le client a été supprimé.",
+        "filterStatus": "Filtrer par statut",
+        "all": "Tous",
+        "deleteSelected": "Supprimer"
+      },
+      "inbox": {
+        "title": "Boîte de réception",
+        "all": "Tous",
+        "unread": "Non lus"
+      },
+      "settings": {
+        "title": "Paramètres",
+        "navigation": {
+          "general": "Général",
+          "members": "Membres",
+          "notifications": "Notifications",
+          "security": "Sécurité"
+        },
+        "general": {
+          "title": "Profil",
+          "description": "Ces informations seront affichées publiquement.",
+          "nameLabel": "Nom",
+          "nameDescription": "Apparaîtra sur les reçus, factures et autres communications.",
+          "emailLabel": "Email",
+          "emailDescription": "Utilisé pour se connecter, pour les reçus par email et les mises à jour produit.",
+          "usernameLabel": "Nom d'utilisateur",
+          "usernameDescription": "Votre nom d'utilisateur unique pour vous connecter et l'URL de votre profil.",
+          "avatarLabel": "Avatar",
+          "avatarDescription": "JPG, GIF ou PNG. 1Mo Max.",
+          "bioLabel": "Bio",
+          "bioDescription": "Brève description pour votre profil. Les URLs sont des hyperliens.",
+          "successTitle": "Succès",
+          "successDescription": "Vos paramètres ont été mis à jour.",
+          "validation": {
+            "nameTooShort": "Trop court",
+            "invalidEmail": "Email invalide"
+          }
+        },
+        "members": {
+          "title": "Membres",
+          "description": "Invitez de nouveaux membres par adresse email."
+        },
+        "notifications": {
+          "channels": {
+            "title": "Canaux de notification",
+            "description": "Où pouvons-nous vous notifier ?",
+            "email": {
+              "label": "Email",
+              "description": "Recevez un résumé quotidien par email."
+            },
+            "desktop": {
+              "label": "Bureau",
+              "description": "Recevez des notifications sur le bureau."
+            }
+          },
+          "accountUpdates": {
+            "title": "Mises à jour du compte",
+            "description": "Recevez des mises à jour concernant Nuxt UI.",
+            "weeklyDigest": {
+              "label": "Résumé hebdomadaire",
+              "description": "Recevez un résumé hebdomadaire des actualités."
+            },
+            "productUpdates": {
+              "label": "Mises à jour produit",
+              "description": "Recevez un email mensuel avec toutes les nouvelles fonctionnalités et mises à jour."
+            },
+            "importantUpdates": {
+              "label": "Mises à jour importantes",
+              "description": "Recevez des emails concernant les mises à jour importantes comme les correctifs de sécurité, la maintenance, etc."
+            }
+          }
+        },
+        "security": {
+          "title": "Compte",
+          "description": "Vous ne souhaitez plus utiliser notre service ? Vous pouvez supprimer votre compte ici. Cette action est irréversible. Toutes les informations liées à ce compte seront supprimées définitivement."
+        }
+      }
     }
   }
 }

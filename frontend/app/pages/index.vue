@@ -2,7 +2,7 @@
 const { t } = useI18n();
 
 definePageMeta({
-  layout: "default",
+  layout: "app",
 });
 
 // Helper to parse ***text*** syntax into HTML with text-primary class

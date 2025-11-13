@@ -272,6 +272,272 @@
     "dashboard": {
       "title": "Dashboard",
       "description": "Your application dashboard"
+    },
+    "error": {
+      "title": "Page not found",
+      "description": "We are sorry but this page could not be found."
+    }
+  },
+  "common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "delete": "Delete",
+      "save": "Save",
+      "saveChanges": "Save changes",
+      "send": "Send",
+      "choose": "Choose",
+      "invitePeople": "Invite people",
+      "display": "Display",
+      "saveDraft": "Save draft",
+      "buyNow": "Buy now",
+      "deleteAccount": "Delete account"
+    },
+    "actions": {
+      "copy": "Copy",
+      "edit": "Edit",
+      "remove": "Remove",
+      "archive": "Archive",
+      "reply": "Reply",
+      "attachFile": "Attach file",
+      "viewDetails": "View details",
+      "viewPayments": "View payments"
+    },
+    "status": {
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "subscribed": "Subscribed",
+      "unsubscribed": "Unsubscribed",
+      "bounced": "Bounced"
+    },
+    "roles": {
+      "member": "Member",
+      "owner": "Owner"
+    },
+    "periods": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "username": "Username",
+      "avatar": "Avatar",
+      "bio": "Bio",
+      "location": "Location",
+      "id": "ID",
+      "date": "Date",
+      "amount": "Amount",
+      "actions": "Actions"
+    },
+    "placeholders": {
+      "searchMembers": "Search members",
+      "filterEmails": "Filter emails...",
+      "writeReply": "Write your reply...",
+      "pickDate": "Pick a date"
+    },
+    "messages": {
+      "success": "Success",
+      "error": "Error",
+      "copiedToClipboard": "Copied to clipboard",
+      "rowsSelected": "{count} of {total} row(s) selected."
+    }
+  },
+  "components": {
+    "notifications": {
+      "title": "Notifications"
+    },
+    "teams": {
+      "createTeam": "Create team",
+      "manageTeams": "Manage teams"
+    },
+    "user": {
+      "profile": "Profile",
+      "billing": "Billing",
+      "settings": "Settings",
+      "theme": "Theme",
+      "primary": "Primary",
+      "neutral": "Neutral",
+      "appearance": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "templates": "Templates",
+      "documentation": "Documentation",
+      "githubRepository": "GitHub repository",
+      "logOut": "Log out"
+    },
+    "customers": {
+      "addModal": {
+        "title": "New customer",
+        "description": "Add a new customer to the database",
+        "button": "New customer",
+        "namePlaceholder": "John Doe",
+        "emailPlaceholder": "john.doe[at]example.com",
+        "successTitle": "Success",
+        "successDescription": "New customer {name} added",
+        "validation": {
+          "nameTooShort": "Too short",
+          "invalidEmail": "Invalid email"
+        }
+      },
+      "deleteModal": {
+        "title": "Delete {count} customer",
+        "titlePlural": "Delete {count} customers",
+        "description": "Are you sure, this action cannot be undone."
+      }
+    },
+    "home": {
+      "revenue": "Revenue",
+      "stats": {
+        "customers": "Customers",
+        "conversions": "Conversions",
+        "orders": "Orders"
+      },
+      "dateRanges": {
+        "last7Days": "Last 7 days",
+        "last14Days": "Last 14 days",
+        "last30Days": "Last 30 days",
+        "last3Months": "Last 3 months",
+        "last6Months": "Last 6 months",
+        "lastYear": "Last year"
+      },
+      "tableHeaders": {
+        "status": "Status"
+      }
+    },
+    "inbox": {
+      "markAsUnread": "Mark as unread",
+      "markAsImportant": "Mark as important",
+      "starThread": "Star thread",
+      "muteThread": "Mute thread",
+      "emailSent": "Email sent",
+      "emailSentDescription": "Your email has been sent successfully",
+      "replyTo": "Reply to {name} ({email})"
+    },
+    "settings": {
+      "members": {
+        "editMember": "Edit member",
+        "removeMember": "Remove member"
+      }
+    }
+  },
+  "layouts": {
+    "default": {
+      "navigation": {
+        "home": "Home",
+        "inbox": "Inbox",
+        "customers": "Customers",
+        "settings": "Settings",
+        "feedback": "Feedback",
+        "helpSupport": "Help & Support"
+      },
+      "search": {
+        "goTo": "Go to",
+        "code": "Code",
+        "viewPageSource": "View page source"
+      },
+      "cookies": {
+        "title": "We use first-party cookies to enhance your experience on our website.",
+        "accept": "Accept",
+        "optOut": "Opt out"
+      }
+    }
+  },
+  "pages": {
+    "dashboard": {
+      "home": {
+        "title": "Home",
+        "notifications": "Notifications",
+        "newMail": "New mail",
+        "newCustomer": "New customer"
+      },
+      "customers": {
+        "title": "Customers",
+        "copyCustomerId": "Copy customer ID",
+        "customerIdCopied": "Customer ID copied to clipboard",
+        "viewCustomerDetails": "View customer details",
+        "viewCustomerPayments": "View customer payments",
+        "deleteCustomer": "Delete customer",
+        "customerDeleted": "Customer deleted",
+        "customerDeletedDescription": "The customer has been deleted.",
+        "filterStatus": "Filter status",
+        "all": "All",
+        "deleteSelected": "Delete"
+      },
+      "inbox": {
+        "title": "Inbox",
+        "all": "All",
+        "unread": "Unread"
+      },
+      "settings": {
+        "title": "Settings",
+        "navigation": {
+          "general": "General",
+          "members": "Members",
+          "notifications": "Notifications",
+          "security": "Security"
+        },
+        "general": {
+          "title": "Profile",
+          "description": "These informations will be displayed publicly.",
+          "nameLabel": "Name",
+          "nameDescription": "Will appear on receipts, invoices, and other communication.",
+          "emailLabel": "Email",
+          "emailDescription": "Used to sign in, for email receipts and product updates.",
+          "usernameLabel": "Username",
+          "usernameDescription": "Your unique username for logging in and your profile URL.",
+          "avatarLabel": "Avatar",
+          "avatarDescription": "JPG, GIF or PNG. 1MB Max.",
+          "bioLabel": "Bio",
+          "bioDescription": "Brief description for your profile. URLs are hyperlinked.",
+          "successTitle": "Success",
+          "successDescription": "Your settings have been updated.",
+          "validation": {
+            "nameTooShort": "Too short",
+            "invalidEmail": "Invalid email"
+          }
+        },
+        "members": {
+          "title": "Members",
+          "description": "Invite new members by email address."
+        },
+        "notifications": {
+          "channels": {
+            "title": "Notification channels",
+            "description": "Where can we notify you?",
+            "email": {
+              "label": "Email",
+              "description": "Receive a daily email digest."
+            },
+            "desktop": {
+              "label": "Desktop",
+              "description": "Receive desktop notifications."
+            }
+          },
+          "accountUpdates": {
+            "title": "Account updates",
+            "description": "Receive updates about Nuxt UI.",
+            "weeklyDigest": {
+              "label": "Weekly digest",
+              "description": "Receive a weekly digest of news."
+            },
+            "productUpdates": {
+              "label": "Product updates",
+              "description": "Receive a monthly email with all new features and updates."
+            },
+            "importantUpdates": {
+              "label": "Important updates",
+              "description": "Receive emails about important updates like security fixes, maintenance, etc."
+            }
+          }
+        },
+        "security": {
+          "title": "Account",
+          "description": "No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
+        }
+      }
     }
   }
 }
