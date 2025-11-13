@@ -18,6 +18,7 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 ## 📚 Stack Technique
 
 ### Frontend (Nuxt 3)
+
 - **Framework**: Nuxt 3.13.2
 - **UI**: shadcn-vue + Radix Vue + Tailwind CSS
 - **State**: Pinia
@@ -26,6 +27,7 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 - **Icons**: Lucide Vue Next
 
 ### Backend (AdonisJS v6)
+
 - **Framework**: AdonisJS 6.14.1
 - **ORM**: Lucid ORM
 - **Database**: PostgreSQL
@@ -79,6 +81,7 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 ## 🚦 Démarrage Rapide
 
 ### Prérequis
+
 - Node.js >= 18.x
 - PostgreSQL >= 14.x
 - pnpm (recommandé) ou npm
@@ -86,12 +89,14 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 ### Installation
 
 1. **Cloner le repository**
+
 ```bash
 git clone <your-repo-url>
-cd Qualiopii
+cd boilerplate
 ```
 
 2. **Configurer le Backend**
+
 ```bash
 cd backend
 npm install
@@ -102,6 +107,7 @@ cp .env.example .env
 ```
 
 3. **Configurer le Frontend**
+
 ```bash
 cd frontend
 npm install
@@ -114,6 +120,7 @@ cp .env.example .env
 ### Configuration des Variables d'Environnement
 
 #### Backend (.env)
+
 ```bash
 # Application
 PORT=3333
@@ -133,6 +140,7 @@ RESEND_API_KEY=re_your_resend_api_key
 ```
 
 #### Frontend (.env)
+
 ```bash
 # API URL
 API_URL=http://localhost:3333
@@ -153,6 +161,7 @@ node ace migration:run
 ### Lancer l'Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 npm run dev
@@ -160,6 +169,7 @@ npm run dev
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -169,12 +179,14 @@ npm run dev
 ## 🔐 Système d'Authentification
 
 ### Rôles Utilisateurs
+
 - **Owner (1)**: Propriétaire de l'organisation, tous les droits
 - **Member (2)**: Membre de l'organisation, droits limités
 
 ### Flow d'Authentification
 
 1. **Inscription Organisation**
+
    ```
    POST /signup
    {
@@ -186,6 +198,7 @@ npm run dev
    ```
 
 2. **Connexion**
+
    ```
    POST /login
    {
@@ -203,6 +216,7 @@ npm run dev
 ### Flow Complet
 
 1. **Créer une Invitation**
+
    ```
    POST /invite-member (auth)
    {
@@ -212,6 +226,7 @@ npm run dev
    ```
 
 2. **Vérifier l'Invitation**
+
    ```
    GET /check-invitation/:identifier (public)
    ```
@@ -260,20 +275,24 @@ npx shadcn-vue@latest add button
 ### Schéma Principal
 
 **users**
+
 - id, fullName, email, password, role, isOwner
 - organizationId (FK), emailVerified, verificationToken
 - createdAt, updatedAt
 
 **organizations**
+
 - id, name, logo, email
 - createdAt, updatedAt
 
 **invitations**
+
 - id, identifier (UUID), email, organizationId (FK)
 - role, expiresAt, accepted
 - createdAt, updatedAt
 
 **access_tokens**
+
 - id, tokenableId, type, name, hash
 - abilities, expiresAt, createdAt, updatedAt
 
@@ -288,12 +307,14 @@ node ace migration:run
 ## 🧪 Tests
 
 ### Backend (Japa)
+
 ```bash
 cd backend
 npm test
 ```
 
 ### Frontend (Vitest - à configurer)
+
 ```bash
 cd frontend
 npm test
@@ -302,18 +323,21 @@ npm test
 ## 📦 Déploiement
 
 ### Backend
+
 1. Build: `npm run build`
 2. Configurer les variables d'environnement de production
 3. Exécuter les migrations: `node ace migration:run --force`
 4. Démarrer: `npm start`
 
 ### Frontend
+
 1. Build: `npm run build`
 2. Deploy le dossier `.output` sur Vercel/Netlify/votre hébergeur
 
 ## 🔧 Scripts Utiles
 
 ### Backend
+
 ```bash
 npm run dev          # Mode développement avec HMR
 npm run build        # Build pour production
@@ -326,6 +350,7 @@ node ace make:model YourModel
 ```
 
 ### Frontend
+
 ```bash
 npm run dev          # Mode développement
 npm run build        # Build pour production
@@ -352,6 +377,7 @@ Ce projet est sous licence MIT.
 ## 🆘 Support
 
 Pour toute question ou problème:
+
 1. Vérifier la documentation
 2. Consulter les issues GitHub
 3. Créer une nouvelle issue si nécessaire
