@@ -1,6 +1,6 @@
-# Nuxt 3 + AdonisJS Multi-Tenant Boilerplate
+# Nuxt 4 + AdonisJS Multi-Tenant Boilerplate
 
-Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS multi-tenant avec Nuxt 3 (frontend) et AdonisJS v6 (backend).
+Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS multi-tenant avec Nuxt 4 (frontend) et AdonisJS v6 (backend).
 
 ## 🚀 Fonctionnalités
 
@@ -9,53 +9,49 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 - 📧 **Système de Mailing** - Intégration Resend pour l'envoi d'emails
 - 👥 **Gestion des Invitations** - Inviter des membres à rejoindre une organisation
 - ✉️ **Vérification Email** - Processus de vérification des emails utilisateurs
-- 🎨 **UI Moderne** - Components shadcn-vue avec Tailwind CSS
-- 🌐 **Internationalisation** - i18n configuré en français par défaut
+- 🎨 **UI Moderne** - Nuxt UI avec Tailwind CSS v4
+- 🌐 **Internationalisation** - @nuxtjs/i18n configuré en français par défaut
 - 📱 **Responsive** - Design adaptatif pour tous les écrans
 - 🔄 **State Management** - Pinia pour la gestion d'état
 - ✅ **Validation** - Zod (frontend) + VineJS (backend)
 
 ## 📚 Stack Technique
 
-### Frontend (Nuxt 3)
+### Frontend (Nuxt 4)
 
-- **Framework**: Nuxt 3.13.2
-- **UI**: shadcn-vue + Radix Vue + Tailwind CSS
-- **State**: Pinia
-- **Forms**: VeeValidate + Zod
-- **i18n**: @nuxtjs/i18n
-- **Icons**: Lucide Vue Next
+- **Framework**: Nuxt 4.2.1 (SPA mode, SSR disabled)
+- **UI**: Nuxt UI 4.1.0
+- **Styling**: Tailwind CSS 4.1.17 (via @tailwindcss/vite)
+- **State**: Pinia 3.0.4
+- **Validation**: Zod 4.1.12
+- **i18n**: @nuxtjs/i18n 10.2.0 (français par défaut)
 
 ### Backend (AdonisJS v6)
 
-- **Framework**: AdonisJS 6.14.1
-- **ORM**: Lucid ORM
+- **Framework**: AdonisJS 6.19.1
+- **ORM**: Lucid ORM 21.8.1
 - **Database**: PostgreSQL
-- **Auth**: @adonisjs/auth avec tokens
-- **Mail**: @adonisjs/mail + Resend
-- **Validation**: @vinejs/vine
-- **Authorization**: @adonisjs/bouncer
+- **Auth**: @adonisjs/auth 9.5.1 avec tokens
+- **Mail**: @adonisjs/mail 9.2.2 + Resend
+- **Validation**: @vinejs/vine 4.1.0
+- **Authorization**: @adonisjs/bouncer 3.1.6
+- **Templating**: Edge.js 6.3.0 + MJML 4.16.1
 
 ## 🏗️ Structure du Projet
 
 ```
 .
-├── frontend/              # Application Nuxt 3
-│   ├── components/
-│   │   ├── ui/           # shadcn-vue components
-│   │   └── headers/      # Headers réutilisables
-│   ├── composables/
-│   │   └── useApi.ts     # Utilitaire API
-│   ├── layouts/          # Layouts Nuxt
-│   ├── middleware/       # Middleware de navigation
-│   ├── pages/
-│   │   ├── index.vue              # Dashboard
-│   │   ├── login.vue              # Page de connexion
-│   │   ├── waiting-verification.vue
-│   │   └── invitation/[identifier].vue
-│   ├── plugins/          # Plugins Nuxt
-│   ├── stores/
-│   │   └── authStore.ts  # Store d'authentification
+├── frontend/              # Application Nuxt 4
+│   ├── app/              # Nouvelle structure Nuxt 4
+│   │   ├── components/   # Components Vue auto-importés
+│   │   ├── layouts/      # Layouts Nuxt (default.vue, auth.vue, app.vue)
+│   │   ├── pages/        # Pages avec routing automatique
+│   │   │   ├── index.vue              # Dashboard
+│   │   │   ├── login.vue              # Page de connexion
+│   │   │   ├── waiting-verification.vue
+│   │   │   └── invitation/[identifier].vue
+│   │   └── assets/
+│   │       └── css/      # Styles globaux
 │   └── nuxt.config.ts
 │
 └── backend/              # API AdonisJS v6
@@ -99,7 +95,7 @@ cd boilerplate
 
 ```bash
 cd backend
-npm install
+pnpm install
 
 # Copier et configurer .env
 cp .env.example .env
@@ -110,7 +106,7 @@ cp .env.example .env
 
 ```bash
 cd frontend
-npm install
+pnpm install
 
 # Copier et configurer .env
 cp .env.example .env
@@ -164,7 +160,7 @@ node ace migration:run
 
 ```bash
 cd backend
-npm run dev
+pnpm dev
 # API disponible sur http://localhost:3333
 ```
 
@@ -172,7 +168,7 @@ npm run dev
 
 ```bash
 cd frontend
-npm run dev
+pnpm dev
 # App disponible sur http://localhost:3000
 ```
 
@@ -250,14 +246,11 @@ npm run dev
 
 ## 🎨 Personnalisation
 
-### Ajouter un Composant UI
+### Composants UI
 
-Les composants shadcn-vue sont dans `frontend/components/ui/`. Pour ajouter un nouveau composant:
+Le projet utilise **Nuxt UI 4.1.0** pour tous les composants d'interface. Les composants sont auto-importés et disponibles directement dans vos templates Vue.
 
-```bash
-cd frontend
-npx shadcn-vue@latest add button
-```
+Consultez la [documentation Nuxt UI](https://ui.nuxt.com) pour la liste complète des composants disponibles et leurs options de personnalisation.
 
 ### Créer une Nouvelle Route API
 
@@ -267,8 +260,8 @@ npx shadcn-vue@latest add button
 
 ### Ajouter une Page Frontend
 
-1. Créer le fichier dans `frontend/pages/`
-2. Nuxt gère automatiquement le routing
+1. Créer le fichier dans `frontend/app/pages/`
+2. Nuxt 4 gère automatiquement le routing file-based
 
 ## 🗃️ Base de Données
 
@@ -324,14 +317,14 @@ npm test
 
 ### Backend
 
-1. Build: `npm run build`
+1. Build: `pnpm build`
 2. Configurer les variables d'environnement de production
 3. Exécuter les migrations: `node ace migration:run --force`
-4. Démarrer: `npm start`
+4. Démarrer: `pnpm start`
 
 ### Frontend
 
-1. Build: `npm run build`
+1. Build: `pnpm build`
 2. Deploy le dossier `.output` sur Vercel/Netlify/votre hébergeur
 
 ## 🔧 Scripts Utiles
@@ -339,10 +332,13 @@ npm test
 ### Backend
 
 ```bash
-npm run dev          # Mode développement avec HMR
-npm run build        # Build pour production
-npm start            # Démarrer en production
-npm test             # Exécuter les tests
+pnpm dev             # Mode développement avec HMR
+pnpm build           # Build pour production
+pnpm start           # Démarrer en production
+pnpm test            # Exécuter les tests
+pnpm lint            # ESLint
+pnpm format          # Prettier
+pnpm typecheck       # TypeScript type checking
 node ace migration:run    # Exécuter les migrations
 node ace migration:rollback  # Rollback dernière migration
 node ace make:controller YourController
@@ -352,10 +348,10 @@ node ace make:model YourModel
 ### Frontend
 
 ```bash
-npm run dev          # Mode développement
-npm run build        # Build pour production
-npm run generate     # Generate static site
-npm run preview      # Preview du build
+pnpm dev             # Mode développement
+pnpm build           # Build pour production
+pnpm preview         # Preview du build
+pnpm typecheck       # TypeScript type checking
 ```
 
 ## 📝 Bonnes Pratiques
