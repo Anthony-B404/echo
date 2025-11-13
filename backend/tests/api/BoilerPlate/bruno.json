@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "TeachMetric",
+  "name": "BoilerPlate",
   "type": "collection",
   "ignore": ["node_modules", ".git"]
 }

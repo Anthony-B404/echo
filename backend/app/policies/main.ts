@@ -15,6 +15,4 @@
 export const policies = {
   OrganizationPolicy: () => import('#policies/organization_policy'),
   InvitationPolicy: () => import('#policies/invitation_policy'),
-  ClassPolicy: () => import('#policies/class_policy'),
-  StudentPolicy: () => import('#policies/student_policy'),
 }

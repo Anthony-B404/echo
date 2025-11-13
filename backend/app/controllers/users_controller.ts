@@ -103,42 +103,4 @@ export default class AuthController {
     }
   }
 
-  public async getTeachersAndInvitationsByOrganization({ auth, response }: HttpContext) {
-    const teachers = await User.query()
-      .where('organizationId', auth.user!.organizationId)
-      .where('role', UserRole.Teacher)
-      .preload('modules')
-
-    const invitations = await Invitation.query()
-      .where('organizationId', auth.user!.organizationId)
-      .where('role', UserRole.Teacher)
-      .where('accepted', false)
-      .preload('modules')
-
-    return response.ok({ teachers, invitations })
-  }
-  public async postModuleForTeacher({ params, request, response }: HttpContext) {
-    const { id } = params
-    const { modulesIds } = request.only(['modulesIds'])
-
-    const user = await User.find(id)
-    if (!user) {
-      return response.notFound({ message: 'User not found' })
-    }
-
-    try {
-      // Récupérer les modules déjà liés à l'invitation et les supprimer
-      const existingModuleIds = await user.related('modules').query().select('id')
-      await user.related('modules').detach(existingModuleIds.map((module) => module.id))
-
-      await user.related('modules').attach(modulesIds)
-
-      return response.ok({ message: 'Modules ajoutés au formateur avec succès' })
-    } catch (error) {
-      return response.status(500).json({
-        message: "Erreur lors de l'ajout des modules au formateur",
-        errors: error.messages,
-      })
-    }
-  }
 }

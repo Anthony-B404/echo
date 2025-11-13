@@ -94,11 +94,10 @@ node ace generate:key               # Generate APP_KEY
 
 ### Backend Architecture (AdonisJS)
 
-- **Controllers**: Thin controllers, business logic in services when needed
+- **Controllers**: Thin controllers in `app/controllers/` (UsersController, OrganizationsController, InvitationsController)
 - **Validators**: VineJS schemas in `app/validators/` - always validate user input
-- **Models**: Lucid models with relationships in `app/models/`
-- **Policies**: Bouncer policies in `app/policies/` for authorization logic
-- **Services**: Business logic in `app/services/` (e.g., `email_error_service.ts`, `reminder_service.ts`)
+- **Models**: Lucid models in `app/models/` (User, Organization, Invitation)
+- **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy)
 - **Import Aliases**: Use `#controllers/*`, `#models/*`, `#validators/*`, etc. (defined in package.json)
 
 ## Database Schema
