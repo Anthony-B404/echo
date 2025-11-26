@@ -2,6 +2,7 @@
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const { $localePath } = useNuxtApp();
 const toast = useToast();
 
 definePageMeta({
@@ -24,7 +25,7 @@ onMounted(async () => {
       description: t("auth.verifyLogin.noToken"),
       color: "error",
     });
-    router.push("/login");
+    router.push($localePath("login"));
     return;
   }
 
@@ -46,14 +47,14 @@ onMounted(async () => {
     });
 
     // Redirect to dashboard
-    router.push("/dashboard");
+    router.push($localePath("dashboard"));
   } catch (error: any) {
     toast.add({
       title: t("auth.verifyLogin.error"),
       description: error.data?.message || t("auth.verifyLogin.invalidToken"),
       color: "error",
     });
-    router.push("/login");
+    router.push($localePath("login"));
   } finally {
     isVerifying.value = false;
   }

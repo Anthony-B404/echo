@@ -37,6 +37,9 @@
       "subscribed": "Subscribed!",
       "subscribedMessage": "You've been subscribed to our newsletter."
     },
+    "language": {
+      "label": "Language"
+    },
     "builtWith": "Built with Nuxt UI"
   },
   "home": {

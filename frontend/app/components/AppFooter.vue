@@ -1,5 +1,9 @@
 <script setup lang="ts">
-const { t } = useI18n();
+import { en, fr } from '@nuxt/ui/locale';
+
+const { t, locale, setLocale } = useI18n();
+
+const locales = [en, fr];
 
 const columns = computed(() => [
   {
@@ -108,6 +112,15 @@ function onSubmit() {
     </template>
 
     <template #right>
+      <ULocaleSelect
+        :model-value="locale"
+        :locales="locales"
+        @update:model-value="setLocale($event)"
+        size="sm"
+        color="neutral"
+        variant="ghost"
+        class="w-40"
+      />
       <UButton
         to="https://go.nuxt.com/discord"
         target="_blank"

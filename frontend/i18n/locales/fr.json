@@ -344,6 +344,9 @@
       "successDescription": "Vous avez été abonné à notre newsletter.",
       "subscribedMessage": "Vous êtes maintenant abonné à notre newsletter."
     },
+    "language": {
+      "label": "Langue"
+    },
     "builtWith": "Créé avec Nuxt UI",
     "copyright": "Copyright ©"
   },

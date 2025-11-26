@@ -2,7 +2,7 @@
   <div class="h-screen flex items-center justify-center px-4">
     <UButton
       icon="i-lucide-chevron-left"
-      to="/"
+      :to="$localePath('index')"
       size="xl"
       color="neutral"
       variant="subtle"

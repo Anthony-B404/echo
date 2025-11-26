@@ -48,6 +48,7 @@ export default class AuthController {
             .subject(i18n.t('emails.registration_magic_link.subject'))
             .htmlView('emails/registration_magic_link', {
               token: existingUser.magicLinkToken,
+              locale: i18n.locale,
               i18n: i18n,
             })
         })
@@ -88,6 +89,7 @@ export default class AuthController {
           .subject(i18n.t('emails.registration_magic_link.subject'))
           .htmlView('emails/registration_magic_link', {
             token: magicLinkToken,
+            locale: i18n.locale,
             i18n: i18n,
           })
       })
@@ -234,6 +236,7 @@ export default class AuthController {
           .subject(i18n.t('emails.login_magic_link.subject'))
           .htmlView('emails/login_magic_link', {
             token: user.magicLinkToken,
+            locale: i18n.locale,
             i18n: i18n,
           })
       })

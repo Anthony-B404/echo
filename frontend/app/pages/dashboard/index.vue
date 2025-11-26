@@ -8,6 +8,7 @@ definePageMeta({
 });
 
 const { t } = useI18n();
+const { $localePath } = useNuxtApp();
 const { isNotificationsSlideoverOpen } = useDashboard();
 
 const items = computed(() => [
@@ -15,12 +16,12 @@ const items = computed(() => [
     {
       label: t('pages.dashboard.home.newMail'),
       icon: "i-lucide-send",
-      to: "/dashboard/inbox",
+      to: $localePath("dashboard-inbox"),
     },
     {
       label: t('pages.dashboard.home.newCustomer'),
       icon: "i-lucide-user-plus",
-      to: "/dashboard/customers",
+      to: $localePath("dashboard-customers"),
     },
   ],
 ] satisfies DropdownMenuItem[][]);
