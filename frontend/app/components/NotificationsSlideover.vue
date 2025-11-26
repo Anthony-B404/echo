@@ -4,18 +4,22 @@ import type { Notification } from "~/types";
 
 const { t } = useI18n();
 const { isNotificationsSlideoverOpen } = useDashboard();
+const localePath = useLocalePath();
 
 const { data: notifications } =
   await useFetch<Notification[]>("/api/notifications");
 </script>
 
 <template>
-  <USlideover v-model:open="isNotificationsSlideoverOpen" :title="t('components.notifications.title')">
+  <USlideover
+    v-model:open="isNotificationsSlideoverOpen"
+    :title="t('components.notifications.title')"
+  >
     <template #body>
       <NuxtLink
         v-for="notification in notifications"
         :key="notification.id"
-        :to="`/inbox?id=${notification.id}`"
+        :to="localePath(`/dashboard/inbox?id=${notification.id}`)"
         class="hover:bg-elevated/50 relative -mx-3 flex items-center gap-3 rounded-md px-3 py-2.5 first:-mt-3 last:-mb-3"
       >
         <UChip color="error" :show="!!notification.unread" inset>
