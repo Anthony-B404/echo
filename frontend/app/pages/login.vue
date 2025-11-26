@@ -25,25 +25,14 @@ const fields = computed(() => [
   },
 ]);
 
+const config = useRuntimeConfig();
+
 const providers = computed(() => [
   {
     label: t("auth.login.providers.google"),
     icon: "i-simple-icons-google",
     onClick: () => {
-      toast.add({
-        title: t("auth.login.providers.google"),
-        description: t("auth.login.providers.googleDescription"),
-      });
-    },
-  },
-  {
-    label: t("auth.login.providers.github"),
-    icon: "i-simple-icons-github",
-    onClick: () => {
-      toast.add({
-        title: t("auth.login.providers.github"),
-        description: t("auth.login.providers.githubDescription"),
-      });
+      window.location.href = `${config.public.apiUrl}/auth/google/redirect`;
     },
   },
 ]);
@@ -71,11 +60,10 @@ type Schema = z.output<typeof schema>;
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
   try {
-    // TODO: Replace with actual API call
-    // await $fetch('/api/auth/send-magic-link', {
-    //   method: 'POST',
-    //   body: { email: payload.data.email }
-    // })
+    await $fetch(`${config.public.apiUrl}/login/request-magic-link`, {
+      method: 'POST',
+      body: { email: payload.data.email }
+    });
 
     toast.add({
       title: t("auth.login.success"),
