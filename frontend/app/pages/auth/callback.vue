@@ -4,6 +4,7 @@ const router = useRouter();
 const { $localePath } = useNuxtApp();
 const toast = useToast();
 const { t } = useI18n();
+const { login } = useAuth();
 
 definePageMeta({
   layout: "auth",
@@ -46,9 +47,9 @@ onMounted(async () => {
 
   // Handle successful authentication
   if (token) {
-    // Store token in localStorage
-    localStorage.setItem("auth_token", token);
-    console.log("Callback - Token stored in localStorage");
+    // Store token using auth store
+    await login(token);
+    console.log("Callback - Token stored via auth store");
 
     toast.add({
       title: t("auth.social.google_success"),

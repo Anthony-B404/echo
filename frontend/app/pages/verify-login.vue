@@ -30,13 +30,14 @@ onMounted(async () => {
 
   try {
     const config = useRuntimeConfig();
-    const response = await $fetch(
+    const { login } = useAuth();
+
+    const response = await $fetch<{ token: string }>(
       `${config.public.apiUrl}/verify-magic-link/${token.value}`,
     );
 
-    // Store token and user data
-    // TODO: Store token in your auth store/composable
-    const authToken = response.token;
+    // Store token using auth store
+    await login(response.token);
 
     toast.add({
       title: t("auth.verifyLogin.success"),

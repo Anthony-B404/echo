@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { Member } from "~/types";
 
+definePageMeta({
+  middleware: "auth",
+});
+
 const { t } = useI18n();
 
 const { data: members } = await useFetch<Member[]>("/api/members", {

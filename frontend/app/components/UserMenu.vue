@@ -2,6 +2,7 @@
 import type { DropdownMenuItem } from "@nuxt/ui";
 
 const { t } = useI18n();
+const { user: authUser, logout } = useAuth();
 
 defineProps<{
   collapsed?: boolean;
@@ -31,13 +32,13 @@ const colors = [
 ];
 const neutrals = ["slate", "gray", "zinc", "neutral", "stone"];
 
-const user = ref({
-  name: "Benjamin Canac",
+const user = computed(() => ({
+  name: authUser.value?.fullName || authUser.value?.email || "User",
   avatar: {
-    src: "https://github.com/benjamincanac.png",
-    alt: "Benjamin Canac",
+    src: authUser.value?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.value?.fullName || authUser.value?.email || "U")}`,
+    alt: authUser.value?.fullName || authUser.value?.email || "User",
   },
-});
+}));
 
 const items = computed<DropdownMenuItem[][]>(() => [
   [
@@ -205,6 +206,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       label: t('components.user.logOut'),
       icon: "i-lucide-log-out",
+      onSelect: async () => {
+        await logout();
+      },
     },
   ],
 ]);

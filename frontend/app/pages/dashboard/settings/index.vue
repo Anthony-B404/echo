@@ -2,6 +2,10 @@
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 
+definePageMeta({
+  middleware: "auth",
+});
+
 const { t } = useI18n();
 
 const fileRef = ref<HTMLInputElement>();

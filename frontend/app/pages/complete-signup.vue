@@ -7,6 +7,7 @@ const route = useRoute();
 const router = useRouter();
 const { $localePath } = useNuxtApp();
 const toast = useToast();
+const { login } = useAuth();
 
 definePageMeta({
   layout: "auth",
@@ -37,7 +38,7 @@ onMounted(async () => {
 
   try {
     const config = useRuntimeConfig();
-    const response = await $fetch(
+    const response = await $fetch<{ email: string; token: string }>(
       `${config.public.apiUrl}/verify-magic-link/${token.value}`,
     );
 
@@ -72,7 +73,7 @@ const schema = z.object({
           message: t("auth.validation.firstNameTooShort"),
         });
       }
-    })
+    }),
   ),
   lastName: z.preprocess(
     (val) => val ?? "",
@@ -88,7 +89,7 @@ const schema = z.object({
           message: t("auth.validation.lastNameTooShort"),
         });
       }
-    })
+    }),
   ),
   organizationName: z.preprocess(
     (val) => val ?? "",
@@ -104,7 +105,7 @@ const schema = z.object({
           message: t("auth.validation.organizationNameTooShort"),
         });
       }
-    })
+    }),
   ),
   logo: z.any().optional(),
 });
@@ -133,14 +134,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       formData.append("logo", selectedLogo.value);
     }
 
-    const response = await $fetch(`${config.public.apiUrl}/register/complete`, {
-      method: "POST",
-      body: formData,
-    });
+    const response = await $fetch<{ token: string; message: string }>(
+      `${config.public.apiUrl}/register/complete`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
-    // Store token and redirect to dashboard
-    const authToken = response.token;
-    // TODO: Store token in your auth store/composable
+    // Store token using auth store
+    await login(response.token);
 
     toast.add({
       title: t("auth.completeSignup.success"),
@@ -149,7 +152,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     });
 
     // Redirect to dashboard or app
-    router.push($localePath("index"));
+    router.push($localePath("dashboard"));
   } catch (error: any) {
     toast.add({
       title: t("auth.completeSignup.error"),

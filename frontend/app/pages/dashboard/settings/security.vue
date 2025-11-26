@@ -2,6 +2,10 @@
 import * as z from "zod";
 import type { FormError } from "@nuxt/ui";
 
+definePageMeta({
+  middleware: "auth",
+});
+
 const { t } = useI18n();
 
 const passwordSchema = z.object({

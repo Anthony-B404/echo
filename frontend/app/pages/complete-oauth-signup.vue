@@ -6,7 +6,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { $localePath } = useNuxtApp();
 const toast = useToast();
-const config = useRuntimeConfig();
+const { user, token, authenticatedFetch } = useAuth();
 
 definePageMeta({
   layout: "auth",
@@ -17,16 +17,12 @@ useSeoMeta({
   description: t("seo.completeSignup.description"),
 });
 
-const token = ref("");
 const userData = ref<{ email: string; fullName?: string } | null>(null);
 const selectedLogo = ref<File | null>(null);
 const isLoading = ref(true);
 
 // Verify auth token and get user data on mount
 onMounted(async () => {
-  // Get token from localStorage
-  token.value = localStorage.getItem("auth_token") || "";
-
   if (!token.value) {
     toast.add({
       title: t("auth.completeSignup.error"),
@@ -38,25 +34,41 @@ onMounted(async () => {
   }
 
   try {
-    // Verify token and get user data
-    const response = await $fetch(`${config.public.apiUrl}/me`, {
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+    // Get user data from auth store (already fetched by auth plugin)
+    if (user.value) {
+      userData.value = {
+        email: user.value.email,
+        fullName: user.value.fullName || user.value.firstName || "",
+      };
 
-    userData.value = {
-      email: response.email,
-      fullName: response.fullName || response.firstName || "",
-    };
+      // If onboarding already completed, redirect to dashboard
+      if (user.value.onboardingCompleted) {
+        router.push($localePath("dashboard"));
+        return;
+      }
 
-    // If onboarding already completed, redirect to dashboard
-    if (response.onboardingCompleted) {
-      router.push($localePath("dashboard"));
-      return;
+      isLoading.value = false;
+    } else {
+      // Fallback: fetch user data if not available
+      const response = await authenticatedFetch<{
+        email: string;
+        fullName?: string;
+        firstName?: string;
+        onboardingCompleted: boolean;
+      }>("/me");
+
+      userData.value = {
+        email: response.email,
+        fullName: response.fullName || response.firstName || "",
+      };
+
+      if (response.onboardingCompleted) {
+        router.push($localePath("dashboard"));
+        return;
+      }
+
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   } catch (error: any) {
     toast.add({
       title: t("auth.completeSignup.error"),
@@ -140,11 +152,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       formData.append("logo", selectedLogo.value);
     }
 
-    await $fetch(`${config.public.apiUrl}/oauth/complete-registration`, {
+    await authenticatedFetch("/oauth/complete-registration", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
       body: formData,
     });
 

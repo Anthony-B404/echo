@@ -130,7 +130,7 @@ export default class AuthController {
       return response.ok({
         message: i18n.t('messages.auth.login.success'),
         user,
-        token: accessToken,
+        token: accessToken.value!.release(),
       })
     }
 
@@ -188,7 +188,7 @@ export default class AuthController {
       return response.ok({
         message: i18n.t('messages.organization.created'),
         user,
-        token: accessToken,
+        token: accessToken.value!.release(),
       })
     } catch (error) {
       return response.status(422).json({
