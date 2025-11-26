@@ -14,6 +14,7 @@ useSeoMeta({
 });
 
 const toast = useToast();
+const config = useRuntimeConfig();
 
 const fields = computed(() => [
   {
@@ -22,6 +23,16 @@ const fields = computed(() => [
     label: t("auth.signup.email"),
     placeholder: t("auth.signup.emailPlaceholder"),
     required: true,
+  },
+]);
+
+const providers = computed(() => [
+  {
+    label: t("auth.signup.providers.google"),
+    icon: "i-simple-icons-google",
+    onClick: () => {
+      window.location.href = `${config.public.apiUrl}/auth/google/redirect`;
+    },
   },
 ]);
 
@@ -78,6 +89,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   <UAuthForm
     :fields="fields"
     :schema="schema"
+    :providers="providers"
     :title="$t('auth.signup.title')"
     icon="i-lucide-mail"
     :submit="{ label: $t('auth.signup.submitButton') }"

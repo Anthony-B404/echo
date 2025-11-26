@@ -232,6 +232,7 @@
       "errorDescription": "Failed to send magic link. Please try again.",
       "footer": "By signing in, you agree to our",
       "termsOfService": "Terms of Service",
+      "processing": "Logging in...",
       "providers": {
         "google": "Google",
         "github": "GitHub",
@@ -250,7 +251,16 @@
       "successDescription": "Check your email at {email} to complete signup",
       "error": "Error",
       "errorDescription": "Failed to send magic link. Please try again.",
-      "footer": "By signing up, you agree to our terms of service"
+      "footer": "By signing up, you agree to our terms of service",
+      "providers": {
+        "google": "Google",
+        "googleDescription": "Sign up with Google"
+      }
+    },
+    "social": {
+      "google_success": "Successfully logged in with Google",
+      "access_denied": "Access denied. You must allow access to continue.",
+      "error": "Error during Google authentication"
     },
     "completeSignup": {
       "title": "Complete your registration",

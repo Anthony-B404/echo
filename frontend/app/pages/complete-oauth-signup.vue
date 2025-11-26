@@ -3,10 +3,10 @@ import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 
 const { t } = useI18n();
-const route = useRoute();
 const router = useRouter();
 const { $localePath } = useNuxtApp();
 const toast = useToast();
+const config = useRuntimeConfig();
 
 definePageMeta({
   layout: "auth",
@@ -17,43 +17,53 @@ useSeoMeta({
   description: t("seo.completeSignup.description"),
 });
 
-const token = ref(route.query.token as string);
-const isVerifying = ref(true);
-const isValid = ref(false);
-const userData = ref<{ email: string } | null>(null);
+const token = ref("");
+const userData = ref<{ email: string; fullName?: string } | null>(null);
 const selectedLogo = ref<File | null>(null);
+const isLoading = ref(true);
 
-// Verify magic link token on mount
+// Verify auth token and get user data on mount
 onMounted(async () => {
+  // Get token from localStorage
+  token.value = localStorage.getItem("auth_token") || "";
+
   if (!token.value) {
     toast.add({
       title: t("auth.completeSignup.error"),
       description: t("auth.completeSignup.noToken"),
       color: "error",
     });
-    router.push($localePath("signup"));
+    router.push($localePath("login"));
     return;
   }
 
   try {
-    const config = useRuntimeConfig();
-    const response = await $fetch(
-      `${config.public.apiUrl}/verify-magic-link/${token.value}`,
-    );
+    // Verify token and get user data
+    const response = await $fetch(`${config.public.apiUrl}/me`, {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     userData.value = {
       email: response.email,
+      fullName: response.fullName || response.firstName || "",
     };
-    isValid.value = true;
+
+    // If onboarding already completed, redirect to dashboard
+    if (response.onboardingCompleted) {
+      router.push($localePath("dashboard"));
+      return;
+    }
+
+    isLoading.value = false;
   } catch (error: any) {
     toast.add({
       title: t("auth.completeSignup.error"),
       description: error.data?.message || t("auth.completeSignup.invalidToken"),
       color: "error",
     });
-    router.push($localePath("signup"));
-  } finally {
-    isVerifying.value = false;
+    router.push($localePath("login"));
   }
 });
 
@@ -72,7 +82,7 @@ const schema = z.object({
           message: t("auth.validation.firstNameTooShort"),
         });
       }
-    })
+    }),
   ),
   lastName: z.preprocess(
     (val) => val ?? "",
@@ -88,7 +98,7 @@ const schema = z.object({
           message: t("auth.validation.lastNameTooShort"),
         });
       }
-    })
+    }),
   ),
   organizationName: z.preprocess(
     (val) => val ?? "",
@@ -104,7 +114,7 @@ const schema = z.object({
           message: t("auth.validation.organizationNameTooShort"),
         });
       }
-    })
+    }),
   ),
   logo: z.any().optional(),
 });
@@ -120,11 +130,8 @@ const state = reactive<Partial<Schema>>({
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
-    const config = useRuntimeConfig();
-
     // Prepare FormData
     const formData = new FormData();
-    formData.append("magicLinkToken", token.value);
     formData.append("firstName", event.data.firstName);
     formData.append("lastName", event.data.lastName);
     formData.append("organizationName", event.data.organizationName);
@@ -133,14 +140,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       formData.append("logo", selectedLogo.value);
     }
 
-    const response = await $fetch(`${config.public.apiUrl}/register/complete`, {
+    await $fetch(`${config.public.apiUrl}/oauth/complete-registration`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
       body: formData,
     });
-
-    // Store token and redirect to dashboard
-    const authToken = response.token;
-    // TODO: Store token in your auth store/composable
 
     toast.add({
       title: t("auth.completeSignup.success"),
@@ -148,7 +154,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       color: "success",
     });
 
-    // Redirect to dashboard or app
+    // Redirect to dashboard
     router.push($localePath("index"));
   } catch (error: any) {
     toast.add({
@@ -162,11 +168,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div v-if="isVerifying" class="flex items-center justify-center py-12">
+  <div v-if="isLoading" class="flex items-center justify-center py-12">
     <UIcon name="i-lucide-loader-2" class="text-primary h-8 w-8 animate-spin" />
   </div>
 
-  <div v-else-if="isValid" class="mx-auto w-full max-w-4xl px-6">
+  <div v-else class="mx-auto w-full max-w-4xl px-6">
     <div class="mb-10 text-center">
       <div class="mb-6 flex justify-center">
         <div class="bg-primary/10 rounded-full p-4">

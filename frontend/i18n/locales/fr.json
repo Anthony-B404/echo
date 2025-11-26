@@ -222,6 +222,7 @@
       "errorDescription": "Échec de l'envoi du lien magique. Veuillez réessayer.",
       "footer": "En vous connectant, vous acceptez nos",
       "termsOfService": "Conditions d'utilisation",
+      "processing": "Connexion en cours...",
       "providers": {
         "google": "Google",
         "github": "GitHub",
@@ -240,7 +241,16 @@
       "successDescription": "Vérifiez votre email à {email} pour finaliser l'inscription",
       "error": "Erreur",
       "errorDescription": "Échec de l'envoi du lien magique. Veuillez réessayer.",
-      "footer": "En vous inscrivant, vous acceptez nos conditions d'utilisation"
+      "footer": "En vous inscrivant, vous acceptez nos conditions d'utilisation",
+      "providers": {
+        "google": "Google",
+        "googleDescription": "S'inscrire avec Google"
+      }
+    },
+    "social": {
+      "google_success": "Connexion avec Google réussie",
+      "access_denied": "Accès refusé. Vous devez autoriser l'accès pour continuer.",
+      "error": "Erreur lors de l'authentification avec Google"
     },
     "completeSignup": {
       "title": "Finaliser votre inscription",

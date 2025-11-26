@@ -13,7 +13,8 @@
     "registration": {
       "magic_link_sent": "A magic link has been sent to your email address. Please check your inbox.",
       "token_invalid": "This registration link is invalid",
-      "token_expired": "This registration link has expired. Please request a new link."
+      "token_expired": "This registration link has expired. Please request a new link.",
+      "already_completed": "Your registration is already completed"
     },
     "login": {
       "magic_link_sent": "A login link has been sent to your email address",
@@ -22,6 +23,12 @@
       "token_invalid": "This login link is invalid",
       "token_expired": "This login link has expired. Please request a new link.",
       "success": "Login successful"
+    },
+    "social": {
+      "google_success": "Successfully logged in with Google",
+      "account_created": "Account successfully created via Google",
+      "error": "Error during Google authentication",
+      "access_denied": "Access denied. You must allow access to continue."
     }
   },
   "organization": {

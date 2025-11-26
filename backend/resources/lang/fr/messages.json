@@ -13,7 +13,8 @@
     "registration": {
       "magic_link_sent": "Un lien magique a été envoyé à votre adresse email. Vérifiez votre boîte de réception.",
       "token_invalid": "Ce lien d'inscription est invalide",
-      "token_expired": "Ce lien d'inscription a expiré. Veuillez demander un nouveau lien."
+      "token_expired": "Ce lien d'inscription a expiré. Veuillez demander un nouveau lien.",
+      "already_completed": "Votre inscription est déjà complétée"
     },
     "login": {
       "magic_link_sent": "Un lien de connexion a été envoyé à votre adresse email",
@@ -22,6 +23,12 @@
       "token_invalid": "Ce lien de connexion est invalide",
       "token_expired": "Ce lien de connexion a expiré. Veuillez demander un nouveau lien.",
       "success": "Connexion réussie"
+    },
+    "social": {
+      "google_success": "Connexion avec Google réussie",
+      "account_created": "Compte créé avec succès via Google",
+      "error": "Erreur lors de l'authentification avec Google",
+      "access_denied": "Accès refusé. Vous devez autoriser l'accès pour continuer."
     }
   },
   "organization": {

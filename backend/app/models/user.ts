@@ -26,6 +26,12 @@ export default class User extends BaseModel {
   declare email: string
 
   @column()
+  declare googleId: string | null
+
+  @column()
+  declare avatar: string | null
+
+  @column()
   declare role: UserRole
 
   @column()
