@@ -3,6 +3,15 @@ import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 
 const { t } = useI18n();
+const { $localePath } = useNuxtApp();
+const { isAuthenticated } = useAuth();
+
+// Redirect to dashboard if already authenticated
+onMounted(() => {
+  if (isAuthenticated.value) {
+    navigateTo($localePath('dashboard'));
+  }
+});
 
 definePageMeta({
   layout: "auth",
