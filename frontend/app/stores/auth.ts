@@ -70,6 +70,10 @@ export const useAuthStore = defineStore("auth", {
         });
 
         this.setUser(response);
+
+        // Charger l'organisation après avoir récupéré l'utilisateur
+        const organizationStore = useOrganizationStore();
+        await organizationStore.fetchOrganization();
       } catch (error) {
         console.error("Failed to fetch user:", error);
         // Token might be invalid, clear auth state
@@ -128,11 +132,15 @@ export const useAuthStore = defineStore("auth", {
         }
       }
 
-      // Clear state
+      // Clear auth state
       this.token = null;
       this.user = null;
       this.isAuthenticated = false;
       localStorage.removeItem(TOKEN_KEY);
+
+      // Clear organization state
+      const organizationStore = useOrganizationStore();
+      organizationStore.clearOrganization();
 
       // Redirect to login
       const { $localePath } = useNuxtApp();

@@ -471,6 +471,7 @@
       "title": "Notifications"
     },
     "teams": {
+      "loading": "Chargement...",
       "createTeam": "Créer une équipe",
       "manageTeams": "Gérer les équipes"
     },

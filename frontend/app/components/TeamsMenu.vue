@@ -1,52 +1,57 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
+import { useOrganizationStore } from "~/stores/organization";
+import { storeToRefs } from "pinia";
 
 const { t } = useI18n();
+const config = useRuntimeConfig();
 
 defineProps<{
   collapsed?: boolean;
 }>();
 
-const teams = ref([
-  {
-    label: "Nuxt",
-    avatar: {
-      src: "https://github.com/nuxt.png",
-      alt: "Nuxt",
-    },
-  },
-  {
-    label: "NuxtHub",
-    avatar: {
-      src: "https://github.com/nuxt-hub.png",
-      alt: "NuxtHub",
-    },
-  },
-  {
-    label: "NuxtLabs",
-    avatar: {
-      src: "https://github.com/nuxtlabs.png",
-      alt: "NuxtLabs",
-    },
-  },
-]);
-const selectedTeam = ref(teams.value[0]);
+// Récupérer l'organisation depuis le store
+const organizationStore = useOrganizationStore();
+const { organization, loading } = storeToRefs(organizationStore);
+
+// Calculer l'URL du logo
+const logoUrl = computed(() => {
+  if (!organization.value?.logo) {
+    return null;
+  }
+  return `${config.public.apiUrl}/${organization.value.logo}`;
+});
+
+// Créer l'objet team à partir de l'organisation
+const currentTeam = computed(() => {
+  if (!organization.value) {
+    return {
+      label: t("components.teams.loading"),
+      avatar: undefined,
+    };
+  }
+
+  return {
+    label: organization.value.name,
+    avatar: logoUrl.value
+      ? {
+          src: logoUrl.value,
+          alt: organization.value.name,
+        }
+      : undefined,
+  };
+});
 
 const items = computed<DropdownMenuItem[][]>(() => {
   return [
-    teams.value.map((team) => ({
-      ...team,
-      onSelect() {
-        selectedTeam.value = team;
-      },
-    })),
+    [currentTeam.value],
     [
       {
-        label: t('components.teams.createTeam'),
+        label: t("components.teams.createTeam"),
         icon: "i-lucide-circle-plus",
       },
       {
-        label: t('components.teams.manageTeams'),
+        label: t("components.teams.manageTeams"),
         icon: "i-lucide-cog",
       },
     ],
@@ -64,14 +69,15 @@ const items = computed<DropdownMenuItem[][]>(() => {
   >
     <UButton
       v-bind="{
-        ...selectedTeam,
-        label: collapsed ? undefined : selectedTeam?.label,
+        ...currentTeam,
+        label: collapsed ? undefined : currentTeam?.label,
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down',
       }"
       color="neutral"
       variant="ghost"
       block
       :square="collapsed"
+      :disabled="loading"
       class="data-[state=open]:bg-elevated"
       :class="[!collapsed && 'py-2']"
       :ui="{

@@ -415,6 +415,7 @@
       "title": "Notifications"
     },
     "teams": {
+      "loading": "Loading...",
       "createTeam": "Create team",
       "manageTeams": "Manage teams"
     },
