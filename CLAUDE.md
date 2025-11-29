@@ -64,10 +64,13 @@ node ace generate:key               # Generate APP_KEY
 
 ### Multi-Tenant Architecture
 
-- **Tenant Isolation**: All data is scoped by `organizationId` foreign key
-- **Critical Rule**: ALWAYS filter database queries by `organizationId` to prevent data leaks
-- **User-Organization Relationship**: Users belong to exactly one organization
-- **Roles**: Owner (1) and Member (2) with Bouncer policies for authorization
+- **Tenant Isolation**: All data is scoped by `currentOrganizationId` (user's active organization)
+- **Critical Rule**: ALWAYS filter database queries by `currentOrganizationId` to prevent data leaks
+- **User-Organization Relationship**: Users can belong to MULTIPLE organizations
+- **Organization Context**: Users have a "current organization" that determines which data they see
+- **Roles**: Owner (1), Administrator (2), and Member (3) - stored per-organization in `organization_user` pivot table
+- **Role Verification**: Use `user.isOwnerOf(orgId)` and `user.hasOrganization(orgId)` methods
+- **Organization Switching**: Users can switch between their organizations via `/api/organizations/:id/switch`
 
 ### Authentication & Authorization Flow
 
@@ -81,7 +84,9 @@ node ace generate:key               # Generate APP_KEY
 
 - **UUID-based**: Invitations use `identifier` (UUID) for secure public links
 - **Expiration**: Invitations expire after set period (`expiresAt`)
-- **Flow**: Create → Check validity → Accept (creates new user + links to organization)
+- **Flow**: Create → Check validity → Accept
+  - **New Users**: Creates user + links to organization with specified role
+  - **Existing Users**: Adds organization to user's organizations (user can belong to multiple orgs)
 - **Email Notifications**: Automatically sent via Resend when invitation created
 
 ### Internationalization (i18n)
@@ -137,7 +142,7 @@ const data = await authenticatedFetch('/protected-endpoint')
 
 - **Controllers**: Thin controllers in `app/controllers/` (UsersController, OrganizationsController, InvitationsController)
 - **Validators**: VineJS schemas in `app/validators/` - always validate user input
-- **Models**: Lucid models in `app/models/` (User, Organization, Invitation)
+- **Models**: Lucid models in `app/models/` (User, Organization, OrganizationUser, Invitation)
 - **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy)
 - **Import Aliases**: Use `#controllers/*`, `#models/*`, `#validators/*`, etc. (defined in package.json)
 
@@ -145,16 +150,28 @@ const data = await authenticatedFetch('/protected-endpoint')
 
 ### Core Tables
 
-- **users**: Multi-tenant users with `organizationId`, `role`, `isOwner` flags
-- **organizations**: Tenant entities with `name`, `logo`, `email`
+- **users**: Users with `currentOrganizationId` (active organization context)
+- **organizations**: Organization entities with `name`, `logo`, `email`
+- **organization_user**: Pivot table linking users to organizations with `role` per organization (1=Owner, 2=Administrator, 3=Member)
 - **invitations**: Pending invitations with `identifier` (UUID), `organizationId`, `role`, `expiresAt`
 - **access_tokens**: API authentication tokens managed by AdonisJS Auth
 
 ### Key Relationships
 
-- User → Organization (many-to-one)
+- User ↔ Organization (many-to-many via `organization_user` pivot)
+- User → Current Organization (belongs to via `currentOrganizationId`)
 - Invitation → Organization (many-to-one)
 - Access Token → User (tokenable polymorphic)
+
+### User Roles (per organization)
+
+```typescript
+export enum UserRole {
+  Owner = 1,         // Full control of organization
+  Administrator = 2, // Can manage users and settings
+  Member = 3         // Basic access to organization resources
+}
+```
 
 ## Configuration & Environment
 
@@ -195,15 +212,18 @@ API_URL=http://localhost:3333
 
 ### Multi-Tenant Issues
 
-- **NEVER** fetch data without filtering by `organizationId`
+- **NEVER** fetch data without filtering by `currentOrganizationId` (user's active organization)
+- Always use `user.hasOrganization(orgId)` before accessing organization data
+- Always use `user.isOwnerOf(orgId)` for owner-only operations
 - Always use Bouncer policies to check tenant access
 - Test organization isolation in all new features
+- Remember: Users can belong to multiple organizations
 
-### Email Verification
+### Current Organization Context
 
-- Users must verify email before full access
-- Check `emailVerified` flag before sensitive operations
-- Resend verification endpoint: `POST /resend-verification`
+- **ALWAYS** ensure user has `currentOrganizationId` set before accessing organization-scoped data
+- Handle case where user might not have a current organization selected
+- Organization switching updates `currentOrganizationId` - verify membership first
 
 ### API Token Management
 

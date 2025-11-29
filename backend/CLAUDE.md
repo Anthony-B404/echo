@@ -72,40 +72,60 @@ node ace generate:key               # Generate APP_KEY
 
 ### Critical Rules
 
-1. **ALWAYS filter queries by `organizationId`** - Never fetch data without tenant isolation
-2. **User-Organization**: Each user belongs to exactly ONE organization
-3. **Policies**: Always use Bouncer policies to verify tenant access
-4. **Transactions**: Use database transactions for multi-model operations
+1. **ALWAYS filter queries by `currentOrganizationId`** - Never fetch data without tenant isolation
+2. **User-Organization**: Each user can belong to MULTIPLE organizations
+3. **Current Organization Context**: All operations use the user's currently active organization (`currentOrganizationId`)
+4. **Policies**: Always use Bouncer policies to verify tenant access with `hasOrganization()` and `isOwnerOf()` methods
+5. **Transactions**: Use database transactions for multi-model operations
+6. **Organization Switching**: Users can switch between their organizations via API endpoint
 
 ### Database Schema
 
 #### Core Tables
 
 **users**
+
 - `id` - Primary key
-- `organizationId` - Foreign key to organizations (tenant isolation)
 - `email` - Unique email
-- `password` - Hashed password
-- `role` - 1 (Owner) or 2 (Member)
-- `isOwner` - Boolean flag
-- `emailVerified` - Boolean flag
-- `emailVerificationToken` - UUID for verification
+- `fullName` - User full name (optional)
+- `firstName` - User first name (optional)
+- `lastName` - User last name (optional)
+- `avatar` - Avatar URL (optional)
+- `googleId` - Google OAuth ID (optional)
+- `currentOrganizationId` - Foreign key to organizations (active organization context)
+- `onboardingCompleted` - Boolean flag
+- `magicLinkToken` - Token for magic link authentication (optional)
+- `magicLinkExpiresAt` - Expiration date for magic link
+- `pendingEmail` - Email pending change (optional)
+- `emailChangeToken` - Token for email change confirmation (optional)
+- `emailChangeExpiresAt` - Expiration date for email change token
 
 **organizations**
+
 - `id` - Primary key
 - `name` - Organization name
 - `logo` - Logo URL (optional)
 - `email` - Organization email
 
+**organization_user** (Pivot Table)
+
+- `id` - Primary key
+- `userId` - Foreign key to users
+- `organizationId` - Foreign key to organizations
+- `role` - 1 (Owner), 2 (Administrator), or 3 (Member)
+- Unique constraint on `[userId, organizationId]`
+
 **invitations**
+
 - `id` - Primary key
 - `identifier` - UUID (for public invitation links)
 - `organizationId` - Foreign key to organizations
 - `email` - Invitee email
-- `role` - 1 (Owner) or 2 (Member)
+- `role` - 1 (Owner), 2 (Administrator), or 3 (Member)
 - `expiresAt` - Expiration date
 
 **access_tokens**
+
 - Managed by @adonisjs/auth
 - Polymorphic relation to User model
 
@@ -113,15 +133,80 @@ node ace generate:key               # Generate APP_KEY
 
 ```typescript
 // User model
-@belongsTo(() => Organization)
-declare organization: BelongsTo<typeof Organization>
+@manyToMany(() => Organization, {
+  pivotTable: 'organization_user',
+  pivotColumns: ['role']
+})
+declare organizations: ManyToMany<typeof Organization>
+
+@belongsTo(() => Organization, {
+  foreignKey: 'currentOrganizationId'
+})
+declare currentOrganization: BelongsTo<typeof Organization>
+
+// Helper methods
+async isOwnerOf(organizationId: number): Promise<boolean>
+async hasOrganization(organizationId: number): Promise<boolean>
 
 // Organization model
-@hasMany(() => User)
-declare users: HasMany<typeof User>
+@manyToMany(() => User, {
+  pivotTable: 'organization_user',
+  pivotColumns: ['role']
+})
+declare users: ManyToMany<typeof User>
 
 @hasMany(() => Invitation)
 declare invitations: HasMany<typeof Invitation>
+```
+
+### User Roles
+
+```typescript
+export enum UserRole {
+  Owner = 1,
+  Administrator = 2,
+  Member = 3,
+}
+```
+
+- **Owner**: Full control of organization (create, update, delete)
+- **Administrator**: Can manage users and settings
+- **Member**: Basic access to organization resources
+
+### Organization Management
+
+#### Switching Organizations
+
+Users can switch their active organization context:
+
+```typescript
+// POST /api/organizations/:id/switch
+const user = auth.user!
+if (!(await user.hasOrganization(organizationId))) {
+  return response.forbidden({ message: 'Access denied' })
+}
+user.currentOrganizationId = organizationId
+await user.save()
+```
+
+#### Listing User Organizations
+
+```typescript
+// GET /api/organizations
+await auth.user!.load('organizations')
+return response.ok(auth.user!.organizations)
+```
+
+#### Creating Organizations
+
+```typescript
+// POST /api/organizations
+const organization = await Organization.create({ name, email })
+await organization.related('users').attach({
+  [userId]: { role: UserRole.Owner },
+})
+user.currentOrganizationId = organization.id
+await user.save()
 ```
 
 ## Authentication & Authorization
@@ -151,8 +236,13 @@ Policies in `app/policies/`:
 // Example: OrganizationPolicy
 export default class OrganizationPolicy {
   async update(user: User, organization: Organization) {
-    // Verify user belongs to organization
-    return user.organizationId === organization.id && user.isOwner
+    // Verify user belongs to organization AND is owner
+    return (await user.hasOrganization(organization.id)) && (await user.isOwnerOf(organization.id))
+  }
+
+  async view(user: User, organization: Organization) {
+    // Verify user has access to organization
+    return user.hasOrganization(organization.id)
   }
 }
 ```
@@ -170,6 +260,27 @@ export default class OrganizationsController {
 
     // Update logic
   }
+
+  async show({ auth, bouncer, params }: HttpContext) {
+    const organization = await Organization.findOrFail(params.id)
+    await bouncer.with('OrganizationPolicy').authorize('view', organization)
+
+    return response.ok(organization)
+  }
+}
+```
+
+**Critical**: Always check organization membership before operations:
+
+```typescript
+// ✅ Correct - Check membership
+if (!(await auth.user!.hasOrganization(organizationId))) {
+  return response.forbidden({ message: 'Access denied' })
+}
+
+// ✅ Correct - Check owner role
+if (!(await auth.user!.isOwnerOf(organizationId))) {
+  return response.forbidden({ message: 'Owner access required' })
 }
 ```
 
@@ -185,6 +296,7 @@ export default class OrganizationsController {
 ### Translation Files
 
 **messages.json** - Application messages
+
 ```json
 {
   "auth": {
@@ -198,6 +310,7 @@ export default class OrganizationsController {
 ```
 
 **emails.json** - Email content
+
 ```json
 {
   "verification": {
@@ -208,6 +321,7 @@ export default class OrganizationsController {
 ```
 
 **validation.json** - VineJS validation messages
+
 ```json
 {
   "required": "The {{ field }} field is required",
@@ -225,11 +339,11 @@ export default class AuthController {
     try {
       // Login logic
       return response.ok({
-        message: i18n.t('messages.auth.welcome')
+        message: i18n.t('messages.auth.welcome'),
       })
     } catch (error) {
       return response.unauthorized({
-        message: i18n.t('messages.auth.invalid_credentials')
+        message: i18n.t('messages.auth.invalid_credentials'),
       })
     }
   }
@@ -250,7 +364,7 @@ await mail.send((message) => {
     .htmlView('emails/verify_email', {
       user,
       token,
-      i18n // ← Pass i18n
+      i18n, // ← Pass i18n
     })
 })
 ```
@@ -274,6 +388,7 @@ vine.messagesProvider = new VineI18nProvider(i18nManager)
 Format: `{file}.{category}.{message}`
 
 Examples:
+
 - `messages.auth.invalid_credentials`
 - `emails.verification.subject`
 - `validation.required`
@@ -303,7 +418,7 @@ export const createUserValidator = vine.compile(
   vine.object({
     email: vine.string().email(),
     password: vine.string().minLength(8),
-    name: vine.string().minLength(2)
+    name: vine.string().minLength(2),
   })
 )
 ```
@@ -349,7 +464,7 @@ await mail.send((message) => {
     .htmlView('emails/verify_email', {
       user,
       token,
-      i18n // Always pass i18n
+      i18n, // Always pass i18n
     })
 })
 ```
@@ -363,9 +478,7 @@ await mail.send((message) => {
   <mj-body>
     <mj-section>
       <mj-column>
-        <mj-text>
-          {{ i18n.t('emails.verification.greeting') }}
-        </mj-text>
+        <mj-text> {{ i18n.t('emails.verification.greeting') }} </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
@@ -419,25 +532,25 @@ node ace migration:refresh          # Rollback all + run all
 
 ```typescript
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
+import type { ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import Organization from '#models/organization'
+
+export enum UserRole {
+  Owner = 1,
+  Administrator = 2,
+  Member = 3,
+}
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare organizationId: number
-
-  @column()
   declare email: string
 
-  @column({ serializeAs: null })
-  declare password: string
-
   @column()
-  declare role: number
+  declare currentOrganizationId: number | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -445,22 +558,56 @@ export default class User extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Organization)
-  declare organization: BelongsTo<typeof Organization>
+  @manyToMany(() => Organization, {
+    pivotTable: 'organization_user',
+    pivotColumns: ['role'],
+  })
+  declare organizations: ManyToMany<typeof Organization>
+
+  @belongsTo(() => Organization, {
+    foreignKey: 'currentOrganizationId',
+  })
+  declare currentOrganization: BelongsTo<typeof Organization>
+
+  // Helper methods for multi-org
+  async isOwnerOf(organizationId: number): Promise<boolean> {
+    await this.load('organizations')
+    const org = this.organizations.find((o) => o.id === organizationId)
+    return org?.$extras.pivot_role === UserRole.Owner
+  }
+
+  async hasOrganization(organizationId: number): Promise<boolean> {
+    await this.load('organizations')
+    return this.organizations.some((o) => o.id === organizationId)
+  }
 }
 ```
 
 ### Querying with Tenant Isolation
 
-**Critical**: Always filter by `organizationId`
+**Critical**: Always filter by `currentOrganizationId` (user's active organization)
 
 ```typescript
-// ✅ Correct - Filtered by organization
-const users = await User.query()
-  .where('organization_id', auth.user.organizationId)
+// ✅ Correct - Filtered by current organization
+const users = await User.query().whereHas('organizations', (query) => {
+  query.where('organizations.id', auth.user!.currentOrganizationId)
+})
+
+// For data scoped to organizations (like documents, projects, etc.)
+const documents = await Document.query().where('organization_id', auth.user!.currentOrganizationId)
 
 // ❌ Wrong - No tenant isolation
 const users = await User.all()
+```
+
+**Accessing user's role in current organization:**
+
+```typescript
+await auth.user!.load('organizations')
+const currentOrg = auth.user!.organizations.find(
+  (org) => org.id === auth.user!.currentOrganizationId
+)
+const userRole = currentOrg?.$extras.pivot_role // 1=Owner, 2=Administrator, 3=Member
 ```
 
 ## Controllers
@@ -475,19 +622,26 @@ import User from '#models/user'
 
 export default class UsersController {
   async index({ auth, response }: HttpContext) {
+    // Get users in current organization
     const users = await User.query()
-      .where('organization_id', auth.user!.organizationId)
+      .whereHas('organizations', (query) => {
+        query.where('organizations.id', auth.user!.currentOrganizationId)
+      })
+      .preload('organizations')
 
     return response.ok(users)
   }
 
-  async show({ auth, params, response, bouncer }: HttpContext) {
+  async show({ auth, params, response }: HttpContext) {
     const user = await User.findOrFail(params.id)
+    await user.load('organizations')
 
-    // Check tenant access
-    if (user.organizationId !== auth.user!.organizationId) {
+    // Check tenant access - verify user is in same organization
+    const hasAccess = user.organizations.some((org) => org.id === auth.user!.currentOrganizationId)
+
+    if (!hasAccess) {
       return response.forbidden({
-        message: 'Access denied'
+        message: 'Access denied',
       })
     }
 
@@ -576,7 +730,7 @@ test.group('Users', () => {
     const user = await User.create({
       email: 'test@example.com',
       password: 'password',
-      organizationId: 1
+      organizationId: 1,
     })
 
     assert.exists(user.id)
@@ -594,11 +748,25 @@ import db from '@adonisjs/lucid/services/db'
 const trx = await db.transaction()
 
 try {
+  // Create organization
   const organization = await Organization.create({ name: 'Acme' }, { client: trx })
-  const user = await User.create({
-    email: 'owner@acme.com',
-    organizationId: organization.id
-  }, { client: trx })
+
+  // Create or update user
+  const user = await User.create(
+    {
+      email: 'owner@acme.com',
+      currentOrganizationId: organization.id,
+    },
+    { client: trx }
+  )
+
+  // Link user to organization with Owner role
+  await organization.related('users').attach(
+    {
+      [user.id]: { role: UserRole.Owner },
+    },
+    trx
+  )
 
   await trx.commit()
 } catch (error) {
@@ -611,7 +779,9 @@ try {
 
 ```typescript
 const users = await User.query()
-  .where('organization_id', auth.user.organizationId)
+  .whereHas('organizations', (query) => {
+    query.where('organizations.id', auth.user!.currentOrganizationId)
+  })
   .paginate(page, perPage)
 
 return response.ok(users.toJSON())
@@ -621,15 +791,50 @@ return response.ok(users.toJSON())
 
 ### Tenant Isolation
 
-**Never** forget `organizationId` filtering:
+**Never** forget `currentOrganizationId` filtering:
 
 ```typescript
-// ❌ Wrong - Data leak
+// ❌ Wrong - Data leak across organizations
 const users = await User.all()
 
-// ✅ Correct - Tenant isolated
-const users = await User.query()
-  .where('organization_id', auth.user.organizationId)
+// ✅ Correct - Tenant isolated by current organization
+const users = await User.query().whereHas('organizations', (query) => {
+  query.where('organizations.id', auth.user!.currentOrganizationId)
+})
+```
+
+### Multi-Organization Access
+
+**Always** verify organization membership before operations:
+
+```typescript
+// ❌ Wrong - No membership check
+const organization = await Organization.findOrFail(params.id)
+// ... perform operations
+
+// ✅ Correct - Verify membership first
+const organization = await Organization.findOrFail(params.id)
+if (!(await auth.user!.hasOrganization(organization.id))) {
+  return response.forbidden({ message: 'Access denied' })
+}
+// ... perform operations
+```
+
+### Current Organization Context
+
+**Always** ensure user has a current organization set:
+
+```typescript
+// ❌ Wrong - Assuming currentOrganizationId is set
+const data = await Data.query().where('organization_id', auth.user!.currentOrganizationId)
+
+// ✅ Correct - Verify current organization exists
+if (!auth.user!.currentOrganizationId) {
+  return response.badRequest({
+    message: i18n.t('messages.organization.no_current_organization'),
+  })
+}
+const data = await Data.query().where('organization_id', auth.user!.currentOrganizationId)
 ```
 
 ### i18n Messages
@@ -642,7 +847,7 @@ return response.unauthorized({ message: 'Invalid credentials' })
 
 // ✅ Correct - i18n
 return response.unauthorized({
-  message: i18n.t('messages.auth.invalid_credentials')
+  message: i18n.t('messages.auth.invalid_credentials'),
 })
 ```
 
@@ -677,10 +882,27 @@ const data = await request.validateUsing(createUserValidator)
 ```typescript
 // ❌ Wrong - No authorization check
 const organization = await Organization.findOrFail(params.id)
+// ... perform operations
 
 // ✅ Correct - With policy check
 const organization = await Organization.findOrFail(params.id)
 await bouncer.with('OrganizationPolicy').authorize('view', organization)
+// ... perform operations
+```
+
+### Role Checking
+
+**Always** use helper methods for role verification:
+
+```typescript
+// ❌ Wrong - Direct role comparison without loading
+if (user.role === UserRole.Owner) { ... }
+
+// ✅ Correct - Use helper method with organization ID
+if (await user.isOwnerOf(organizationId)) { ... }
+
+// ✅ Correct - Check membership
+if (await user.hasOrganization(organizationId)) { ... }
 ```
 
 ## Build & Deployment
@@ -691,6 +913,7 @@ pnpm start          # Start production server
 ```
 
 Deployment considerations:
+
 - Set `NODE_ENV=production`
 - Run migrations: `node ace migration:run --force`
 - Generate APP_KEY: `node ace generate:key`
