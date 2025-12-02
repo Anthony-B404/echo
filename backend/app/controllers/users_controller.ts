@@ -11,6 +11,7 @@ import fs from 'node:fs/promises'
 import mail from '@adonisjs/mail/services/main'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
+import { errors } from '@vinejs/vine'
 
 export default class UsersController {
   public async me({ auth, response }: HttpContext) {
@@ -142,6 +143,27 @@ export default class UsersController {
         user,
       })
     } catch (error) {
+      if (error instanceof errors.E_VALIDATION_ERROR) {
+        // Extraire le premier message d'erreur et traduire le nom du champ
+        const firstError = error.messages[0]
+
+        if (firstError) {
+          // Traduire le nom du champ
+          const translatedField = i18n.t(
+            `validation.fields.${firstError.field}`,
+            firstError.field
+          )
+
+          // Injecter le nom traduit dans le message d'erreur
+          const translatedMessage = i18n.t(firstError.message, { field: translatedField })
+
+          return response.status(422).json({
+            message: translatedMessage,
+            error: 'Validation failure',
+          })
+        }
+      }
+
       return response.status(422).json({
         message: i18n.t('messages.errors.validation_failed'),
         errors: error.messages || error.message,

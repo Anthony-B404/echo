@@ -1,9 +1,18 @@
 {
+  "fields": {
+    "name": "nom",
+    "email": "email",
+    "logo": "logo",
+    "firstName": "prénom",
+    "lastName": "nom de famille",
+    "removeAvatar": "supprimer l'avatar"
+  },
   "required": "Le champ {field} est requis",
   "email": "Le champ {field} doit être une adresse email valide",
   "minLength": "Le champ {field} doit contenir au moins {minLength} caractères",
   "maxLength": "Le champ {field} ne peut pas dépasser {maxLength} caractères",
   "unique": "Cette valeur pour {field} existe déjà",
+  "database.unique": "Cette valeur pour {field} est déjà utilisée",
   "confirmed": "Le champ {field} ne correspond pas à la confirmation",
   "enum": "La valeur sélectionnée pour {field} est invalide",
   "number": "Le champ {field} doit être un nombre",

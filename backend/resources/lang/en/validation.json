@@ -1,9 +1,18 @@
 {
+  "fields": {
+    "name": "name",
+    "email": "email",
+    "logo": "logo",
+    "firstName": "first name",
+    "lastName": "last name",
+    "removeAvatar": "remove avatar"
+  },
   "required": "The {field} field is required",
   "email": "The {field} field must be a valid email address",
   "minLength": "The {field} field must be at least {minLength} characters",
   "maxLength": "The {field} field cannot exceed {maxLength} characters",
   "unique": "This value for {field} already exists",
+  "database.unique": "This {field} is already in use",
   "confirmed": "The {field} field does not match the confirmation",
   "enum": "The selected value for {field} is invalid",
   "number": "The {field} field must be a number",

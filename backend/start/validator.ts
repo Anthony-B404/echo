@@ -29,7 +29,7 @@ vine.messagesProvider = new SimpleMessagesProvider(
     // Enum validation
     'enum': 'validation.enum',
     // Database unique validation
-    'database.unique': 'validation.unique',
+    'database.unique': 'validation.database.unique',
     // Confirmed validation
     'confirmed': 'validation.confirmed',
   },

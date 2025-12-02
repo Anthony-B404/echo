@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { createOrganizationValidator } from '#validators/organization'
+import { createOrganizationValidator, updateOrganizationValidator } from '#validators/organization'
 import { cuid } from '@adonisjs/core/helpers'
 import app from '@adonisjs/core/services/app'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
@@ -10,6 +10,7 @@ import { join } from 'node:path'
 import fs from 'node:fs/promises'
 import OrganizationPolicy from '#policies/organization_policy'
 import { DateTime } from 'luxon'
+import { errors } from '@vinejs/vine'
 export default class OrganizationsController {
   private readonly LOGO_DIRECTORY = app.makePath('storage/organizations/logos')
 
@@ -102,7 +103,9 @@ export default class OrganizationsController {
       const fileName = await this.handleLogoUpload(logo)
       organizationData.logo = fileName
 
-      const organizationPayload = await createOrganizationValidator.validate(organizationData)
+      const organizationPayload = await createOrganizationValidator(authUser.id).validate(
+        organizationData
+      )
       const organization = await Organization.create(organizationPayload)
 
       // Créer la relation pivot avec role Owner
@@ -126,6 +129,31 @@ export default class OrganizationsController {
         },
       })
     } catch (error) {
+      if (error instanceof errors.E_VALIDATION_ERROR) {
+        // Extraire le premier message d'erreur et traduire le nom du champ
+        const firstError = error.messages[0]
+
+        if (firstError) {
+          // Traduire le nom du champ (ex: "name" → "nom" en français)
+          const translatedField = i18n.t(
+            `validation.fields.${firstError.field}`,
+            firstError.field
+          )
+
+          // Injecter le nom traduit dans le message d'erreur
+          const translatedMessage = i18n.t(firstError.message, { field: translatedField })
+
+          return response.status(422).json({
+            message: translatedMessage,
+            error: 'Validation failure',
+          })
+        }
+
+        return response.status(422).json({
+          message: i18n.t('messages.errors.validation_failed'),
+          error: 'Validation failure',
+        })
+      }
       return this.handleError(response, error, i18n)
     }
   }
@@ -183,23 +211,54 @@ export default class OrganizationsController {
       const logo = request.file('logo')
       const fileName = await this.handleLogoUpload(logo)
 
-      const updatedData = {
+      const inputData = {
         name: request.input('name', organization.name),
         email: request.input('email', organization.email),
         logo: fileName || oldLogo,
       }
 
-      await organization.merge(updatedData).save()
+      // Valider les données avec le validator d'update
+      const validatedData = await updateOrganizationValidator(
+        user.id,
+        organization.id
+      ).validate(inputData)
+
+      await organization.merge(validatedData).save()
 
       if (fileName && oldLogo && oldLogo !== fileName) {
         await this.deleteOldLogo(oldLogo)
       }
 
       return response.json({
-        ...updatedData,
-        logo: updatedData.logo ? `organization-logo/${updatedData.logo}` : null,
+        ...validatedData,
+        logo: validatedData.logo ? `organization-logo/${validatedData.logo}` : null,
       })
     } catch (error) {
+      if (error instanceof errors.E_VALIDATION_ERROR) {
+        // Extraire le premier message d'erreur et traduire le nom du champ
+        const firstError = error.messages[0]
+
+        if (firstError) {
+          // Traduire le nom du champ (ex: "name" → "nom" en français)
+          const translatedField = i18n.t(
+            `validation.fields.${firstError.field}`,
+            firstError.field
+          )
+
+          // Injecter le nom traduit dans le message d'erreur
+          const translatedMessage = i18n.t(firstError.message, { field: translatedField })
+
+          return response.status(422).json({
+            message: translatedMessage,
+            error: 'Validation failure',
+          })
+        }
+
+        return response.status(422).json({
+          message: i18n.t('messages.errors.validation_failed'),
+          error: 'Validation failure',
+        })
+      }
       return this.handleError(response, error, i18n)
     }
   }
