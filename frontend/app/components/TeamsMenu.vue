@@ -8,7 +8,7 @@ import * as z from "zod";
 const { t } = useI18n();
 const config = useRuntimeConfig();
 const toast = useToast();
-const { authenticatedFetch } = useAuth();
+const { authenticatedFetch, user } = useAuth();
 
 defineProps<{
   collapsed?: boolean;
@@ -115,6 +115,8 @@ const currentTeam = computed(() => {
 
 // Ouvrir la modale de création d'organisation
 const openCreateOrgModal = () => {
+  // Pré-remplir l'email avec celui de l'utilisateur
+  state.email = user.value?.email;
   createOrgModalOpen.value = true;
 };
 
@@ -188,7 +190,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     // Ajouter le logo si un fichier a été sélectionné
     const fileInput = fileRef.value;
     if (fileInput?.files && fileInput.files.length > 0) {
-      formData.append("logo", fileInput.files[0]);
+      const file = fileInput.files[0];
+      if (file) {
+        formData.append("logo", file);
+      }
     }
 
     // Créer l'organisation
