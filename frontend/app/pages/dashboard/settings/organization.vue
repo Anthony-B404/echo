@@ -94,7 +94,10 @@ async function onSubmit(event: FormSubmitEvent<OrganizationSchema>) {
       });
 
       // Update organization in store
-      await organizationStore.fetchOrganization();
+      await Promise.all([
+        organizationStore.fetchOrganization(),
+        organizationStore.fetchUserOrganizations()
+      ]);
 
       // Update local state with new data
       organization.name = response.name;
