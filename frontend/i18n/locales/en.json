@@ -428,6 +428,7 @@
         "organizationNamePlaceholder": "My company",
         "organizationEmail": "Organization email",
         "organizationEmailPlaceholder": "email",
+        "logo": "Logo (optional)",
         "successTitle": "Organization created!",
         "successDescription": "Your new organization has been created successfully",
         "errorTitle": "Error",

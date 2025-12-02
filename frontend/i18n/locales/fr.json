@@ -484,6 +484,7 @@
         "organizationNamePlaceholder": "Mon entreprise",
         "organizationEmail": "Email de l'organisation",
         "organizationEmailPlaceholder": "email",
+        "logo": "Logo (optionnel)",
         "successTitle": "Organisation créée !",
         "successDescription": "Votre nouvelle organisation a été créée avec succès",
         "errorTitle": "Erreur",

@@ -29,6 +29,8 @@ onMounted(() => {
 const createOrgModalOpen = ref(false);
 const submitting = ref(false);
 const formRef = ref();
+const fileRef = ref<HTMLInputElement>();
+const logoPreview = ref<string>();
 
 // Schéma de validation Zod
 const schema = z.object({
@@ -38,15 +40,19 @@ const schema = z.object({
       if (!val || val.length === 0) {
         ctx.addIssue({
           code: "custom",
-          message: t("components.teams.createOrganizationModal.validation.nameRequired"),
+          message: t(
+            "components.teams.createOrganizationModal.validation.nameRequired",
+          ),
         });
       } else if (val.length < 2) {
         ctx.addIssue({
           code: "custom",
-          message: t("components.teams.createOrganizationModal.validation.nameTooShort"),
+          message: t(
+            "components.teams.createOrganizationModal.validation.nameTooShort",
+          ),
         });
       }
-    })
+    }),
   ),
   email: z.preprocess(
     (val) => val ?? "",
@@ -54,16 +60,21 @@ const schema = z.object({
       if (!val || val.length === 0) {
         ctx.addIssue({
           code: "custom",
-          message: t("components.teams.createOrganizationModal.validation.emailRequired"),
+          message: t(
+            "components.teams.createOrganizationModal.validation.emailRequired",
+          ),
         });
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
         ctx.addIssue({
           code: "custom",
-          message: t("components.teams.createOrganizationModal.validation.invalidEmail"),
+          message: t(
+            "components.teams.createOrganizationModal.validation.invalidEmail",
+          ),
         });
       }
-    })
+    }),
   ),
+  logo: z.string().optional(),
 });
 
 type Schema = z.output<typeof schema>;
@@ -107,6 +118,31 @@ const openCreateOrgModal = () => {
   createOrgModalOpen.value = true;
 };
 
+// Gérer le changement de fichier logo
+function onFileChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+
+  if (!input.files?.length) {
+    return;
+  }
+
+  logoPreview.value = URL.createObjectURL(input.files[0]!);
+}
+
+// Ouvrir le sélecteur de fichier
+function onFileClick() {
+  fileRef.value?.click();
+}
+
+// Supprimer le logo
+function onRemoveLogo() {
+  logoPreview.value = undefined;
+  // Clear file input
+  if (fileRef.value) {
+    fileRef.value.value = "";
+  }
+}
+
 // Switcher vers une autre organisation
 async function switchOrganization(orgId: number) {
   try {
@@ -127,7 +163,8 @@ async function switchOrganization(orgId: number) {
   } catch (error: any) {
     toast.add({
       title: t("common.messages.error"),
-      description: error.data?.message || t("components.teams.organizationSwitchError"),
+      description:
+        error.data?.message || t("components.teams.organizationSwitchError"),
       color: "error",
     });
   }
@@ -145,8 +182,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       JSON.stringify({
         name: event.data.name,
         email: event.data.email,
-      })
+      }),
     );
+
+    // Ajouter le logo si un fichier a été sélectionné
+    const fileInput = fileRef.value;
+    if (fileInput?.files && fileInput.files.length > 0) {
+      formData.append("logo", fileInput.files[0]);
+    }
 
     // Créer l'organisation
     const response = await authenticatedFetch<{
@@ -158,9 +201,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     });
 
     // Switcher vers la nouvelle organisation
-    await authenticatedFetch(`/organizations/${response.organization.id}/switch`, {
-      method: "POST",
-    });
+    await authenticatedFetch(
+      `/organizations/${response.organization.id}/switch`,
+      {
+        method: "POST",
+      },
+    );
 
     // Rafraîchir les données de toutes les organisations
     await organizationStore.fetchUserOrganizations();
@@ -168,7 +214,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     // Afficher un toast de succès
     toast.add({
       title: t("components.teams.createOrganizationModal.successTitle"),
-      description: t("components.teams.createOrganizationModal.successDescription"),
+      description: t(
+        "components.teams.createOrganizationModal.successDescription",
+      ),
       color: "success",
     });
 
@@ -176,12 +224,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     createOrgModalOpen.value = false;
     state.name = undefined;
     state.email = undefined;
+    logoPreview.value = undefined;
+    if (fileRef.value) {
+      fileRef.value.value = "";
+    }
   } catch (error: any) {
     // Afficher un toast d'erreur
     toast.add({
       title: t("components.teams.createOrganizationModal.errorTitle"),
       description:
-        error.data?.message || t("components.teams.createOrganizationModal.errorDescription"),
+        error.data?.message ||
+        t("components.teams.createOrganizationModal.errorDescription"),
       color: "error",
     });
   } finally {
@@ -190,6 +243,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 }
 
 const items = computed<DropdownMenuItem[][]>(() => {
+  const localePath = useLocalePath();
+
   // Construire la liste des organisations
   const organizationItems = organizations.value.map((org) => ({
     label: org.name,
@@ -199,7 +254,8 @@ const items = computed<DropdownMenuItem[][]>(() => {
           alt: org.name,
         }
       : undefined,
-    icon: org.isCurrent ? "i-lucide-check" : undefined,
+    trailingIcon: org.isCurrent ? "i-lucide-check" : undefined,
+    class: org.isCurrent ? "bg-primary/10" : undefined,
     onClick: () => {
       if (!org.isCurrent) {
         switchOrganization(org.id);
@@ -218,6 +274,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
       {
         label: t("components.teams.manageTeams"),
         icon: "i-lucide-cog",
+        to: localePath("/dashboard/settings/organization"),
       },
     ],
   ];
@@ -267,12 +324,18 @@ const items = computed<DropdownMenuItem[][]>(() => {
         @submit="onSubmit"
       >
         <UFormField
-          :label="$t('components.teams.createOrganizationModal.organizationName')"
+          :label="
+            $t('components.teams.createOrganizationModal.organizationName')
+          "
           name="name"
         >
           <UInput
             v-model="state.name"
-            :placeholder="$t('components.teams.createOrganizationModal.organizationNamePlaceholder')"
+            :placeholder="
+              $t(
+                'components.teams.createOrganizationModal.organizationNamePlaceholder',
+              )
+            "
             icon="i-lucide-building"
             size="lg"
             class="w-full"
@@ -280,17 +343,53 @@ const items = computed<DropdownMenuItem[][]>(() => {
         </UFormField>
 
         <UFormField
-          :label="$t('components.teams.createOrganizationModal.organizationEmail')"
+          :label="
+            $t('components.teams.createOrganizationModal.organizationEmail')
+          "
           name="email"
         >
           <UInput
             v-model="state.email"
             type="email"
-            :placeholder="$t('components.teams.createOrganizationModal.organizationEmailPlaceholder')"
+            :placeholder="
+              $t(
+                'components.teams.createOrganizationModal.organizationEmailPlaceholder',
+              )
+            "
             icon="i-lucide-mail"
             size="lg"
             class="w-full"
           />
+        </UFormField>
+
+        <UFormField
+          :label="$t('components.teams.createOrganizationModal.logo')"
+          name="logo"
+        >
+          <div class="flex items-center gap-3">
+            <UAvatar :src="logoPreview" :alt="state.name || 'Logo'" size="lg" />
+            <UButton
+              :label="$t('common.buttons.choose')"
+              color="neutral"
+              size="md"
+              @click="onFileClick"
+            />
+            <UButton
+              v-if="logoPreview"
+              :label="$t('common.buttons.delete')"
+              color="error"
+              variant="ghost"
+              size="md"
+              @click="onRemoveLogo"
+            />
+            <input
+              ref="fileRef"
+              type="file"
+              class="hidden"
+              accept=".jpg, .jpeg, .png, .gif"
+              @change="onFileChange"
+            />
+          </div>
         </UFormField>
       </UForm>
     </template>
