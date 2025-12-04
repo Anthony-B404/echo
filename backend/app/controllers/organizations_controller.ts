@@ -85,6 +85,42 @@ export default class OrganizationsController {
   }
 
   /**
+   * Obtenir la liste des membres de l'organisation courante
+   */
+  public async getMembers({ response, auth, bouncer, i18n }: HttpContext) {
+    const authUser = auth.user!
+
+    if (!authUser.currentOrganizationId) {
+      return response.status(400).json({
+        message: i18n.t('messages.errors.no_current_organization'),
+      })
+    }
+
+    const organization = await Organization.findOrFail(authUser.currentOrganizationId)
+
+    if (await bouncer.with(OrganizationPolicy).denies('getMembers', organization)) {
+      return response.status(403).json({
+        message: i18n.t('messages.errors.unauthorized'),
+      })
+    }
+
+    await organization.load('users', (query) => {
+      query.pivotColumns(['role']).orderByRaw('pivot_role ASC')
+    })
+
+    const members = organization.users.map((user) => ({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.$extras.pivot_role,
+      avatar: user.avatar ? `user-avatar/${user.avatar}` : null,
+      isCurrentUser: user.id === authUser.id,
+    }))
+
+    return response.json(members)
+  }
+
+  /**
    * Créer une nouvelle organisation
    */
   public async createOrganization({ request, response, auth, bouncer, i18n }: HttpContext) {

@@ -1,0 +1,74 @@
+meta {
+  name: Get Members
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/members
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return array of members", function() {
+    const data = res.getBody();
+    expect(Array.isArray(data)).to.be.true;
+  });
+
+  test("each member should have required fields", function() {
+    const data = res.getBody();
+    if (data.length > 0) {
+      expect(data[0]).to.have.property('id');
+      expect(data[0]).to.have.property('fullName');
+      expect(data[0]).to.have.property('email');
+      expect(data[0]).to.have.property('role');
+      expect(data[0]).to.have.property('avatar');
+      expect(data[0]).to.have.property('isCurrentUser');
+    }
+  });
+
+  test("members should be sorted by role (Owner first)", function() {
+    const data = res.getBody();
+    if (data.length > 1) {
+      // Role values: Owner = 1, Administrator = 2, Member = 3
+      // Verify members are sorted in ascending order by role
+      for (let i = 0; i < data.length - 1; i++) {
+        expect(data[i].role).to.be.at.most(data[i + 1].role);
+      }
+    }
+  });
+
+  test("role should be a valid value (1, 2, or 3)", function() {
+    const data = res.getBody();
+    data.forEach(member => {
+      expect(member.role).to.be.oneOf([1, 2, 3]);
+    });
+  });
+
+  test("isCurrentUser should be boolean", function() {
+    const data = res.getBody();
+    data.forEach(member => {
+      expect(typeof member.isCurrentUser).to.equal('boolean');
+    });
+  });
+
+  test("at least one member should be marked as current user", function() {
+    const data = res.getBody();
+    const currentUser = data.find(member => member.isCurrentUser === true);
+    expect(currentUser).to.exist;
+  });
+}

@@ -67,6 +67,7 @@ router
     router.put('/organization/update', [OrganizationsController, 'updateOrganization'])
     router.post('/organizations/:id/switch', [OrganizationsController, 'switchOrganization'])
     router.delete('/organizations/:id', [OrganizationsController, 'deleteOrganization'])
+    router.get('/members', [OrganizationsController, 'getMembers'])
 
     // Invitation routes
     router.post('/invite-member', [InvitationsController, 'createInvitation'])

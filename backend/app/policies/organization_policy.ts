@@ -32,6 +32,18 @@ export default class OrganizationPolicy extends BasePolicy {
   }
 
   /**
+   * Les owners et admins peuvent obtenir la liste des membres
+   */
+  public async getMembers(user: User, organization: Organization): Promise<AuthorizerResponse> {
+    await user.load('organizations')
+    const org = user.organizations.find((o) => o.id === organization.id)
+    if (!org) return false
+
+    const role = org.$extras.pivot_role
+    return role === UserRole.Owner || role === UserRole.Administrator
+  }
+
+  /**
    * Seul le owner peut modifier une organisation
    */
   public async updateOrganization(
