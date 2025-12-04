@@ -24,10 +24,12 @@ export interface Mail {
 import type { UserRole } from './auth'
 
 export interface Member {
-  name: string;
-  username: string;
+  id: number;
+  fullName: string | null;
+  email: string;
   role: UserRole;
-  avatar: AvatarProps;
+  avatar: string | null;
+  isCurrentUser: boolean;
 }
 
 export interface Stat {

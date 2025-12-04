@@ -12,20 +12,34 @@ const { t } = useI18n();
 const toast = useToast();
 const { authenticatedFetch } = useAuth();
 
-const { data: members, refresh: refreshMembers } = await useFetch<Member[]>(
-  "/api/members",
-  {
-    default: () => [],
-  },
-);
+const members = ref<Member[]>([]);
+
+const loadMembers = async () => {
+  try {
+    const data = await authenticatedFetch<Member[]>("/members");
+    members.value = data || [];
+  } catch (error) {
+    toast.add({
+      title: t("components.settings.members.errorLoadingTitle"),
+      description: t("components.settings.members.errorLoadingDescription"),
+      color: "error",
+    });
+  }
+};
+
+await loadMembers();
+
+const refreshMembers = loadMembers;
 
 const q = ref("");
 
 const filteredMembers = computed(() => {
   return members.value.filter((member) => {
+    const name = member.fullName || "";
+    const email = member.email || "";
     return (
-      member.name.search(new RegExp(q.value, "i")) !== -1 ||
-      member.username.search(new RegExp(q.value, "i")) !== -1
+      name.search(new RegExp(q.value, "i")) !== -1 ||
+      email.search(new RegExp(q.value, "i")) !== -1
     );
   });
 });
