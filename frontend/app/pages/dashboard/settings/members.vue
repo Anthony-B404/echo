@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Member, Invitation } from "~/types";
+import { UserRole } from "~/types/auth";
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { SelectItem } from "@nuxt/ui";
@@ -11,6 +12,7 @@ definePageMeta({
 const { t } = useI18n();
 const toast = useToast();
 const { authenticatedFetch } = useAuth();
+const authStore = useAuthStore();
 
 const members = ref<Member[]>([]);
 const invitations = ref<Invitation[]>([]);
@@ -46,6 +48,13 @@ await loadInvitations();
 
 const refreshMembers = loadMembers;
 const refreshInvitations = loadInvitations;
+
+// Get current user's role in the organization
+const currentUserRole = computed(() => {
+  // Find current user in members list to get their role
+  const currentMember = members.value.find((m) => m.isCurrentUser);
+  return currentMember?.role ?? UserRole.Member;
+});
 
 // Collapsible state for invitations - open by default if there are invitations
 const invitationsOpen = ref(invitations.value.length > 0);
@@ -332,7 +341,11 @@ async function deleteInvitation(id: number) {
         />
       </template>
 
-      <SettingsMembersList :members="filteredMembers" />
+      <SettingsMembersList
+        :members="filteredMembers"
+        :current-user-role="currentUserRole"
+        @refresh="refreshMembers"
+      />
     </UPageCard>
 
     <!-- Invitation Modal -->

@@ -62,6 +62,12 @@
     "email_already_in_use": "Cette adresse email est déjà utilisée",
     "avatar_removed": "Avatar supprimé avec succès"
   },
+  "member": {
+    "updated": "Membre mis à jour avec succès",
+    "role_updated": "Rôle du membre mis à jour avec succès",
+    "deleted": "Membre retiré de l'organisation avec succès",
+    "not_found": "Membre introuvable dans cette organisation"
+  },
   "errors": {
     "server_error": "Une erreur serveur s'est produite",
     "not_found": "Ressource introuvable",
@@ -75,6 +81,7 @@
     "invitation_create_failed": "Erreur lors de la création de l'invitation",
     "email_already_used": "Cette adresse email est déjà utilisée",
     "invitation_delete_failed": "Erreur lors de la suppression de l'invitation",
-    "user_delete_failed": "Erreur lors de la suppression de l'utilisateur"
+    "user_delete_failed": "Erreur lors de la suppression de l'utilisateur",
+    "member_delete_failed": "Erreur lors du retrait du membre"
   }
 }

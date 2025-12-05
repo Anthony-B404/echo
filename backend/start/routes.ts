@@ -15,6 +15,7 @@ const UsersController = () => import('#controllers/users_controller')
 const OrganizationsController = () => import('#controllers/organizations_controller')
 const InvitationsController = () => import('#controllers/invitations_controller')
 const SocialAuthController = () => import('#controllers/social_auth_controller')
+const MembersController = () => import('#controllers/members_controller')
 
 router.get('/', async () => {
   return {
@@ -55,7 +56,11 @@ router
     // User routes
     router.get('/me', [UsersController, 'me'])
     router.put('/profile', [UsersController, 'updateProfile'])
-    router.delete('/delete-member/:id', [UsersController, 'deleteMember'])
+
+    // Member management routes
+    router.put('/update-member/:id', [MembersController, 'updateMember'])
+    router.put('/update-member-role/:id', [MembersController, 'updateMemberRole'])
+    router.delete('/delete-member/:id', [MembersController, 'deleteMember'])
 
     // OAuth completion route (requires authentication)
     router.post('/oauth/complete-registration', [SocialAuthController, 'completeOAuthRegistration'])

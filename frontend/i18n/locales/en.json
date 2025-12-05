@@ -535,6 +535,26 @@
         "removeMember": "Remove member",
         "errorLoadingTitle": "Error loading members",
         "errorLoadingDescription": "An error occurred while loading the members list",
+        "editModal": {
+          "title": "Edit member",
+          "description": "Edit member information.",
+          "successTitle": "Member updated",
+          "successDescription": "Member information has been updated successfully.",
+          "errorTitle": "Error",
+          "errorDescription": "An error occurred while updating the member."
+        },
+        "deleteModal": {
+          "title": "Remove member",
+          "description": "Are you sure you want to remove this member from the organization?",
+          "warning": "This action will remove the member from the organization. They can be re-invited later.",
+          "confirmButton": "Remove member",
+          "successTitle": "Member removed",
+          "successDescription": "The member has been removed from the organization successfully.",
+          "errorTitle": "Error",
+          "errorDescription": "An error occurred while removing the member."
+        },
+        "roleChangeSuccess": "Role updated successfully",
+        "roleChangeError": "Error updating role",
         "inviteModal": {
           "title": "Invite member",
           "description": "Invite a new member to join your organization.",

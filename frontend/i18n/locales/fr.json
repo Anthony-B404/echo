@@ -591,6 +591,26 @@
         "removeMember": "Retirer le membre",
         "errorLoadingTitle": "Erreur de chargement des membres",
         "errorLoadingDescription": "Une erreur est survenue lors du chargement de la liste des membres",
+        "editModal": {
+          "title": "Modifier le membre",
+          "description": "Modifiez les informations du membre.",
+          "successTitle": "Membre mis à jour",
+          "successDescription": "Les informations du membre ont été mises à jour avec succès.",
+          "errorTitle": "Erreur",
+          "errorDescription": "Une erreur est survenue lors de la mise à jour du membre."
+        },
+        "deleteModal": {
+          "title": "Retirer le membre",
+          "description": "Êtes-vous sûr de vouloir retirer ce membre de l'organisation ?",
+          "warning": "Cette action retirera le membre de l'organisation. Il pourra être réinvité ultérieurement.",
+          "confirmButton": "Retirer le membre",
+          "successTitle": "Membre retiré",
+          "successDescription": "Le membre a été retiré de l'organisation avec succès.",
+          "errorTitle": "Erreur",
+          "errorDescription": "Une erreur est survenue lors du retrait du membre."
+        },
+        "roleChangeSuccess": "Rôle mis à jour avec succès",
+        "roleChangeError": "Erreur lors de la mise à jour du rôle",
         "inviteModal": {
           "title": "Inviter un membre",
           "description": "Invitez un nouveau membre à rejoindre votre organisation.",

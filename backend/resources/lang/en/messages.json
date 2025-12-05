@@ -62,6 +62,12 @@
     "email_already_in_use": "This email address is already in use",
     "avatar_removed": "Avatar removed successfully"
   },
+  "member": {
+    "updated": "Member updated successfully",
+    "role_updated": "Member role updated successfully",
+    "deleted": "Member removed from organization successfully",
+    "not_found": "Member not found in this organization"
+  },
   "errors": {
     "server_error": "A server error occurred",
     "not_found": "Resource not found",
@@ -75,6 +81,7 @@
     "invitation_create_failed": "Error creating invitation",
     "email_already_used": "This email address is already in use",
     "invitation_delete_failed": "Error deleting invitation",
-    "user_delete_failed": "Error deleting user"
+    "user_delete_failed": "Error deleting user",
+    "member_delete_failed": "Error removing member"
   }
 }
