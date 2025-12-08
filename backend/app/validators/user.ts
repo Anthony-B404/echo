@@ -9,8 +9,8 @@ export const registrationRequestValidator = vine.compile(
       .email()
       .unique(async (db, value) => {
         const user = await db.from('users').where('email', value).first()
-        // Allow if no user exists OR if user exists but onboarding not completed
-        return !user || !user.onboarding_completed
+        // Allow if: no user OR onboarding not completed OR user is disabled
+        return !user || !user.onboarding_completed || user.disabled
       }),
   })
 )

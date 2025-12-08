@@ -32,6 +32,29 @@ export default class AuthController {
       const existingUser = await User.findBy('email', payload.email)
 
       if (existingUser) {
+        // If user is disabled, allow re-registration with new onboarding
+        if (existingUser.disabled) {
+          existingUser.magicLinkToken = randomUUID()
+          existingUser.magicLinkExpiresAt = DateTime.now().plus({ minutes: 15 })
+          existingUser.onboardingCompleted = false // Reset for new onboarding
+          await existingUser.save()
+
+          // Send magic link email
+          await mail.send((message) => {
+            message
+              .to(existingUser.email)
+              .from('onboarding@resend.dev')
+              .subject(i18n.t('emails.registration_magic_link.subject'))
+              .htmlView('emails/registration_magic_link', {
+                token: existingUser.magicLinkToken,
+                locale: i18n.locale,
+                i18n: i18n,
+              })
+          })
+
+          return response.ok({ message: i18n.t('messages.auth.registration.magic_link_sent') })
+        }
+
         // If onboarding already completed, return error
         if (existingUser.onboardingCompleted) {
           return response.status(422).json({
@@ -165,9 +188,13 @@ export default class AuthController {
     }
 
     // Otherwise, this is a registration flow - return user data for complete registration
+    // Include existing user info for pre-filling forms (especially for disabled users re-registering)
     return response.ok({
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
       token: token,
+      isDisabled: user.disabled,
     })
   }
 
@@ -198,12 +225,33 @@ export default class AuthController {
       // Calculate full name from first and last name
       const fullName = `${data.firstName} ${data.lastName}`
 
-      // Update existing organization (created in step 1)
-      const organization = await Organization.findOrFail(user.currentOrganizationId)
-      organization.name = data.organizationName
-      organization.email = user.email
-      organization.logo = fileName
-      await organization.save()
+      // Handle organization: create new if disabled user, update existing otherwise
+      let organization: Organization
+
+      if (user.disabled) {
+        // Disabled user re-registering: create new organization
+        organization = await Organization.create({
+          name: data.organizationName,
+          email: user.email,
+          logo: fileName,
+        })
+
+        // Attach user as Owner of the new organization
+        await organization.related('users').attach({
+          [user.id]: { role: UserRole.Owner },
+        })
+
+        // Update user: re-enable and set new organization
+        user.currentOrganizationId = organization.id
+        user.disabled = false
+      } else {
+        // Normal registration: update existing organization (created in step 1)
+        organization = await Organization.findOrFail(user.currentOrganizationId)
+        organization.name = data.organizationName
+        organization.email = user.email
+        organization.logo = fileName
+        await organization.save()
+      }
 
       // Update user with complete information
       user.firstName = data.firstName
@@ -264,6 +312,19 @@ export default class AuthController {
       if (!user) {
         return response.status(404).json({
           message: i18n.t('messages.auth.login.user_not_found'),
+        })
+      }
+
+      // Check if user is disabled
+      if (user.disabled) {
+        return response.status(403).json({
+          message: i18n.t('messages.auth.login.account_disabled'),
+          code: 'ACCOUNT_DISABLED',
+          userData: {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
         })
       }
 

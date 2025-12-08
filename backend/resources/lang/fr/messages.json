@@ -20,6 +20,7 @@
       "magic_link_sent": "Un lien de connexion a été envoyé à votre adresse email",
       "user_not_found": "Aucun compte trouvé avec cette adresse email",
       "onboarding_not_completed": "Veuillez d'abord finaliser votre inscription",
+      "account_disabled": "Votre compte a été désactivé. Veuillez vous réinscrire ou accepter une invitation pour le réactiver.",
       "token_invalid": "Ce lien de connexion est invalide",
       "token_expired": "Ce lien de connexion a expiré. Veuillez demander un nouveau lien.",
       "success": "Connexion réussie"
