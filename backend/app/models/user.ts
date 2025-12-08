@@ -56,6 +56,9 @@ export default class User extends BaseModel {
   declare onboardingCompleted: boolean
 
   @column()
+  declare disabled: boolean
+
+  @column()
   declare magicLinkToken: string | null
 
   @column.dateTime()
