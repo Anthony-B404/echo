@@ -55,6 +55,19 @@ export default class SocialAuthController {
           await user.save()
         }
 
+        // Check if user is disabled - require new onboarding to reactivate
+        if (user.disabled) {
+          // Reset onboarding to force creating a new organization
+          user.onboardingCompleted = false
+          await user.save()
+
+          // Generate token and redirect to onboarding
+          const token = await User.accessTokens.create(user)
+          return response.redirect(
+            `${env.get('FRONTEND_URL')}/auth/callback?token=${token.value!.release()}&needsOnboarding=true&reactivating=true`
+          )
+        }
+
         // If onboarding not completed, redirect to complete registration
         if (!user.onboardingCompleted) {
           const token = await User.accessTokens.create(user)
@@ -145,13 +158,33 @@ export default class SocialAuthController {
       // Calculate full name
       const fullName = `${data.firstName} ${data.lastName}`
 
-      // Update organization
-      const organization = await Organization.findOrFail(user.currentOrganizationId)
-      organization.name = data.organizationName
-      organization.logo = fileName
-      await organization.save()
+      // Check if this is a disabled user reactivating (no currentOrganizationId)
+      // OR if user was disabled (need to create new org)
+      if (!user.currentOrganizationId || user.disabled) {
+        // Create NEW organization for reactivating user
+        const organization = await Organization.create({
+          name: data.organizationName,
+          email: user.email,
+          logo: fileName,
+        })
 
-      // Update user
+        // Attach user as Owner
+        await organization.related('users').attach({
+          [user.id]: { role: UserRole.Owner },
+        })
+
+        // Update user
+        user.currentOrganizationId = organization.id
+        user.disabled = false
+      } else {
+        // Update existing organization (normal flow for new users)
+        const organization = await Organization.findOrFail(user.currentOrganizationId)
+        organization.name = data.organizationName
+        organization.logo = fileName
+        await organization.save()
+      }
+
+      // Update user info
       user.firstName = data.firstName
       user.lastName = data.lastName
       user.fullName = fullName
