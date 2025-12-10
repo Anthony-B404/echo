@@ -1,5 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import env from '#start/env'
+import logger from '@adonisjs/core/services/logger'
+
+interface LemonSqueezyCheckoutResponse {
+  data: {
+    attributes: {
+      url: string
+    }
+  }
+}
 
 export default class BillingController {
   /**
@@ -53,6 +62,13 @@ export default class BillingController {
       })
     }
 
+    // Map locale to ISO country code for checkout localization
+    const localeToCountry: Record<string, string> = {
+      fr: 'FR',
+      en: 'US',
+    }
+    const country = localeToCountry[i18n.locale] || 'US'
+
     try {
       const checkoutResponse = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
         method: 'POST',
@@ -67,6 +83,10 @@ export default class BillingController {
             attributes: {
               checkout_data: {
                 email: user.email,
+                name: user.fullName || undefined,
+                billing_address: {
+                  country: country,
+                },
                 custom: {
                   user_id: String(user.id),
                 },
@@ -95,20 +115,20 @@ export default class BillingController {
 
       if (!checkoutResponse.ok) {
         const errorData = await checkoutResponse.json()
-        console.error('Lemon Squeezy checkout error:', errorData)
+        logger.error({ err: errorData }, 'Lemon Squeezy checkout error')
         return response.status(500).json({
           message: i18n.t('messages.billing.checkout_failed'),
         })
       }
 
-      const checkoutData = await checkoutResponse.json()
+      const checkoutData = (await checkoutResponse.json()) as LemonSqueezyCheckoutResponse
       const checkoutUrl = checkoutData.data.attributes.url
 
       return response.ok({
         checkoutUrl,
       })
     } catch (error) {
-      console.error('Checkout creation error:', error)
+      logger.error({ err: error }, 'Checkout creation error')
       return response.status(500).json({
         message: i18n.t('messages.billing.checkout_failed'),
       })
