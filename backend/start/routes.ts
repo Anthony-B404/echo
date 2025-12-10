@@ -16,6 +16,8 @@ const OrganizationsController = () => import('#controllers/organizations_control
 const InvitationsController = () => import('#controllers/invitations_controller')
 const SocialAuthController = () => import('#controllers/social_auth_controller')
 const MembersController = () => import('#controllers/members_controller')
+const BillingController = () => import('#controllers/billing_controller')
+const WebhooksController = () => import('#controllers/webhooks_controller')
 
 router.get('/', async () => {
   return {
@@ -45,6 +47,9 @@ router.get('/verify-email-change/:token', [UsersController, 'verifyEmailChange']
 // OAuth routes
 router.get('/auth/google/redirect', [SocialAuthController, 'googleRedirect'])
 router.get('/auth/google/callback', [SocialAuthController, 'googleCallback'])
+
+// Webhook routes (public - signature verified in controller)
+router.post('/webhooks/lemonsqueezy', [WebhooksController, 'handleLemonSqueezy'])
 
 // Protected routes
 router
@@ -79,5 +84,9 @@ router
     router.get('/invitations', [InvitationsController, 'listInvitations'])
     router.post('/resend-invitation/:id', [InvitationsController, 'resendInvitation'])
     router.delete('/delete-invitation/:id', [InvitationsController, 'deleteInvitation'])
+
+    // Billing routes
+    router.get('/billing/status', [BillingController, 'getSubscriptionStatus'])
+    router.post('/billing/checkout', [BillingController, 'createCheckoutSession'])
   })
   .use(middleware.auth({ guards: ['api'] }))

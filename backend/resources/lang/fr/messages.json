@@ -69,6 +69,11 @@
     "deleted": "Membre retiré de l'organisation avec succès",
     "not_found": "Membre introuvable dans cette organisation"
   },
+  "billing": {
+    "checkout_failed": "Impossible de créer la session de paiement",
+    "already_subscribed": "Vous avez déjà un abonnement actif",
+    "subscription_created": "Abonnement créé avec succès"
+  },
   "errors": {
     "server_error": "Une erreur serveur s'est produite",
     "not_found": "Ressource introuvable",

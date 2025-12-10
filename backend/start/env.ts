@@ -52,4 +52,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   GOOGLE_CLIENT_ID: Env.schema.string(),
   GOOGLE_CLIENT_SECRET: Env.schema.string(),
   GOOGLE_CALLBACK_URL: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Lemon Squeezy
+  |----------------------------------------------------------
+  */
+  LEMON_SQUEEZY_API_KEY: Env.schema.string(),
+  LEMON_SQUEEZY_STORE_ID: Env.schema.string(),
+  LEMON_SQUEEZY_VARIANT_ID: Env.schema.string(),
+  LEMON_SQUEEZY_WEBHOOK_SECRET: Env.schema.string(),
 })

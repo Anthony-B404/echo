@@ -69,6 +69,11 @@
     "deleted": "Member removed from organization successfully",
     "not_found": "Member not found in this organization"
   },
+  "billing": {
+    "checkout_failed": "Failed to create checkout session",
+    "already_subscribed": "You already have an active subscription",
+    "subscription_created": "Subscription created successfully"
+  },
   "errors": {
     "server_error": "A server error occurred",
     "not_found": "Resource not found",
