@@ -116,7 +116,15 @@ export default class WebhooksController {
       currentPeriodEnd: subscriptionData.renews_at ? DateTime.fromISO(subscriptionData.renews_at) : null,
     })
 
-    console.log('Subscription created for user:', user.id)
+    // End trial period now that user has a subscription
+    await user
+      .merge({
+        trialEndsAt: DateTime.now(),
+        trialUsed: true,
+      })
+      .save()
+
+    console.log('Subscription created for user:', user.id, '- Trial ended')
   }
 
   /**

@@ -24,6 +24,15 @@ const subscriptionStatus = ref<{
     cardLastFour: string | null;
     updatePaymentMethodUrl: string | null;
   } | null;
+  trial: {
+    isOnTrial: boolean;
+    trialStartedAt: string | null;
+    trialEndsAt: string | null;
+    trialDaysRemaining: number;
+    trialExpired: boolean;
+    trialUsed: boolean;
+  };
+  hasAccess: boolean;
 } | null>(null);
 
 // Check for success redirect from Lemon Squeezy
@@ -38,9 +47,10 @@ const isCancelled = computed(() => {
 const fetchSubscriptionStatus = async () => {
   try {
     loading.value = true;
-    subscriptionStatus.value = await authenticatedFetch<typeof subscriptionStatus.value>(
-      "/billing/status"
-    );
+    subscriptionStatus.value =
+      await authenticatedFetch<typeof subscriptionStatus.value>(
+        "/billing/status",
+      );
   } catch (error) {
     console.error("Failed to fetch subscription status:", error);
     toast.add({
@@ -59,7 +69,7 @@ const handleSubscribe = async () => {
     checkoutLoading.value = true;
     const response = await authenticatedFetch<{ checkoutUrl: string }>(
       "/billing/checkout",
-      { method: "POST" }
+      { method: "POST" },
     );
 
     // Redirect to Lemon Squeezy checkout
@@ -192,15 +202,22 @@ onMounted(async () => {
     </div>
 
     <template v-else>
+      <!-- Trial status alert (when on trial) -->
+      <UAlert
+        v-if="subscriptionStatus?.trial?.isOnTrial"
+        class="mb-6"
+        :title="t('pages.dashboard.settings.billing.trial.title')"
+        :description="
+          t('pages.dashboard.settings.billing.trial.description', {
+            days: subscriptionStatus.trial.trialDaysRemaining,
+          })
+        "
+        color="info"
+        icon="i-lucide-clock"
+      />
+
       <!-- No subscription -->
       <div v-if="!subscriptionStatus?.hasSubscription" class="space-y-4">
-        <UAlert
-          :title="t('pages.dashboard.settings.billing.noSubscription.title')"
-          :description="t('pages.dashboard.settings.billing.noSubscription.description')"
-          color="info"
-          icon="i-lucide-info"
-        />
-
         <UButton
           :label="t('pages.dashboard.settings.billing.subscribe')"
           :loading="checkoutLoading"
@@ -216,7 +233,13 @@ onMounted(async () => {
         <UAlert
           v-if="isCancelled"
           :title="t('pages.dashboard.settings.billing.cancelled.alert.title')"
-          :description="t('pages.dashboard.settings.billing.cancelled.alert.description', { date: formatDate(subscriptionStatus.subscription?.currentPeriodEnd) })"
+          :description="
+            t('pages.dashboard.settings.billing.cancelled.alert.description', {
+              date: formatDate(
+                subscriptionStatus.subscription?.currentPeriodEnd,
+              ),
+            })
+          "
           color="warning"
           icon="i-lucide-alert-triangle"
         />
@@ -228,28 +251,50 @@ onMounted(async () => {
             <span class="text-sm font-medium">
               {{ t("pages.dashboard.settings.billing.status") }}:
             </span>
-            <UBadge :color="getStatusColor(subscriptionStatus.subscription?.status || '')">
-              {{ t(`pages.dashboard.settings.billing.statuses.${subscriptionStatus.subscription?.status}`) }}
+            <UBadge
+              :color="
+                getStatusColor(subscriptionStatus.subscription?.status || '')
+              "
+            >
+              {{
+                t(
+                  `pages.dashboard.settings.billing.statuses.${subscriptionStatus.subscription?.status}`,
+                )
+              }}
             </UBadge>
           </div>
 
           <!-- Renewal date -->
-          <div v-if="subscriptionStatus.subscription?.currentPeriodEnd" class="text-sm text-muted">
+          <div
+            v-if="subscriptionStatus.subscription?.currentPeriodEnd"
+            class="text-muted text-sm"
+          >
             <span class="font-medium">
-              {{ isCancelled ? t("pages.dashboard.settings.billing.endsAt") : t("pages.dashboard.settings.billing.renewsAt") }}:
+              {{
+                isCancelled
+                  ? t("pages.dashboard.settings.billing.endsAt")
+                  : t("pages.dashboard.settings.billing.renewsAt")
+              }}:
             </span>
             {{ formatDate(subscriptionStatus.subscription.currentPeriodEnd) }}
           </div>
 
           <!-- Payment method -->
-          <div v-if="subscriptionStatus.subscription?.cardLastFour" class="space-y-2">
+          <div
+            v-if="subscriptionStatus.subscription?.cardLastFour"
+            class="space-y-2"
+          >
             <span class="text-sm font-medium">
               {{ t("pages.dashboard.settings.billing.paymentMethod.title") }}:
             </span>
             <div class="flex items-center gap-2">
-              <UIcon :name="getCardIcon(subscriptionStatus.subscription.cardBrand)" class="h-5 w-5" />
+              <UIcon
+                :name="getCardIcon(subscriptionStatus.subscription.cardBrand)"
+                class="h-5 w-5"
+              />
               <span class="text-sm">
-                {{ formatCardBrand(subscriptionStatus.subscription.cardBrand) }} •••• {{ subscriptionStatus.subscription.cardLastFour }}
+                {{ formatCardBrand(subscriptionStatus.subscription.cardBrand) }}
+                •••• {{ subscriptionStatus.subscription.cardLastFour }}
               </span>
             </div>
           </div>
@@ -259,7 +304,10 @@ onMounted(async () => {
         <div class="flex flex-wrap gap-3 pt-2">
           <!-- Update payment method -->
           <UButton
-            v-if="subscriptionStatus.subscription?.updatePaymentMethodUrl && !isCancelled"
+            v-if="
+              subscriptionStatus.subscription?.updatePaymentMethodUrl &&
+              !isCancelled
+            "
             :label="t('pages.dashboard.settings.billing.paymentMethod.update')"
             icon="i-lucide-pencil"
             color="neutral"
@@ -294,7 +342,9 @@ onMounted(async () => {
   <!-- Cancel subscription modal -->
   <BillingCancelSubscriptionModal
     :open="cancelModalOpen"
-    :current-period-end="subscriptionStatus?.subscription?.currentPeriodEnd || null"
+    :current-period-end="
+      subscriptionStatus?.subscription?.currentPeriodEnd || null
+    "
     @close="cancelModalOpen = false"
     @cancelled="handleCancelled"
   />

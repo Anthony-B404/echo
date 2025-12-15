@@ -28,7 +28,7 @@ export default class OrganizationPolicy extends BasePolicy {
     user: User,
     organization: Organization
   ): Promise<AuthorizerResponse> {
-    return await user.isOwnerOf(organization.id)
+    return await user.hasOrganization(organization.id)
   }
 
   /**

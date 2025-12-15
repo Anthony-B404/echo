@@ -494,7 +494,8 @@
       "error": "Erreur",
       "copiedToClipboard": "Copié dans le presse-papier",
       "rowsSelected": "{count} sur {total} ligne(s) sélectionnée(s)."
-    }
+    },
+    "or": "ou"
   },
   "components": {
     "notifications": {
@@ -506,6 +507,7 @@
       "manageTeams": "Gérer les équipes",
       "organizationSwitched": "Organisation changée avec succès",
       "organizationSwitchError": "Erreur lors du changement d'organisation",
+      "subscriptionExpired": "L'abonnement de cette organisation n'a pas été renouvelé",
       "createOrganizationModal": {
         "title": "Créer une organisation",
         "description": "Renseignez les informations de votre nouvelle organisation.",
@@ -525,6 +527,21 @@
           "invalidEmail": "Email invalide"
         }
       }
+    },
+    "trialBanner": {
+      "title": "Essai gratuit",
+      "description": "Il vous reste {days} jours d'essai.",
+      "subscribe": "S'abonner"
+    },
+    "accessBlockedModal": {
+      "title": "Accès bloqué",
+      "description": "Votre abonnement est terminé. Veuillez vous abonner pour continuer à utiliser l'application.",
+      "descriptionMember": "L'abonnement du propriétaire de l'organisation est terminé. Créez votre propre organisation pour continuer.",
+      "switchToAccessible": "Basculez vers une organisation à laquelle vous avez accès :",
+      "subscribe": "S'abonner maintenant",
+      "createOrganization": "Créer mon organisation",
+      "logout": "Se déconnecter",
+      "error": "Erreur lors de la création du paiement"
     },
     "user": {
       "profile": "Profil",
@@ -847,8 +864,43 @@
           "error": {
             "fetchFailed": "Impossible de charger le statut de l'abonnement",
             "checkoutFailed": "Impossible de créer la session de paiement"
+          },
+          "trial": {
+            "title": "Essai gratuit actif",
+            "description": "Il vous reste {days} jours d'essai gratuit.",
+            "expiredTitle": "Essai gratuit terminé",
+            "expiredDescription": "Votre essai gratuit est terminé. Abonnez-vous pour continuer à utiliser l'application."
           }
         }
+      }
+    },
+    "trialExpired": {
+      "title": "Votre essai gratuit est terminé",
+      "description": "Abonnez-vous maintenant pour continuer à utiliser toutes les fonctionnalités.",
+      "subscribe": "S'abonner",
+      "logout": "Se déconnecter",
+      "error": "Impossible de créer la session de paiement"
+    },
+    "createOrganization": {
+      "seoTitle": "Créer une organisation",
+      "seoDescription": "Créez votre propre organisation pour commencer",
+      "title": "Créez votre organisation",
+      "subtitle": "Devenez propriétaire de votre propre organisation",
+      "nameLabel": "Nom de l'organisation",
+      "namePlaceholder": "Mon Entreprise",
+      "emailLabel": "Email de l'organisation",
+      "emailPlaceholder": "contact{'@'}monentreprise.com",
+      "logoLabel": "Logo (optionnel)",
+      "removeLogo": "Supprimer",
+      "submit": "Créer l'organisation",
+      "successTitle": "Succès",
+      "successDescription": "Votre organisation a été créée avec succès.",
+      "errorTitle": "Erreur",
+      "errorDescription": "Une erreur s'est produite lors de la création de l'organisation.",
+      "newOrg": "Nouvelle Organisation",
+      "validation": {
+        "nameTooShort": "Le nom doit contenir au moins 2 caractères",
+        "invalidEmail": "Email invalide"
       }
     }
   }

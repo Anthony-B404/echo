@@ -260,6 +260,14 @@ export default class AuthController {
       user.onboardingCompleted = true
       user.magicLinkToken = null
       user.magicLinkExpiresAt = null
+
+      // Initialize 14-day trial for new users
+      if (!user.trialUsed) {
+        user.trialStartedAt = DateTime.now()
+        user.trialEndsAt = DateTime.now().plus({ days: 14 })
+        user.trialUsed = true
+      }
+
       await user.save()
 
       // Create access token

@@ -5,6 +5,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const toast = useToast();
+const trialStore = useTrialStore();
 
 const open = ref(false);
 
@@ -129,6 +130,11 @@ const groups = computed(() => [
 ]);
 
 onMounted(async () => {
+  // Fetch trial status if not already loaded
+  if (!trialStore.loaded) {
+    await trialStore.fetchTrialStatus();
+  }
+
   const cookie = useCookie("cookie-consent");
   if (cookie.value === "accepted") {
     return;
@@ -185,13 +191,22 @@ onMounted(async () => {
           popover
         />
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
-        />
+        <!-- Bottom section: Trial banner + feedback/help links -->
+        <div class="mt-auto">
+          <!-- Trial Banner (only show when on trial and not collapsed) -->
+          <BillingTrialBanner
+            v-if="trialStore.isOnTrial && !collapsed"
+            :days-remaining="trialStore.trialDaysRemaining"
+            :trial-ends-at="trialStore.trialEndsAt"
+          />
+
+          <UNavigationMenu
+            :collapsed="collapsed"
+            :items="links[1]"
+            orientation="vertical"
+            tooltip
+          />
+        </div>
       </template>
 
       <template #footer="{ collapsed }">
@@ -204,5 +219,8 @@ onMounted(async () => {
     <slot />
 
     <NotificationsSlideover />
+
+    <!-- Access blocked modal (shows when trial expired or subscription ended) -->
+    <BillingAccessBlockedModal v-if="trialStore.loaded && !trialStore.hasAccess" />
   </UDashboardGroup>
 </template>

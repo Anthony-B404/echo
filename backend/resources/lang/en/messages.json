@@ -79,7 +79,9 @@
     "cancel_failed": "Failed to cancel subscription",
     "reactivate_failed": "Failed to reactivate subscription",
     "no_active_subscription": "No active subscription",
-    "cannot_reactivate": "Cannot reactivate - subscription has already expired"
+    "cannot_reactivate": "Cannot reactivate - subscription has already expired",
+    "subscription_ended": "Your subscription has ended. Please subscribe to continue using the application.",
+    "subscription_ended_member": "The organization owner's subscription has ended. Create your own organization to continue."
   },
   "errors": {
     "server_error": "A server error occurred",

@@ -438,7 +438,8 @@
       "error": "Error",
       "copiedToClipboard": "Copied to clipboard",
       "rowsSelected": "{count} of {total} row(s) selected."
-    }
+    },
+    "or": "or"
   },
   "components": {
     "notifications": {
@@ -450,6 +451,7 @@
       "manageTeams": "Manage teams",
       "organizationSwitched": "Organization switched successfully",
       "organizationSwitchError": "Error switching organization",
+      "subscriptionExpired": "The subscription for this organization has not been renewed",
       "createOrganizationModal": {
         "title": "Create organization",
         "description": "Enter your new organization information.",
@@ -469,6 +471,21 @@
           "invalidEmail": "Invalid email"
         }
       }
+    },
+    "trialBanner": {
+      "title": "Free Trial",
+      "description": "You have {days} days remaining in your trial.",
+      "subscribe": "Subscribe Now"
+    },
+    "accessBlockedModal": {
+      "title": "Access Blocked",
+      "description": "Your subscription has ended. Please subscribe to continue using the application.",
+      "descriptionMember": "The organization owner's subscription has ended. Create your own organization to continue.",
+      "switchToAccessible": "Switch to an organization you have access to:",
+      "subscribe": "Subscribe Now",
+      "createOrganization": "Create my organization",
+      "logout": "Log out",
+      "error": "Failed to create checkout session"
     },
     "user": {
       "profile": "Profile",
@@ -791,8 +808,43 @@
           "error": {
             "fetchFailed": "Failed to load subscription status",
             "checkoutFailed": "Failed to create checkout session"
+          },
+          "trial": {
+            "title": "Free Trial Active",
+            "description": "You have {days} days remaining in your free trial.",
+            "expiredTitle": "Trial Expired",
+            "expiredDescription": "Your free trial has ended. Subscribe to continue using the application."
           }
         }
+      }
+    },
+    "trialExpired": {
+      "title": "Your Free Trial Has Ended",
+      "description": "Subscribe now to continue using all features.",
+      "subscribe": "Subscribe",
+      "logout": "Log out",
+      "error": "Failed to create checkout session"
+    },
+    "createOrganization": {
+      "seoTitle": "Create Organization",
+      "seoDescription": "Create your own organization to get started",
+      "title": "Create your organization",
+      "subtitle": "Become the owner of your own organization",
+      "nameLabel": "Organization name",
+      "namePlaceholder": "My Company",
+      "emailLabel": "Organization email",
+      "emailPlaceholder": "contact{'@'}mycompany.com",
+      "logoLabel": "Logo (optional)",
+      "removeLogo": "Remove",
+      "submit": "Create organization",
+      "successTitle": "Success",
+      "successDescription": "Your organization has been created successfully.",
+      "errorTitle": "Error",
+      "errorDescription": "An error occurred while creating the organization.",
+      "newOrg": "New Organization",
+      "validation": {
+        "nameTooShort": "Name must be at least 2 characters",
+        "invalidEmail": "Invalid email"
       }
     }
   }

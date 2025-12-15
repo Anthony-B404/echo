@@ -43,10 +43,39 @@ export default class BillingController {
 
     await user.load('subscription')
 
+    // Check if user is owner of current organization
+    const isOwnerOfCurrentOrganization = user.currentOrganizationId
+      ? await user.isOwnerOf(user.currentOrganizationId)
+      : false
+
+    // Build trial info (always included)
+    const trialInfo = {
+      isOnTrial: user.isOnTrial(),
+      trialStartedAt: user.trialStartedAt?.toISO() ?? null,
+      trialEndsAt: user.trialEndsAt?.toISO() ?? null,
+      trialDaysRemaining: user.getTrialDaysRemaining(),
+      trialExpired: user.isTrialExpired(),
+      trialUsed: user.trialUsed,
+    }
+
+    // Calculate effective access based on role
+    let effectiveHasAccess: boolean
+    if (isOwnerOfCurrentOrganization) {
+      // Owner: check their own access
+      effectiveHasAccess = await user.hasAccess()
+    } else {
+      // Member: check organization owner's access
+      const ownerAccess = await user.getOrganizationOwnerAccess()
+      effectiveHasAccess = ownerAccess.hasAccess
+    }
+
     if (!user.subscription) {
       return response.ok({
         hasSubscription: false,
         subscription: null,
+        trial: trialInfo,
+        hasAccess: effectiveHasAccess,
+        isOwnerOfCurrentOrganization,
       })
     }
 
@@ -86,6 +115,9 @@ export default class BillingController {
             cardLastFour: attrs.card_last_four,
             updatePaymentMethodUrl: attrs.urls.update_payment_method,
           },
+          trial: trialInfo,
+          hasAccess: effectiveHasAccess,
+          isOwnerOfCurrentOrganization,
         })
       }
     } catch (error) {
@@ -103,6 +135,9 @@ export default class BillingController {
         cardLastFour: user.subscription.cardLastFour,
         updatePaymentMethodUrl: null,
       },
+      trial: trialInfo,
+      hasAccess: effectiveHasAccess,
+      isOwnerOfCurrentOrganization,
     })
   }
 

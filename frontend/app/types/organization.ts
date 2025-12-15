@@ -30,6 +30,7 @@ export interface UserOrganization {
   role: UserRole
   isOwner: boolean
   isCurrent: boolean
+  hasAccess: boolean
 }
 
 export interface OrganizationState {

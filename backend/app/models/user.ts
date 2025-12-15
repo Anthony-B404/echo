@@ -77,6 +77,15 @@ export default class User extends BaseModel {
   @column.dateTime()
   declare emailChangeExpiresAt: DateTime | null
 
+  @column.dateTime()
+  declare trialStartedAt: DateTime | null
+
+  @column.dateTime()
+  declare trialEndsAt: DateTime | null
+
+  @column()
+  declare trialUsed: boolean
+
   declare isCurrentUser?: boolean
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
@@ -104,5 +113,59 @@ export default class User extends BaseModel {
   async hasActiveSubscription(): Promise<boolean> {
     await this.load('subscription')
     return this.subscription?.isActive() ?? false
+  }
+
+  /**
+   * Check if user is currently on trial
+   */
+  isOnTrial(): boolean {
+    if (!this.trialEndsAt) return false
+    return DateTime.now() < this.trialEndsAt
+  }
+
+  /**
+   * Get number of trial days remaining
+   */
+  getTrialDaysRemaining(): number {
+    if (!this.trialEndsAt) return 0
+    const diff = this.trialEndsAt.diff(DateTime.now(), 'days').days
+    return Math.max(0, Math.ceil(diff))
+  }
+
+  /**
+   * Check if trial has expired
+   */
+  isTrialExpired(): boolean {
+    if (!this.trialUsed) return false
+    if (!this.trialEndsAt) return false
+    return DateTime.now() >= this.trialEndsAt
+  }
+
+  /**
+   * Check if user has access (either on trial or has active subscription)
+   */
+  async hasAccess(): Promise<boolean> {
+    if (this.isOnTrial()) return true
+    return await this.hasActiveSubscription()
+  }
+
+  /**
+   * Get the organization owner's access status for the current organization
+   * Used to check if a member should have access based on the owner's subscription
+   */
+  async getOrganizationOwnerAccess(): Promise<{ hasAccess: boolean; owner: User | null }> {
+    if (!this.currentOrganizationId) {
+      return { hasAccess: false, owner: null }
+    }
+
+    await this.load('currentOrganization')
+    const owner = await this.currentOrganization.getOwner()
+
+    if (!owner) {
+      return { hasAccess: false, owner: null }
+    }
+
+    const ownerHasAccess = await owner.hasAccess()
+    return { hasAccess: ownerHasAccess, owner }
   }
 }

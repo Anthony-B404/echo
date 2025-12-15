@@ -247,26 +247,50 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 }
 
+// Helper to check if an org is blocked
+const isOrgBlocked = (org: (typeof organizations.value)[0]) => {
+  return !org.hasAccess && !org.isOwner;
+};
+
 const items = computed<DropdownMenuItem[][]>(() => {
   const localePath = useLocalePath();
 
   // Construire la liste des organisations
-  const organizationItems = organizations.value.map((org) => ({
-    label: org.name,
-    avatar: org.logo
-      ? {
-          src: `${config.public.apiUrl}/${org.logo}`,
-          alt: org.name,
+  const organizationItems = organizations.value.map((org) => {
+    const isBlocked = isOrgBlocked(org);
+
+    return {
+      id: `org-${org.id}`,
+      label: org.name,
+      avatar: org.logo
+        ? {
+            src: `${config.public.apiUrl}/${org.logo}`,
+            alt: org.name,
+          }
+        : undefined,
+      // Show lock icon if blocked, check icon if current
+      trailingIcon: isBlocked
+        ? "i-lucide-lock"
+        : org.isCurrent
+          ? "i-lucide-check"
+          : undefined,
+      class: org.isCurrent
+        ? "bg-primary/10"
+        : isBlocked
+          ? "opacity-50"
+          : undefined,
+      disabled: isBlocked,
+      // Store org data for tooltip slot
+      _org: org,
+      _isBlocked: isBlocked,
+      onClick: () => {
+        // Don't allow switching to blocked organizations
+        if (!org.isCurrent && !isBlocked) {
+          switchOrganization(org.id);
         }
-      : undefined,
-    trailingIcon: org.isCurrent ? "i-lucide-check" : undefined,
-    class: org.isCurrent ? "bg-primary/10" : undefined,
-    onClick: () => {
-      if (!org.isCurrent) {
-        switchOrganization(org.id);
-      }
-    },
-  }));
+      },
+    };
+  });
 
   return [
     organizationItems,
@@ -311,6 +335,28 @@ const items = computed<DropdownMenuItem[][]>(() => {
         trailingIcon: 'text-dimmed',
       }"
     />
+
+    <template #item="{ item }">
+      <UTooltip
+        v-if="item._isBlocked"
+        :text="t('components.teams.subscriptionExpired')"
+        :popper="{ placement: 'right' }"
+      >
+        <span class="flex w-full items-center gap-2 cursor-not-allowed">
+          <UAvatar
+            v-if="item.avatar"
+            v-bind="item.avatar"
+            size="2xs"
+          />
+          <span class="truncate">{{ item.label }}</span>
+          <UIcon
+            v-if="item.trailingIcon"
+            :name="item.trailingIcon"
+            class="text-muted ml-auto h-4 w-4 shrink-0"
+          />
+        </span>
+      </UTooltip>
+    </template>
   </UDropdownMenu>
 
   <!-- Modale de création d'organisation -->

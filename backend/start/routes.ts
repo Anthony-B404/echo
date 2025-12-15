@@ -51,15 +51,44 @@ router.get('/auth/google/callback', [SocialAuthController, 'googleCallback'])
 // Webhook routes (public - signature verified in controller)
 router.post('/webhooks/lemonsqueezy', [WebhooksController, 'handleLemonSqueezy'])
 
-// Protected routes
+// Protected routes WITHOUT trial guard (always accessible when authenticated)
 router
   .group(() => {
-    // Auth routes
+    // Auth routes (must work even when trial expired)
     router.post('/logout', [AuthController, 'logout'])
     router.get('/check-token', [AuthController, 'checkToken'])
 
-    // User routes
+    // User routes (must work even when trial expired for UI display)
     router.get('/me', [UsersController, 'me'])
+
+    // OAuth completion route (onboarding - trial not yet set)
+    router.post('/oauth/complete-registration', [SocialAuthController, 'completeOAuthRegistration'])
+
+    // Organization GET (needed for auth callback flow and UI display when trial expired)
+    router.get('/organization', [OrganizationsController, 'getOrganizationWithUsers'])
+    router.get('/organizations', [OrganizationsController, 'listUserOrganizations'])
+
+    // Organization creation (must work when trial expired for members to create their own org)
+    router.post('/organizations', [OrganizationsController, 'createOrganization'])
+
+    // Organization switch (must work when current org is blocked to switch to accessible org)
+    router.post('/organizations/:id/switch', [OrganizationsController, 'switchOrganization'])
+
+    // List accessible organizations (for blocked modal to show switch options)
+    router.get('/organizations/accessible', [OrganizationsController, 'listAccessibleOrganizations'])
+
+    // Billing routes (must work even when trial expired for subscription)
+    router.get('/billing/status', [BillingController, 'getSubscriptionStatus'])
+    router.post('/billing/checkout', [BillingController, 'createCheckoutSession'])
+    router.post('/billing/cancel', [BillingController, 'cancelSubscription'])
+    router.post('/billing/reactivate', [BillingController, 'reactivateSubscription'])
+  })
+  .use(middleware.auth({ guards: ['api'] }))
+
+// Protected routes WITH trial guard (blocked when trial expired)
+router
+  .group(() => {
+    // User routes
     router.put('/profile', [UsersController, 'updateProfile'])
 
     // Member management routes
@@ -67,15 +96,8 @@ router
     router.put('/update-member-role/:id', [MembersController, 'updateMemberRole'])
     router.delete('/delete-member/:id', [MembersController, 'deleteMember'])
 
-    // OAuth completion route (requires authentication)
-    router.post('/oauth/complete-registration', [SocialAuthController, 'completeOAuthRegistration'])
-
-    // Organization routes
-    router.get('/organizations', [OrganizationsController, 'listUserOrganizations'])
-    router.post('/organizations', [OrganizationsController, 'createOrganization'])
-    router.get('/organization', [OrganizationsController, 'getOrganizationWithUsers'])
+    // Organization routes (PUT/DELETE actions blocked when trial expired)
     router.put('/organization/update', [OrganizationsController, 'updateOrganization'])
-    router.post('/organizations/:id/switch', [OrganizationsController, 'switchOrganization'])
     router.delete('/organizations/:id', [OrganizationsController, 'deleteOrganization'])
     router.get('/members', [OrganizationsController, 'getMembers'])
 
@@ -84,11 +106,6 @@ router
     router.get('/invitations', [InvitationsController, 'listInvitations'])
     router.post('/resend-invitation/:id', [InvitationsController, 'resendInvitation'])
     router.delete('/delete-invitation/:id', [InvitationsController, 'deleteInvitation'])
-
-    // Billing routes
-    router.get('/billing/status', [BillingController, 'getSubscriptionStatus'])
-    router.post('/billing/checkout', [BillingController, 'createCheckoutSession'])
-    router.post('/billing/cancel', [BillingController, 'cancelSubscription'])
-    router.post('/billing/reactivate', [BillingController, 'reactivateSubscription'])
   })
   .use(middleware.auth({ guards: ['api'] }))
+  .use(middleware.trialGuard())

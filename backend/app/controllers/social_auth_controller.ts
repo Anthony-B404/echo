@@ -10,6 +10,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import fs from 'node:fs/promises'
 import { completeOAuthRegistrationValidator } from '#validators/user'
+import { DateTime } from 'luxon'
 
 export default class SocialAuthController {
   private readonly LOGO_DIRECTORY = app.makePath('storage/organizations/logos')
@@ -189,6 +190,14 @@ export default class SocialAuthController {
       user.lastName = data.lastName
       user.fullName = fullName
       user.onboardingCompleted = true
+
+      // Initialize 14-day trial for new users (OAuth flow)
+      if (!user.trialUsed) {
+        user.trialStartedAt = DateTime.now()
+        user.trialEndsAt = DateTime.now().plus({ days: 14 })
+        user.trialUsed = true
+      }
+
       await user.save()
 
       return response.ok({
