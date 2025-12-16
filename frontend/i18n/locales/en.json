@@ -500,6 +500,7 @@
       "appearance": "Appearance",
       "light": "Light",
       "dark": "Dark",
+      "system": "System",
       "templates": "Templates",
       "documentation": "Documentation",
       "githubRepository": "GitHub repository",

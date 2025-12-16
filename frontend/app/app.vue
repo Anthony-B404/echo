@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const colorMode = useColorMode();
+const themeStore = useThemeStore();
 
 const color = computed(() =>
   colorMode.value === "dark" ? "#171717" : "white",
@@ -14,6 +15,10 @@ useHead({
   htmlAttrs: {
     lang: "fr",
   },
+});
+
+onMounted(() => {
+  themeStore.restoreTheme();
 });
 </script>
 

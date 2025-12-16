@@ -13,6 +13,7 @@ defineProps<{
 
 const colorMode = useColorMode();
 const appConfig = useAppConfig();
+const themeStore = useThemeStore();
 
 const colors = [
   "red",
@@ -34,6 +35,36 @@ const colors = [
   "rose",
 ];
 const neutrals = ["slate", "gray", "zinc", "neutral", "stone"];
+
+// Tailwind color palette values for chip display
+const colorPalette: Record<string, { light: string; dark: string }> = {
+  red: { light: "#ef4444", dark: "#f87171" },
+  orange: { light: "#f97316", dark: "#fb923c" },
+  amber: { light: "#f59e0b", dark: "#fbbf24" },
+  yellow: { light: "#eab308", dark: "#facc15" },
+  lime: { light: "#84cc16", dark: "#a3e635" },
+  green: { light: "#22c55e", dark: "#4ade80" },
+  emerald: { light: "#10b981", dark: "#34d399" },
+  teal: { light: "#14b8a6", dark: "#2dd4bf" },
+  cyan: { light: "#06b6d4", dark: "#22d3ee" },
+  sky: { light: "#0ea5e9", dark: "#38bdf8" },
+  blue: { light: "#3b82f6", dark: "#60a5fa" },
+  indigo: { light: "#6366f1", dark: "#818cf8" },
+  violet: { light: "#8b5cf6", dark: "#a78bfa" },
+  purple: { light: "#a855f7", dark: "#c084fc" },
+  fuchsia: { light: "#d946ef", dark: "#e879f9" },
+  pink: { light: "#ec4899", dark: "#f472b6" },
+  rose: { light: "#f43f5e", dark: "#fb7185" },
+  slate: { light: "#64748b", dark: "#94a3b8" },
+  gray: { light: "#6b7280", dark: "#9ca3af" },
+  zinc: { light: "#71717a", dark: "#a1a1aa" },
+  "old-neutral": { light: "#737373", dark: "#a3a3a3" },
+  stone: { light: "#78716c", dark: "#a8a29e" },
+};
+
+const getChipColor = (colorName: string, mode: "light" | "dark") => {
+  return colorPalette[colorName]?.[mode] || "#888888";
+};
 
 const user = computed(() => ({
   name: authUser.value?.fullName || authUser.value?.email || "User",
@@ -88,8 +119,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
             type: "checkbox",
             onSelect: (e) => {
               e.preventDefault();
-
-              appConfig.ui.colors.primary = color;
+              themeStore.setPrimaryColor(color);
             },
           })),
         },
@@ -112,8 +142,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
             checked: appConfig.ui.colors.neutral === color,
             onSelect: (e) => {
               e.preventDefault();
-
-              appConfig.ui.colors.neutral = color;
+              themeStore.setNeutralColor(color);
             },
           })),
         },
@@ -127,10 +156,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
           label: t("components.user.light"),
           icon: "i-lucide-sun",
           type: "checkbox",
-          checked: colorMode.value === "light",
+          checked: colorMode.preference === "light",
           onSelect(e: Event) {
             e.preventDefault();
-
             colorMode.preference = "light";
           },
         },
@@ -138,14 +166,20 @@ const items = computed<DropdownMenuItem[][]>(() => [
           label: t("components.user.dark"),
           icon: "i-lucide-moon",
           type: "checkbox",
-          checked: colorMode.value === "dark",
-          onUpdateChecked(checked: boolean) {
-            if (checked) {
-              colorMode.preference = "dark";
-            }
-          },
+          checked: colorMode.preference === "dark",
           onSelect(e: Event) {
             e.preventDefault();
+            colorMode.preference = "dark";
+          },
+        },
+        {
+          label: t("components.user.system"),
+          icon: "i-lucide-monitor",
+          type: "checkbox",
+          checked: colorMode.preference === "system",
+          onSelect(e: Event) {
+            e.preventDefault();
+            colorMode.preference = "system";
           },
         },
       ],
@@ -228,10 +262,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
     <template #chip-leading="{ item }">
       <div class="inline-flex size-5 shrink-0 items-center justify-center">
         <span
-          class="ring-bg size-2 rounded-full bg-(--chip-light) ring dark:bg-(--chip-dark)"
+          class="size-2 rounded-full ring ring-white/20 dark:ring-black/20"
           :style="{
-            '--chip-light': `var(--color-${(item as any).chip}-500)`,
-            '--chip-dark': `var(--color-${(item as any).chip}-400)`,
+            backgroundColor: getChipColor((item as any).chip, colorMode.value === 'dark' ? 'dark' : 'light'),
           }"
         />
       </div>

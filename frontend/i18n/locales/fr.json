@@ -556,6 +556,7 @@
       "appearance": "Apparence",
       "light": "Clair",
       "dark": "Sombre",
+      "system": "Système",
       "templates": "Modèles",
       "documentation": "Documentation",
       "githubRepository": "Dépôt GitHub",
