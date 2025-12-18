@@ -4,7 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This Project is a multi-tenant SaaS boilerplate with Nuxt 4 frontend and AdonisJS v6 backend. The project recently migrated from shadcn-vue to Nuxt UI and from Nuxt 3 to Nuxt 4 with a new directory structure (`app/` instead of traditional Nuxt directories).
+**Audio Analysis SaaS** - Une application SaaS permettant aux utilisateurs d'analyser et transcrire des fichiers audio à l'aide de l'IA Mistral.
+
+### Fonctionnalités Principales
+
+1. **Upload Audio** : Les utilisateurs peuvent uploader des fichiers audio (MP3, WAV, M4A, etc.)
+2. **Prompt Personnalisé** : L'utilisateur entre un prompt décrivant ce qu'il souhaite obtenir (résumé, extraction de points clés, analyse de sentiment, etc.)
+3. **Transcription** : Utilisation de l'API Mistral pour transcrire l'audio en texte
+4. **Analyse IA** : L'API Mistral analyse la transcription selon le prompt de l'utilisateur
+5. **Résumé** : Génération d'un résumé/analyse conforme aux instructions du prompt
+
+### Workflow Utilisateur
+
+```mermaid
+graph LR
+    A[Upload Audio] --> B[Saisie Prompt]
+    B --> C[Transcription Mistral]
+    C --> D[Analyse selon Prompt]
+    D --> E[Affichage Résultat]
+```
+
+### Stack Technique
+
+Ce projet est basé sur un boilerplate multi-tenant SaaS avec Nuxt 4 frontend et AdonisJS v6 backend. Le projet utilise Nuxt UI pour l'interface et une architecture `app/` directory.
 
 ## Technology Stack
 
@@ -326,3 +348,124 @@ API_URL=http://localhost:3333
 - **Webhook Sync**: Lemon Squeezy webhooks update subscription status automatically via `WebhooksController`
 - **402 Response**: When access is denied, API returns 402 with `code: 'SUBSCRIPTION_ENDED'`
 - **Frontend Handling**: Use `trial` store and `AccessBlockedModal` component to handle access denial
+
+## Feature: Audio Analysis with Mistral AI
+
+### Page Structure
+
+La page d'analyse audio (`/dashboard/analyze` ou `/analyze`) doit contenir :
+
+1. **Zone d'Upload Audio**
+   - Drag & drop ou bouton de sélection de fichier
+   - Formats supportés : MP3, WAV, M4A, OGG, FLAC
+   - Affichage du nom du fichier et de sa taille après upload
+   - Limite de taille recommandée : 25MB
+
+2. **Zone de Prompt**
+   - Textarea pour que l'utilisateur entre ses instructions
+   - Exemples de prompts suggérés :
+     - "Fais un résumé de cette conversation"
+     - "Extrais les points clés et les actions à faire"
+     - "Identifie les participants et leurs positions"
+     - "Analyse le sentiment général de la conversation"
+
+3. **Bouton de Traitement**
+   - Déclenche la transcription puis l'analyse
+   - État de chargement avec indicateur de progression
+
+4. **Zone de Résultat**
+   - Affichage du résumé/analyse généré
+   - Option de copier le résultat
+   - Option de télécharger en format texte
+
+### API Mistral Integration
+
+**Configuration Backend** (`.env`):
+```bash
+MISTRAL_API_KEY=your_mistral_api_key_here
+```
+
+**Endpoints à créer**:
+
+```typescript
+// POST /api/audio/transcribe
+// Body: FormData avec le fichier audio
+// Response: { transcription: string, duration: number }
+
+// POST /api/audio/analyze
+// Body: { transcription: string, prompt: string }
+// Response: { analysis: string }
+
+// POST /api/audio/process (endpoint combiné)
+// Body: FormData avec audio + prompt
+// Response: { transcription: string, analysis: string }
+```
+
+**Modèles Mistral recommandés**:
+- **Transcription** : Utiliser `mistral-large-latest` ou le modèle audio si disponible
+- **Analyse** : `mistral-large-latest` pour l'analyse texte selon le prompt
+
+### Frontend Components
+
+Créer dans `frontend/app/components/audio/`:
+
+```
+AudioUploader.vue      # Composant d'upload drag & drop
+PromptInput.vue        # Textarea avec exemples de prompts
+AnalysisResult.vue     # Affichage formaté du résultat
+AudioAnalyzer.vue      # Composant parent orchestrant le flow
+```
+
+### Backend Controller
+
+Créer `AudioController.ts` dans `backend/app/controllers/`:
+
+```typescript
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default class AudioController {
+  // POST /api/audio/process
+  async process({ request, response, i18n }: HttpContext) {
+    // 1. Valider le fichier et le prompt
+    // 2. Envoyer à Mistral pour transcription
+    // 3. Envoyer la transcription + prompt pour analyse
+    // 4. Retourner le résultat
+  }
+}
+```
+
+### Database Schema (optionnel)
+
+Si vous voulez sauvegarder l'historique des analyses :
+
+```typescript
+// analyses table
+{
+  id: number
+  userId: number
+  organizationId: number  // Multi-tenant scope
+  audioFilename: string
+  audioDuration: number
+  prompt: string
+  transcription: text
+  analysis: text
+  createdAt: DateTime
+}
+```
+
+### Error Handling
+
+Gérer les cas suivants :
+- Fichier trop volumineux (> limite)
+- Format audio non supporté
+- Erreur API Mistral (quota, timeout, etc.)
+- Prompt vide ou invalide
+- Transcription impossible (audio de mauvaise qualité)
+
+### UI/UX Guidelines
+
+- Utiliser les composants Nuxt UI existants (UButton, UTextarea, UCard, etc.)
+- Afficher un skeleton loader pendant le traitement
+- Permettre l'annulation du traitement
+- Afficher le temps estimé/écoulé
+- Design responsive pour mobile

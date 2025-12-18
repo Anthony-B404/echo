@@ -437,6 +437,7 @@
         "home": "Accueil",
         "inbox": "Boîte de réception",
         "customers": "Clients",
+        "analyze": "Analyse Audio",
         "settings": "Paramètres",
         "feedback": "Commentaires",
         "helpSupport": "Aide & Support"
@@ -478,6 +479,33 @@
         "title": "Boîte de réception",
         "all": "Tous",
         "unread": "Non lus"
+      },
+      "analyze": {
+        "title": "Analyse Audio",
+        "uploadTitle": "Fichier Audio",
+        "promptTitle": "Instructions",
+        "processButton": "Analyser",
+        "resetButton": "Recommencer",
+        "resultTitle": "Résultats",
+        "success": "Analyse terminée !",
+        "error": "Une erreur est survenue lors de l'analyse",
+        "dropzone": {
+          "title": "Glissez-déposez votre fichier audio ici",
+          "description": "ou cliquez pour sélectionner",
+          "formats": "MP3, WAV, M4A, OGG, FLAC - Max 25MB"
+        },
+        "promptPlaceholder": "Décrivez ce que vous souhaitez obtenir de cette analyse...",
+        "examplesTitle": "Exemples de prompts :",
+        "examples": {
+          "summary": "Fais un résumé de cette conversation",
+          "keyPoints": "Extrais les points clés et actions à faire",
+          "participants": "Identifie les participants et leurs positions",
+          "sentiment": "Analyse le sentiment général"
+        },
+        "tabs": {
+          "analysis": "Analyse",
+          "transcription": "Transcription"
+        }
       },
       "settings": {
         "title": "Paramètres",

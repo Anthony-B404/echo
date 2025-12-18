@@ -101,5 +101,12 @@
     "invitation_delete_failed": "Error deleting invitation",
     "user_delete_failed": "Error deleting user",
     "member_delete_failed": "Error removing member"
+  },
+  "audio": {
+    "no_file_uploaded": "No audio file was uploaded",
+    "invalid_file": "The audio file is invalid",
+    "file_upload_error": "Error uploading file",
+    "transcription_empty": "Unable to transcribe the audio file. Please try again with a better quality file.",
+    "processing_error": "An error occurred while processing the audio"
   }
 }

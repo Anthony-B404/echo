@@ -435,6 +435,7 @@
         "home": "Home",
         "inbox": "Inbox",
         "customers": "Customers",
+        "analyze": "Audio Analysis",
         "settings": "Settings",
         "feedback": "Feedback",
         "helpSupport": "Help & Support"
@@ -476,6 +477,33 @@
         "title": "Inbox",
         "all": "All",
         "unread": "Unread"
+      },
+      "analyze": {
+        "title": "Audio Analysis",
+        "uploadTitle": "Audio File",
+        "promptTitle": "Instructions",
+        "processButton": "Analyze",
+        "resetButton": "Start Over",
+        "resultTitle": "Results",
+        "success": "Analysis complete!",
+        "error": "An error occurred during analysis",
+        "dropzone": {
+          "title": "Drag and drop your audio file here",
+          "description": "or click to select",
+          "formats": "MP3, WAV, M4A, OGG, FLAC - Max 25MB"
+        },
+        "promptPlaceholder": "Describe what you want to get from this analysis...",
+        "examplesTitle": "Example prompts:",
+        "examples": {
+          "summary": "Summarize this conversation",
+          "keyPoints": "Extract key points and action items",
+          "participants": "Identify participants and their positions",
+          "sentiment": "Analyze the overall sentiment"
+        },
+        "tabs": {
+          "analysis": "Analysis",
+          "transcription": "Transcription"
+        }
       },
       "settings": {
         "title": "Settings",

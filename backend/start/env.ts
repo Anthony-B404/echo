@@ -62,4 +62,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   LEMON_SQUEEZY_STORE_ID: Env.schema.string(),
   LEMON_SQUEEZY_VARIANT_ID: Env.schema.string(),
   LEMON_SQUEEZY_WEBHOOK_SECRET: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Mistral AI
+  |----------------------------------------------------------
+  */
+  MISTRAL_API_KEY: Env.schema.string(),
 })

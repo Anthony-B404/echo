@@ -101,6 +101,14 @@ const links = computed(() => {
         },
       },
       {
+        label: t("layouts.default.navigation.analyze"),
+        icon: "i-lucide-audio-lines",
+        to: localePath("/dashboard/analyze"),
+        onSelect: () => {
+          open.value = false;
+        },
+      },
+      {
         label: t("layouts.default.navigation.settings"),
         to: localePath("/dashboard/settings"),
         icon: "i-lucide-settings",

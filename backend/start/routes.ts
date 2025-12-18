@@ -19,6 +19,7 @@ const MembersController = () => import('#controllers/members_controller')
 const BillingController = () => import('#controllers/billing_controller')
 const WebhooksController = () => import('#controllers/webhooks_controller')
 const ContactController = () => import('#controllers/contact_controller')
+const AudioController = () => import('#controllers/audio_controller')
 
 router.get('/', async () => {
   return {
@@ -110,6 +111,9 @@ router
     router.get('/invitations', [InvitationsController, 'listInvitations'])
     router.post('/resend-invitation/:id', [InvitationsController, 'resendInvitation'])
     router.delete('/delete-invitation/:id', [InvitationsController, 'deleteInvitation'])
+
+    // Audio analysis routes
+    router.post('/audio/process', [AudioController, 'process'])
   })
   .use(middleware.auth({ guards: ['api'] }))
   .use(middleware.trialGuard())
