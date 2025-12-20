@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "BoilerPlate",
+  "name": "Alexia",
   "type": "collection",
   "ignore": ["node_modules", ".git"]
 }

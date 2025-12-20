@@ -828,7 +828,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=
-DB_DATABASE=boilerplate_db
+DB_DATABASE=alexia_db
 
 # Email
 RESEND_API_KEY=            # From resend.com

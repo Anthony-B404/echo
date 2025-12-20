@@ -4,7 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This Project is a multi-tenant SaaS boilerplate with Nuxt 4 frontend and AdonisJS v6 backend. The project recently migrated from shadcn-vue to Nuxt UI and from Nuxt 3 to Nuxt 4 with a new directory structure (`app/` instead of traditional Nuxt directories).
+Alexia is a B2B SaaS application that transforms audio recordings (meetings, dictations, calls) into structured written documents using AI. Built with Nuxt 4 frontend and AdonisJS v6 backend with multi-tenant architecture.
+
+### Core Features (MVP)
+- **Audio Workshop**: Upload (MP3, WAV) or record via microphone
+- **Transformation Engine**: AI-powered transcription + intelligent restructuring via templates
+- **Template Manager**: Customizable document templates (Medical reports, Legal summaries, Commercial action lists)
+- **Dashboard & Export**: Audio library with PDF/Word export
+
+### Business Context
+- **Target users**: Professionals (Lawyers, Doctors, Salespeople)
+- **Value proposition**: "1-hour messy audio → 2-minute structured document"
+- **UX principles**: Minimalist, reassuring, "Drag, Drop, Done"
 
 ## Technology Stack
 
@@ -244,7 +255,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=
-DB_DATABASE=boilerplate_db
+DB_DATABASE=alexia_db
 
 # Email (Resend)
 RESEND_API_KEY=            # From resend.com for emails

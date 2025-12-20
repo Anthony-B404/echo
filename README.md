@@ -1,21 +1,47 @@
-# Nuxt 4 + AdonisJS Multi-Tenant Boilerplate
+# Alexia
 
-Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS multi-tenant avec Nuxt 4 (frontend) et AdonisJS v6 (backend).
+> Transformez vos enregistrements audio en documents structurés grâce à l'IA.
 
-## 🚀 Fonctionnalités
+## Concept
 
-- ✅ **Architecture Multi-Tenant** - Isolation complète des données par organisation
-- 🔐 **Authentification API Tokens** - Système d'auth sécurisé avec tokens
-- 📧 **Système de Mailing** - Intégration Resend pour l'envoi d'emails
-- 👥 **Gestion des Invitations** - Inviter des membres à rejoindre une organisation
-- ✉️ **Vérification Email** - Processus de vérification des emails utilisateurs
-- 🎨 **UI Moderne** - Nuxt UI avec Tailwind CSS v4
-- 🌐 **Internationalisation** - i18n frontend (@nuxtjs/i18n) et backend (@adonisjs/i18n) avec français et anglais
-- 📱 **Responsive** - Design adaptatif pour tous les écrans
-- 🔄 **State Management** - Pinia pour la gestion d'état
-- ✅ **Validation** - Zod (frontend) + VineJS (backend)
+Alexia est une application web B2B qui transforme des enregistrements audio (réunions, dictées, appels) en documents écrits parfaitement structurés. Ce n'est pas juste un transcripteur, c'est un rédacteur intelligent capable de s'adapter au métier de l'utilisateur (Avocat, Médecin, Commercial).
 
-## 📚 Stack Technique
+**L'objectif** : L'utilisateur dépose un audio de 1 heure en désordre, et récupère en 2 minutes un document de synthèse clair et prêt à être envoyé.
+
+## Fonctionnalités
+
+### Atelier Audio
+- Upload de fichiers (MP3, WAV, M4A)
+- Enregistrement direct via microphone
+- Interface drag & drop intuitive ("Drag, Drop, Done")
+
+### Moteur de Transformation
+- **Étape 1** : Transcription fidèle de l'audio en texte brut (avec distinction des interlocuteurs)
+- **Étape 2** : Restructuration intelligente via Templates IA
+- Adaptation au contexte métier de l'utilisateur
+
+### Gestionnaire de Templates
+- Templates prédéfinis par métier :
+  - Compte rendu Médical
+  - Synthèse Juridique
+  - Liste d'actions commerciales
+- Création de templates personnalisés
+- Partage de templates au sein de l'organisation
+
+### Dashboard & Export
+- Bibliothèque d'enregistrements organisée
+- Export PDF et Word formatés professionnellement
+- Historique et recherche
+
+## Expérience Utilisateur
+
+- Interface **minimaliste** et **rassurante**
+- Accent sur la **confidentialité** (sentiment de sécurité)
+- Focus sur la **productivité**
+
+---
+
+## Stack Technique
 
 ### Frontend (Nuxt 4)
 
@@ -29,16 +55,17 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 ### Backend (AdonisJS v6)
 
 - **Framework**: AdonisJS 6.19.1
-- **ORM**: Lucid ORM 21.8.1
-- **Database**: PostgreSQL
-- **Auth**: @adonisjs/auth 9.5.1 avec tokens
+- **ORM**: Lucid ORM 21.8.1 avec PostgreSQL
+- **Auth**: @adonisjs/auth 9.5.1 avec tokens API
 - **Mail**: @adonisjs/mail 9.2.2 + Resend
 - **Validation**: @vinejs/vine 4.1.0
 - **Authorization**: @adonisjs/bouncer 3.1.6
 - **i18n**: @adonisjs/i18n 2.2.3 (français et anglais)
-- **Templating**: Edge.js 6.3.0 + MJML 4.16.1
+- **Billing**: Lemon Squeezy
 
-## 🏗️ Structure du Projet
+---
+
+## Structure du Projet
 
 ```
 .
@@ -47,10 +74,6 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 │   │   ├── components/   # Components Vue auto-importés
 │   │   ├── layouts/      # Layouts Nuxt (default.vue, auth.vue, app.vue)
 │   │   ├── pages/        # Pages avec routing automatique
-│   │   │   ├── index.vue              # Dashboard
-│   │   │   ├── login.vue              # Page de connexion
-│   │   │   ├── waiting-verification.vue
-│   │   │   └── invitation/[identifier].vue
 │   │   └── assets/
 │   │       └── css/      # Styles globaux
 │   └── nuxt.config.ts
@@ -58,33 +81,24 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 └── backend/              # API AdonisJS v6
     ├── app/
     │   ├── controllers/
-    │   │   ├── users_controller.ts
-    │   │   ├── organizations_controller.ts
-    │   │   └── invitations_controller.ts
-    │   ├── middleware/   # Middleware auth & i18n
-    │   │   ├── auth_middleware.ts
-    │   │   └── detect_user_locale_middleware.ts
+    │   ├── middleware/
     │   ├── models/
-    │   │   ├── user.ts
-    │   │   ├── organization.ts
-    │   │   └── invitation.ts
-    │   ├── policies/     # Policies d'autorisation
-    │   └── validators/   # Validateurs VineJS
-    ├── config/           # Configuration
-    │   └── i18n.ts       # Config i18n
+    │   ├── policies/
+    │   └── validators/
+    ├── config/
     ├── database/
-    │   └── migrations/   # Migrations DB
+    │   └── migrations/
     ├── resources/
     │   ├── lang/         # Fichiers de traduction
-    │   │   ├── en/       # Anglais
-    │   │   └── fr/       # Français
     │   └── views/        # Templates Email Edge.js
     └── start/
-        ├── routes.ts     # Routes API
-        └── validator.ts  # Config validation i18n
+        ├── routes.ts
+        └── validator.ts
 ```
 
-## 🚦 Démarrage Rapide
+---
+
+## Démarrage Rapide
 
 ### Prérequis
 
@@ -98,7 +112,7 @@ Un boilerplate moderne et prêt à l'emploi pour créer des applications SaaS mu
 
 ```bash
 git clone <your-repo-url>
-cd boilerplate
+cd Alexia
 ```
 
 2. **Configurer le Backend**
@@ -139,7 +153,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=your_password
-DB_DATABASE=boilerplate_db
+DB_DATABASE=alexia_db
 
 # Mail (Resend)
 RESEND_API_KEY=re_your_resend_api_key
@@ -158,7 +172,7 @@ API_URL=http://localhost:3333
 cd backend
 
 # Créer la base de données
-createdb boilerplate_db
+createdb alexia_db
 
 # Exécuter les migrations
 node ace migration:run
@@ -182,208 +196,9 @@ pnpm dev
 # App disponible sur http://localhost:3000
 ```
 
-## 🔐 Système d'Authentification
+---
 
-### Rôles Utilisateurs
-
-- **Owner (1)**: Propriétaire de l'organisation, tous les droits
-- **Member (2)**: Membre de l'organisation, droits limités
-
-### Flow d'Authentification
-
-1. **Inscription Organisation**
-
-   ```
-   POST /signup
-   {
-     "email": "owner@example.com",
-     "password": "password",
-     "fullName": "John Doe",
-     "organizationName": "My Company"
-   }
-   ```
-
-2. **Connexion**
-
-   ```
-   POST /login
-   {
-     "email": "user@example.com",
-     "password": "password"
-   }
-   ```
-
-3. **Routes Protégées**
-   - Toutes les routes sous `/api/*` nécessitent un token d'authentification
-   - Header requis: `Authorization: Bearer <token>`
-
-## 👥 Système d'Invitation
-
-### Flow Complet
-
-1. **Créer une Invitation**
-
-   ```
-   POST /invite-member (auth)
-   {
-     "email": "newmember@example.com",
-     "role": 2
-   }
-   ```
-
-2. **Vérifier l'Invitation**
-
-   ```
-   GET /check-invitation/:identifier (public)
-   ```
-
-3. **Accepter l'Invitation**
-   ```
-   POST /accept-invitation (public)
-   {
-     "identifier": "uuid",
-     "fullName": "Jane Doe",
-     "password": "password"
-   }
-   ```
-
-## 🌐 Internationalisation Backend
-
-### Fonctionnement
-
-Le backend détecte automatiquement la langue de l'utilisateur via l'en-tête HTTP `Accept-Language` et retourne les messages dans la langue appropriée (français ou anglais).
-
-### Fichiers de Traduction
-
-Les traductions sont organisées dans `backend/resources/lang/`:
-
-```
-backend/resources/lang/
-├── en/
-│   ├── messages.json    # Messages applicatifs
-│   ├── emails.json      # Contenu des emails
-│   └── validation.json  # Messages de validation
-└── fr/
-    ├── messages.json
-    ├── emails.json
-    └── validation.json
-```
-
-### Utilisation dans les Controllers
-
-```typescript
-public async login({ i18n, response }: HttpContext) {
-  return response.unauthorized({
-    message: i18n.t('messages.auth.invalid_credentials')
-  })
-}
-```
-
-### Utilisation dans les Templates Email
-
-```edge
-<mj-text>
-  {{ i18n.t('emails.verification.welcome') }}
-</mj-text>
-```
-
-### Ajouter une Nouvelle Traduction
-
-1. Ajouter la clé dans `backend/resources/lang/en/messages.json`
-2. Ajouter la traduction dans `backend/resources/lang/fr/messages.json`
-3. Utiliser `i18n.t('category.key')` dans votre code
-
-## 📧 Configuration Email (Resend)
-
-1. Créer un compte sur [Resend](https://resend.com)
-2. Obtenir votre API Key
-3. Configurer `RESEND_API_KEY` dans `.env`
-4. Les templates email sont dans `backend/resources/views/emails/`
-
-## 🎨 Personnalisation
-
-### Composants UI
-
-Le projet utilise **Nuxt UI 4.1.0** pour tous les composants d'interface. Les composants sont auto-importés et disponibles directement dans vos templates Vue.
-
-Consultez la [documentation Nuxt UI](https://ui.nuxt.com) pour la liste complète des composants disponibles et leurs options de personnalisation.
-
-### Créer une Nouvelle Route API
-
-1. Créer le controller dans `backend/app/controllers/`
-2. Ajouter la route dans `backend/start/routes.ts`
-3. Créer le validator si nécessaire dans `backend/app/validators/`
-
-### Ajouter une Page Frontend
-
-1. Créer le fichier dans `frontend/app/pages/`
-2. Nuxt 4 gère automatiquement le routing file-based
-
-## 🗃️ Base de Données
-
-### Schéma Principal
-
-**users**
-
-- id, fullName, email, password, role, isOwner
-- organizationId (FK), emailVerified, verificationToken
-- createdAt, updatedAt
-
-**organizations**
-
-- id, name, logo, email
-- createdAt, updatedAt
-
-**invitations**
-
-- id, identifier (UUID), email, organizationId (FK)
-- role, expiresAt, accepted
-- createdAt, updatedAt
-
-**access_tokens**
-
-- id, tokenableId, type, name, hash
-- abilities, expiresAt, createdAt, updatedAt
-
-### Créer une Migration
-
-```bash
-cd backend
-node ace make:migration create_your_table_name
-node ace migration:run
-```
-
-## 🧪 Tests
-
-### Backend (Japa)
-
-```bash
-cd backend
-npm test
-```
-
-### Frontend (Vitest - à configurer)
-
-```bash
-cd frontend
-npm test
-```
-
-## 📦 Déploiement
-
-### Backend
-
-1. Build: `pnpm build`
-2. Configurer les variables d'environnement de production
-3. Exécuter les migrations: `node ace migration:run --force`
-4. Démarrer: `pnpm start`
-
-### Frontend
-
-1. Build: `pnpm build`
-2. Deploy le dossier `.output` sur Vercel/Netlify/votre hébergeur
-
-## 🔧 Scripts Utiles
+## Scripts Utiles
 
 ### Backend
 
@@ -397,8 +212,6 @@ pnpm format          # Prettier
 pnpm typecheck       # TypeScript type checking
 node ace migration:run    # Exécuter les migrations
 node ace migration:rollback  # Rollback dernière migration
-node ace make:controller YourController
-node ace make:model YourModel
 ```
 
 ### Frontend
@@ -410,30 +223,18 @@ pnpm preview         # Preview du build
 pnpm typecheck       # TypeScript type checking
 ```
 
-## 📝 Bonnes Pratiques
+---
 
-1. **Multi-Tenant**: Toujours filtrer les requêtes par `organizationId`
-2. **Sécurité**: Utiliser les policies Bouncer pour les autorisations
-3. **Validation**: Valider toutes les entrées (Zod + VineJS)
-4. **Types**: Utiliser TypeScript strict mode
-5. **Git**: Commits atomiques et conventionnels
+## Architecture Multi-Tenant
 
-## 🤝 Contribuer
+Alexia utilise une architecture multi-tenant où :
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une PR.
-
-## 📄 Licence
-
-Ce projet est sous licence MIT.
-
-## 🆘 Support
-
-Pour toute question ou problème:
-
-1. Vérifier la documentation
-2. Consulter les issues GitHub
-3. Créer une nouvelle issue si nécessaire
+- Chaque utilisateur peut appartenir à **plusieurs organisations**
+- Les données sont isolées par organisation (`currentOrganizationId`)
+- **Rôles** : Owner (propriétaire), Administrator, Member
 
 ---
 
-**Développé avec ❤️ en utilisant Nuxt 3 et AdonisJS v6**
+## Licence
+
+Ce projet est sous licence MIT.
