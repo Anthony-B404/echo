@@ -14,6 +14,8 @@ export enum AudioStatus {
 }
 
 export default class Audio extends BaseModel {
+  public static table = 'audios'
+
   @column({ isPrimary: true })
   declare id: number
 

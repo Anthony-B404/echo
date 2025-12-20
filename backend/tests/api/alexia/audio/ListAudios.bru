@@ -1,0 +1,108 @@
+meta {
+  name: List Audios
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/audios
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept-Language: fr
+}
+
+tests {
+  test("should return paginated list of audios", function() {
+    const data = res.getBody();
+    expect(res.getStatus()).to.equal(200);
+    expect(data).to.have.property('data');
+    expect(data).to.have.property('meta');
+    expect(data.data).to.be.an('array');
+  });
+
+  test("should have pagination meta", function() {
+    const data = res.getBody();
+    expect(data.meta).to.have.property('total');
+    expect(data.meta).to.have.property('perPage');
+    expect(data.meta).to.have.property('currentPage');
+    expect(data.meta).to.have.property('lastPage');
+  });
+
+  test("audio items should have required fields", function() {
+    const data = res.getBody();
+    if (data.data.length > 0) {
+      const audio = data.data[0];
+      expect(audio).to.have.property('id');
+      expect(audio).to.have.property('organizationId');
+      expect(audio).to.have.property('userId');
+      expect(audio).to.have.property('fileName');
+      expect(audio).to.have.property('status');
+      expect(audio).to.have.property('createdAt');
+    }
+  });
+
+  test("status should be valid value", function() {
+    const data = res.getBody();
+    const validStatuses = ['pending', 'processing', 'completed', 'failed'];
+    data.data.forEach(audio => {
+      expect(validStatuses).to.include(audio.status);
+    });
+  });
+}
+
+docs {
+  # List Audios
+
+  Returns a paginated list of audios for the current organization.
+
+  **Query Parameters:**
+  - `page` (optional): Page number (default: 1)
+  - `limit` (optional): Items per page (default: 20, max: 100)
+  - `status` (optional): Filter by status (pending, processing, completed, failed)
+
+  **Response (200):**
+  ```json
+  {
+    "meta": {
+      "total": 25,
+      "perPage": 20,
+      "currentPage": 1,
+      "lastPage": 2,
+      "firstPage": 1,
+      "firstPageUrl": "/?page=1",
+      "lastPageUrl": "/?page=2",
+      "nextPageUrl": "/?page=2",
+      "previousPageUrl": null
+    },
+    "data": [
+      {
+        "id": 1,
+        "organizationId": 1,
+        "userId": 1,
+        "title": "meeting-notes",
+        "fileName": "meeting-notes.mp3",
+        "filePath": "audios/1/uuid.mp3",
+        "fileSize": 1024000,
+        "mimeType": "audio/mpeg",
+        "duration": null,
+        "status": "completed",
+        "errorMessage": null,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+  **Errors:**
+  - 400: No current organization selected
+  - 401: Unauthorized
+  - 402: Subscription ended
+}

@@ -109,6 +109,14 @@ const links = computed(() => {
         },
       },
       {
+        label: t("layouts.default.navigation.workshop"),
+        icon: "i-lucide-audio-waveform",
+        to: localePath("/dashboard/workshop"),
+        onSelect: () => {
+          open.value = false;
+        },
+      },
+      {
         label: t("layouts.default.navigation.settings"),
         to: localePath("/dashboard/settings"),
         icon: "i-lucide-settings",

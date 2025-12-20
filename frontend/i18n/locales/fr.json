@@ -178,7 +178,8 @@
       "display": "Afficher",
       "saveDraft": "Enregistrer le brouillon",
       "buyNow": "Acheter maintenant",
-      "deleteAccount": "Supprimer le compte"
+      "deleteAccount": "Supprimer le compte",
+      "loadMore": "Charger plus"
     },
     "actions": {
       "copy": "Copier",
@@ -429,6 +430,50 @@
         "errorLoadingTitle": "Erreur de chargement des invitations",
         "errorLoadingDescription": "Une erreur est survenue lors du chargement de la liste des invitations"
       }
+    },
+    "workshop": {
+      "upload": {
+        "title": "Glissez-déposez votre fichier audio ici",
+        "description": "ou cliquez pour sélectionner",
+        "formats": "MP3, WAV, M4A, OGG, FLAC - Max {maxSize}",
+        "uploading": "Import en cours...",
+        "invalidFile": "Fichier invalide"
+      },
+      "recorder": {
+        "notSupported": "L'enregistrement audio n'est pas supporté dans ce navigateur",
+        "start": "Démarrer l'enregistrement",
+        "stop": "Arrêter",
+        "use": "Utiliser cet enregistrement",
+        "discard": "Supprimer"
+      },
+      "list": {
+        "title": "Mes audios",
+        "emptyTitle": "Aucun audio",
+        "emptyDescription": "Importez ou enregistrez un fichier audio pour commencer"
+      },
+      "filters": {
+        "all": "Tous",
+        "completed": "Terminés",
+        "processing": "En cours",
+        "failed": "Échoués"
+      },
+      "status": {
+        "pending": "En attente",
+        "processing": "En cours",
+        "completed": "Terminé",
+        "failed": "Échoué"
+      },
+      "processing": {
+        "pending": "En attente de traitement...",
+        "analyzing": "Analyse en cours... {progress}%",
+        "completed": "Traitement terminé",
+        "failed": "Traitement échoué",
+        "errorTitle": "Erreur de traitement"
+      },
+      "deleteModal": {
+        "title": "Supprimer l'audio",
+        "description": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
+      }
     }
   },
   "layouts": {
@@ -438,6 +483,7 @@
         "inbox": "Boîte de réception",
         "customers": "Clients",
         "analyze": "Analyse Audio",
+        "workshop": "Atelier Audio",
         "settings": "Paramètres",
         "feedback": "Commentaires",
         "helpSupport": "Aide & Support"
@@ -479,6 +525,46 @@
         "title": "Boîte de réception",
         "all": "Tous",
         "unread": "Non lus"
+      },
+      "workshop": {
+        "title": "Atelier Audio",
+        "newAudio": "Nouveau fichier audio",
+        "tabs": {
+          "upload": "Importer",
+          "record": "Enregistrer"
+        },
+        "processButton": "Analyser",
+        "uploadSuccess": "Fichier importé",
+        "processingStarted": "Le traitement a commencé",
+        "uploadError": "Erreur d'import",
+        "processingComplete": "Traitement terminé",
+        "processingError": "Erreur de traitement",
+        "deleteSuccess": "Audio supprimé",
+        "deleteError": "Erreur de suppression",
+        "validationError": "Erreur de validation",
+        "fileAndPromptRequired": "Veuillez sélectionner un fichier et entrer des instructions",
+        "detail": {
+          "title": "Détail audio",
+          "notFound": "Audio introuvable",
+          "notFoundDescription": "Ce fichier audio n'existe pas ou a été supprimé",
+          "backToWorkshop": "Retour à l'atelier",
+          "processingInProgress": "Traitement en cours...",
+          "processingComplete": "Traitement terminé",
+          "processingError": "Erreur de traitement",
+          "copiedToClipboard": "Copié dans le presse-papiers",
+          "playerPlaceholder": "Le lecteur audio sera disponible prochainement",
+          "tabs": {
+            "transcription": "Transcription",
+            "analysis": "Analyse"
+          },
+          "language": "Langue",
+          "confidence": "Confiance",
+          "analysisComingSoon": "Analyse à venir",
+          "analysisComingSoonDescription": "La fonctionnalité d'analyse sera disponible prochainement",
+          "noAnalysis": "Pas d'analyse disponible",
+          "noAnalysisDescription": "L'analyse de ce fichier n'a pas encore été générée.",
+          "processingFailed": "Le traitement a échoué"
+        }
       },
       "analyze": {
         "title": "Analyse Audio",

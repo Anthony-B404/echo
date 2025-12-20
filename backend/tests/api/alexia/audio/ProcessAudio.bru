@@ -28,19 +28,26 @@ tests {
     const data = res.getBody();
     expect(res.getStatus()).to.equal(202);
     expect(data).to.have.property('jobId');
+    expect(data).to.have.property('audioId');
     expect(data).to.have.property('statusUrl');
     expect(data).to.have.property('message');
-  
-    // Save jobId for next test
+
+    // Save jobId and audioId for next tests
     bru.setEnvVar("jobId", data.jobId);
+    bru.setEnvVar("audioId", data.audioId);
   });
-  
+
   test("should return valid UUID as jobId", function() {
     const data = res.getBody();
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     expect(data.jobId).to.match(uuidRegex);
   });
-  
+
+  test("should return audioId as number", function() {
+    const data = res.getBody();
+    expect(data.audioId).to.be.a('number');
+  });
+
   test("should return correct statusUrl format", function() {
     const data = res.getBody();
     expect(data.statusUrl).to.include('/audio/status/');

@@ -8,6 +8,7 @@ export interface TranscriptionJobData {
   jobId: string
   userId: number
   organizationId: number
+  audioId: number
   audioFilePath: string
   audioFileName: string
   prompt: string

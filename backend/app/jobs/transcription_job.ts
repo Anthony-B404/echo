@@ -2,6 +2,8 @@ import { Worker, Job } from 'bullmq'
 import queueConfig from '#config/queue'
 import MistralService from '#services/mistral_service'
 import storageService from '#services/storage_service'
+import Audio, { AudioStatus } from '#models/audio'
+import Transcription from '#models/transcription'
 import type { TranscriptionJobData, TranscriptionJobResult } from '#services/queue_service'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -20,9 +22,16 @@ import { randomUUID } from 'node:crypto'
 async function processTranscriptionJob(
   job: Job<TranscriptionJobData, TranscriptionJobResult>
 ): Promise<TranscriptionJobResult> {
-  const { audioFilePath, audioFileName, prompt } = job.data
+  const { audioId, audioFilePath, audioFileName, prompt } = job.data
 
-  console.log(`[Job ${job.id}] Starting transcription for: ${audioFileName}`)
+  console.log(`[Job ${job.id}] Starting transcription for: ${audioFileName} (audioId: ${audioId})`)
+
+  // Load audio record and set status to processing
+  const audio = await Audio.find(audioId)
+  if (audio) {
+    audio.status = AudioStatus.Processing
+    await audio.save()
+  }
 
   // Stage 1: Download file from storage (0-10%)
   await job.updateProgress(5)
@@ -61,10 +70,27 @@ async function processTranscriptionJob(
     await job.updateProgress(90)
     console.log(`[Job ${job.id}] Analysis complete (${analysis.length} chars)`)
 
-    // Stage 4: Cleanup (90-100%)
-    await unlink(tempPath)
-    await job.updateProgress(100)
+    // Save transcription AND analysis to database
+    if (audio) {
+      await Transcription.create({
+        audioId: audio.id,
+        rawText: transcription,
+        language: 'fr', // Default to French, could be detected later
+        analysis: analysis,
+      })
+      console.log(`[Job ${job.id}] Transcription and analysis saved to database`)
+    }
 
+    // Stage 4: Cleanup and finalize (90-100%)
+    await unlink(tempPath)
+
+    // Update audio status to completed
+    if (audio) {
+      audio.status = AudioStatus.Completed
+      await audio.save()
+    }
+
+    await job.updateProgress(100)
     console.log(`[Job ${job.id}] Job completed successfully`)
 
     return {
@@ -72,6 +98,13 @@ async function processTranscriptionJob(
       analysis,
     }
   } catch (error) {
+    // Update audio status to failed
+    if (audio) {
+      audio.status = AudioStatus.Failed
+      audio.errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      await audio.save()
+    }
+
     // Cleanup temp file on error
     try {
       await unlink(tempPath)

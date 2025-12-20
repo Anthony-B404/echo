@@ -1,0 +1,43 @@
+meta {
+  name: Delete Audio - Not Found
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/audios/999999
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept-Language: fr
+}
+
+tests {
+  test("should return 404 for non-existent audio", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("should return error message", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+  });
+}
+
+docs {
+  # Delete Audio - Not Found
+
+  Tests the 404 response when trying to delete a non-existent audio.
+
+  **Response (404):**
+  ```json
+  {
+    "message": "Audio introuvable"
+  }
+  ```
+}

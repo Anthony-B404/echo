@@ -1,6 +1,6 @@
 # Roadmap MVP Alexia - Audio vers Documents Structurés
 
-> **Dernière mise à jour**: 20 Décembre 2024
+> **Dernière mise à jour**: 21 Décembre 2025
 > **Durée estimée**: 6-8 semaines
 
 ## Vue d'ensemble
@@ -121,62 +121,104 @@ backend/app/models/document.ts      # DocumentStatus, DocumentFormat enums
 
 ---
 
-## Phase 2: Upload Audio (Semaine 2-3) ⏳ EN COURS
+## Phase 2: Upload Audio (Semaine 2-3) ✅ COMPLÉTÉ
 
-### 2.1 API Upload ⚠️ PARTIELLEMENT COMPLÉTÉ
+### 2.1 API Upload ✅ COMPLÉTÉ
 
-**Existant (Phase 1.1)**:
+**Routes API implémentées**:
 ```
-✅ POST /audio/process           # Upload + lance transcription async
+✅ POST /audio/process           # Upload + lance transcription async + sauvegarde BDD
 ✅ GET  /audio/status/:jobId     # Polling statut job
-✅ backend/app/controllers/audio_controller.ts  # process() + status()
-✅ backend/app/validators/audio.ts              # Constantes validation
+✅ GET  /audios                  # Liste paginée des audios (org scope)
+✅ GET  /audios/:id              # Détails audio + transcription
+✅ DELETE /audios/:id            # Supprimer audio + fichier
 ```
 
-**À compléter**:
+**Fichiers créés/modifiés**:
 ```
-⬜ POST   /api/audios/upload         # Upload avec sauvegarde BDD
-⬜ GET    /api/audios                # Liste des audios (orga)
-⬜ GET    /api/audios/:id            # Détails audio
-⬜ DELETE /api/audios/:id            # Supprimer audio
+✅ backend/app/controllers/audios_controller.ts  # CRUD complet (index, show, destroy)
+✅ backend/app/policies/audio_policy.ts          # Autorisation multi-tenant
+✅ backend/app/controllers/audio_controller.ts   # Modifié: sauvegarde Audio en BDD
+✅ backend/app/jobs/transcription_job.ts         # Modifié: sauvegarde Transcription en BDD
+✅ backend/app/services/queue_service.ts         # Modifié: ajout audioId dans job data
+✅ backend/app/validators/audio.ts               # Ajout audioIndexValidator (pagination)
+✅ backend/app/models/audio.ts                   # Ajout table = 'audios'
+✅ backend/resources/lang/fr/messages.json       # Messages audio (not_found, deleted, etc.)
+✅ backend/resources/lang/en/messages.json       # Traductions anglaises
+✅ backend/start/routes.ts                       # Nouvelles routes CRUD
 ```
 
-**Fichiers à créer/modifier**:
+**Tests Bruno créés**:
 ```
-⬜ backend/app/controllers/audios_controller.ts  # CRUD complet avec modèle Audio
-⬜ backend/app/policies/audio_policy.ts          # Autorisation multi-tenant
-⬜ Modifier audio_controller.ts                  # Sauvegarder dans table audios
-⬜ Modifier transcription_job.ts                 # Sauvegarder transcription en BDD
+✅ backend/tests/api/alexia/audio/ListAudios.bru
+✅ backend/tests/api/alexia/audio/ListAudiosWithFilter.bru
+✅ backend/tests/api/alexia/audio/GetAudio.bru
+✅ backend/tests/api/alexia/audio/GetAudio-NotFound.bru
+✅ backend/tests/api/alexia/audio/DeleteAudio.bru
+✅ backend/tests/api/alexia/audio/DeleteAudio-NotFound.bru
+✅ backend/tests/api/alexia/audio/ProcessAudio.bru  # Mis à jour: capture audioId
 ```
+
+**Flow complet implémenté**:
+1. ✅ Upload audio via POST /audio/process
+2. ✅ Stockage fichier via StorageService
+3. ✅ Création Audio en BDD (status: pending)
+4. ✅ Ajout job queue avec audioId
+5. ✅ Worker met à jour status → processing
+6. ✅ Transcription Voxtral Small → sauvegarde Transcription en BDD
+7. ✅ Analyse Mistral Large → retour dans job result
+8. ✅ Worker met à jour status → completed/failed
+9. ✅ CRUD audios avec isolation multi-tenant
 
 **Validation** (déjà configurée):
 - Formats acceptés: MP3, WAV, M4A, OGG, FLAC
 - Taille max: 25MB (configurable)
 
-### 2.2 Frontend Upload ⬜ NON COMMENCÉ
-**Pages à créer**:
+### 2.2 Frontend Upload ✅ COMPLÉTÉ
+
+**Pages créées**:
 ```
-⬜ frontend/app/pages/dashboard/workshop/index.vue    # Page principale
-⬜ frontend/app/pages/dashboard/workshop/[id].vue     # Détail audio
+✅ frontend/app/pages/dashboard/workshop/index.vue    # Page principale
+✅ frontend/app/pages/dashboard/workshop/[id].vue     # Détail audio
 ```
 
-**Composants à créer**:
+**Composants créés**:
 ```
 frontend/app/components/workshop/
-  ⬜ AudioUploadZone.vue           # Drag & drop
-  ⬜ AudioRecorder.vue             # Enregistrement micro
-  ⬜ AudioList.vue                 # Liste des audios
-  ⬜ AudioCard.vue                 # Carte audio individuelle
-  ⬜ AudioPlayer.vue               # Lecteur audio
-  ⬜ ProcessingStatus.vue          # Statut traitement
+  ✅ AudioUploadZone.vue           # Drag & drop
+  ✅ AudioRecorder.vue             # Enregistrement micro
+  ✅ AudioList.vue                 # Liste des audios
+  ✅ AudioCard.vue                 # Carte audio individuelle
+  ✅ AudioPlayer.vue               # Lecteur audio
+  ✅ ProcessingStatus.vue          # Statut traitement
+  ✅ AudioDeleteModal.vue          # Modal de confirmation suppression
+  ✅ EmptyState.vue                # État vide de la liste
 ```
 
-**Composables à créer**:
+**Composables créés**:
 ```
-⬜ frontend/app/composables/useAudioUpload.ts
-⬜ frontend/app/composables/useAudioRecorder.ts
-⬜ frontend/app/stores/audio.ts
-⬜ frontend/app/types/audio.ts
+✅ frontend/app/composables/useAudioUpload.ts
+✅ frontend/app/composables/useAudioRecorder.ts
+✅ frontend/app/composables/useAudioPolling.ts    # Polling statut transcription
+✅ frontend/app/composables/useMarkdown.ts        # Rendu markdown des analyses
+✅ frontend/app/stores/audio.ts
+✅ frontend/app/types/audio.ts
+```
+
+**Autres modifications**:
+```
+✅ frontend/app/layouts/default.vue     # Navigation Atelier ajoutée
+✅ frontend/i18n/locales/fr.json        # Traductions FR
+✅ frontend/i18n/locales/en.json        # Traductions EN
+✅ frontend/app/assets/css/main.css     # Styles additionnels
+```
+
+**Backend - Amélioration analyse**:
+```
+✅ backend/database/migrations/1766270576042_add_analysis_to_transcriptions_table.ts
+✅ backend/app/models/transcription.ts  # Champ analysis ajouté
+✅ backend/app/jobs/transcription_job.ts # Sauvegarde analyse en BDD
+✅ backend/app/controllers/audios_controller.ts # Retourne analyse
 ```
 
 ---
@@ -225,13 +267,16 @@ backend/app/listeners/audio_uploaded.ts  # Event listener (optionnel)
 **Flow implémenté**:
 1. ✅ Upload audio via POST /audio/process
 2. ✅ Stockage fichier via StorageService
-3. ✅ Ajout job queue via QueueService
-4. ✅ Worker traite job (transcription_job.ts)
-5. ✅ Appel Voxtral Small API (transcribe)
-6. ✅ Appel Mistral Large API (analyze)
-7. ⬜ Sauvegarde en BDD (nécessite modèles Phase 1.2)
-8. ✅ Progress tracking (0-100%)
-9. ⬜ (Optionnel) Email notification
+3. ✅ Création Audio en BDD (status: pending)
+4. ✅ Ajout job queue via QueueService (avec audioId)
+5. ✅ Worker traite job (transcription_job.ts)
+6. ✅ Mise à jour Audio status → processing
+7. ✅ Appel Voxtral Small API (transcribe)
+8. ✅ Sauvegarde Transcription en BDD
+9. ✅ Appel Mistral Large API (analyze)
+10. ✅ Mise à jour Audio status → completed/failed
+11. ✅ Progress tracking (0-100%)
+12. ⬜ (Optionnel) Email notification
 
 ### 3.3 Frontend Status
 **Composants à modifier**:
@@ -518,17 +563,25 @@ frontend/locales/en.json
 ~~3. **Créer service storage local** - Upload/download depuis `storage/uploads`~~ ✅
 ~~4. **Créer migrations** - Tables `audios`, `transcriptions`, `templates`, `documents`~~ ✅
 ~~5. **Créer modèles Lucid** - Audio, Transcription, Template, Document~~ ✅
+~~6. **Phase 2.1 Backend API** - CRUD audios avec persistance BDD~~ ✅
+   - ~~Créer `audios_controller.ts`~~ ✅
+   - ~~Créer `audio_policy.ts`~~ ✅
+   - ~~Modifier `audio_controller.ts` pour sauvegarder en BDD~~ ✅
+   - ~~Modifier `transcription_job.ts` pour sauvegarder transcription~~ ✅
+   - ~~Ajouter routes GET/DELETE /audios~~ ✅
+   - ~~Créer tests Bruno~~ ✅
 
-### ⏳ En cours (Phase 2.1 - Backend API)
-1. **Créer `audios_controller.ts`** - CRUD complet avec intégration modèle Audio
-2. **Créer `audio_policy.ts`** - Autorisation multi-tenant
-3. **Modifier `audio_controller.ts`** - Sauvegarder audio dans BDD lors du process
-4. **Modifier `transcription_job.ts`** - Sauvegarder transcription dans BDD
-5. **Ajouter routes** - GET /audios, GET /audios/:id, DELETE /audios/:id
+### ✅ Phase 2.2 Complétée - Frontend Workshop
+~~1. **Frontend Workshop** - Page upload avec drag & drop~~ ✅
+~~2. **Composants audio** - Upload, liste, player, status, delete modal, empty state~~ ✅
+~~3. **Store Pinia** - Gestion état audios~~ ✅
+~~4. **Composables** - useAudioUpload, useAudioRecorder, useAudioPolling, useMarkdown~~ ✅
+~~5. **Backend** - Sauvegarde analyse dans transcription~~ ✅
 
-### ⬜ À venir (Phase 2.2 - Frontend)
-6. **Frontend Workshop** - Page upload avec drag & drop
-7. **Composants audio** - Upload, liste, player, status
+### ⏳ Prochaine étape (Phase 3+)
+5. **Templates prédéfinis** - Seeder avec 8 templates métier
+6. **Transformation IA** - Service de transformation transcription → document
+7. **Export PDF/Word** - Services de génération documents
 
 ---
 
@@ -539,27 +592,44 @@ frontend/locales/en.json
 # Phase 1.1 - Infrastructure
 backend/app/services/storage_service.ts      ✅
 backend/app/services/mistral_service.ts      ✅
-backend/app/services/queue_service.ts        ✅
-backend/app/jobs/transcription_job.ts        ✅
-backend/app/controllers/audio_controller.ts  ✅ (process + status)
-backend/app/validators/audio.ts              ✅
+backend/app/services/queue_service.ts        ✅ (modifié Phase 2.1: audioId)
+backend/app/jobs/transcription_job.ts        ✅ (modifié Phase 2.1: save to DB)
+backend/app/controllers/audio_controller.ts  ✅ (modifié Phase 2.1: save Audio)
+backend/app/validators/audio.ts              ✅ (modifié Phase 2.1: audioIndexValidator)
 backend/config/drive.ts                      ✅
 backend/config/queue.ts                      ✅
 backend/start/worker.ts                      ✅
 
 # Phase 1.2 - Modèles
-backend/app/models/audio.ts                  ✅
+backend/app/models/audio.ts                  ✅ (modifié Phase 2.1: table name)
 backend/app/models/transcription.ts          ✅
 backend/app/models/template.ts               ✅
 backend/app/models/document.ts               ✅
+
+# Phase 2.1 - API CRUD Audio
+backend/app/controllers/audios_controller.ts ✅ (index, show, destroy)
+backend/app/policies/audio_policy.ts         ✅ (list, view, update, delete)
+backend/start/routes.ts                      ✅ (nouvelles routes /audios)
+backend/resources/lang/fr/messages.json      ✅ (messages audio)
+backend/resources/lang/en/messages.json      ✅ (messages audio EN)
+
+# Phase 2.1 - Tests Bruno
+backend/tests/api/alexia/audio/ListAudios.bru           ✅
+backend/tests/api/alexia/audio/ListAudiosWithFilter.bru ✅
+backend/tests/api/alexia/audio/GetAudio.bru             ✅
+backend/tests/api/alexia/audio/GetAudio-NotFound.bru    ✅
+backend/tests/api/alexia/audio/DeleteAudio.bru          ✅
+backend/tests/api/alexia/audio/DeleteAudio-NotFound.bru ✅
+
+# Phase 2.2 - Amélioration analyse
+backend/database/migrations/1766270576042_add_analysis_to_transcriptions_table.ts ✅
+backend/app/models/transcription.ts                     ✅ (modifié: champ analysis)
+backend/app/jobs/transcription_job.ts                   ✅ (modifié: sauvegarde analyse)
+backend/app/controllers/audios_controller.ts            ✅ (modifié: retourne analyse)
 ```
 
 ### Backend - ⬜ À créer
 ```
-# Phase 2 - API CRUD
-backend/app/controllers/audios_controller.ts     # CRUD complet
-backend/app/policies/audio_policy.ts             # Autorisation
-
 # Phase 4+ - Templates & Documents
 backend/app/controllers/templates_controller.ts
 backend/app/controllers/documents_controller.ts
@@ -571,22 +641,30 @@ backend/app/services/pdf_service.ts
 backend/app/services/docx_service.ts
 ```
 
+### Frontend - ✅ Phase 2 Créés
+```
+# Phase 2 - Workshop ✅
+frontend/app/pages/dashboard/workshop/index.vue        ✅
+frontend/app/pages/dashboard/workshop/[id].vue         ✅
+frontend/app/components/workshop/AudioUploadZone.vue   ✅
+frontend/app/components/workshop/AudioRecorder.vue     ✅
+frontend/app/components/workshop/AudioList.vue         ✅
+frontend/app/components/workshop/AudioCard.vue         ✅
+frontend/app/components/workshop/AudioPlayer.vue       ✅
+frontend/app/components/workshop/ProcessingStatus.vue  ✅
+frontend/app/components/workshop/AudioDeleteModal.vue  ✅
+frontend/app/components/workshop/EmptyState.vue        ✅
+frontend/app/composables/useAudioUpload.ts             ✅
+frontend/app/composables/useAudioRecorder.ts           ✅
+frontend/app/composables/useAudioPolling.ts            ✅
+frontend/app/composables/useMarkdown.ts                ✅
+frontend/app/stores/audio.ts                           ✅
+frontend/app/types/audio.ts                            ✅
+frontend/app/layouts/default.vue                       ✅ (modifié)
+```
+
 ### Frontend - ⬜ À créer
 ```
-# Phase 2 - Workshop
-frontend/app/pages/dashboard/workshop/index.vue
-frontend/app/pages/dashboard/workshop/[id].vue
-frontend/app/components/workshop/AudioUploadZone.vue
-frontend/app/components/workshop/AudioRecorder.vue
-frontend/app/components/workshop/AudioList.vue
-frontend/app/components/workshop/AudioCard.vue
-frontend/app/components/workshop/AudioPlayer.vue
-frontend/app/components/workshop/ProcessingStatus.vue
-frontend/app/composables/useAudioUpload.ts
-frontend/app/composables/useAudioRecorder.ts
-frontend/app/stores/audio.ts
-frontend/app/types/audio.ts
-
 # Phase 5+ - Templates & Documents
 frontend/app/pages/dashboard/documents/index.vue
 frontend/app/components/workshop/TemplateSelector.vue

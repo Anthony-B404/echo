@@ -1,0 +1,93 @@
+meta {
+  name: Get Audio
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/audios/{{audioId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept-Language: fr
+}
+
+tests {
+  test("should return audio details", function() {
+    const data = res.getBody();
+    expect(res.getStatus()).to.equal(200);
+    expect(data).to.have.property('id');
+    expect(data).to.have.property('organizationId');
+    expect(data).to.have.property('userId');
+    expect(data).to.have.property('fileName');
+    expect(data).to.have.property('filePath');
+    expect(data).to.have.property('fileSize');
+    expect(data).to.have.property('status');
+  });
+
+  test("should include transcription if completed", function() {
+    const data = res.getBody();
+    if (data.status === 'completed') {
+      expect(data).to.have.property('transcription');
+      if (data.transcription) {
+        expect(data.transcription).to.have.property('rawText');
+        expect(data.transcription).to.have.property('language');
+      }
+    }
+  });
+
+  test("audioId should match requested id", function() {
+    const data = res.getBody();
+    const requestedId = parseInt(bru.getEnvVar("audioId"));
+    expect(data.id).to.equal(requestedId);
+  });
+}
+
+docs {
+  # Get Audio Details
+
+  Returns detailed information about a specific audio, including its transcription if available.
+
+  **Prerequisites:**
+  - Must have an audioId from a previous ProcessAudio request
+
+  **Response (200):**
+  ```json
+  {
+    "id": 1,
+    "organizationId": 1,
+    "userId": 1,
+    "title": "meeting-notes",
+    "fileName": "meeting-notes.mp3",
+    "filePath": "audios/1/uuid.mp3",
+    "fileSize": 1024000,
+    "mimeType": "audio/mpeg",
+    "duration": null,
+    "status": "completed",
+    "errorMessage": null,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "transcription": {
+      "id": 1,
+      "audioId": 1,
+      "rawText": "Transcription text...",
+      "language": "fr",
+      "timestamps": null,
+      "confidence": null,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  }
+  ```
+
+  **Errors:**
+  - 401: Unauthorized
+  - 402: Subscription ended
+  - 403: Access denied (audio belongs to different organization)
+  - 404: Audio not found
+}

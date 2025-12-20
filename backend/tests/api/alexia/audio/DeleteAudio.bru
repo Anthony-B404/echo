@@ -1,0 +1,58 @@
+meta {
+  name: Delete Audio
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/audios/{{audioId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Accept-Language: fr
+}
+
+tests {
+  test("should delete audio successfully", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success message", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+  });
+}
+
+docs {
+  # Delete Audio
+
+  Deletes an audio file and its associated transcription.
+
+  **Prerequisites:**
+  - Must have an audioId from a previous ProcessAudio request
+  - Audio must belong to the current organization
+
+  **What gets deleted:**
+  - Audio record from database
+  - Audio file from storage
+  - Associated transcription (cascade delete)
+
+  **Response (200):**
+  ```json
+  {
+    "message": "Audio supprime avec succes"
+  }
+  ```
+
+  **Errors:**
+  - 401: Unauthorized
+  - 402: Subscription ended
+  - 403: Access denied (audio belongs to different organization)
+  - 404: Audio not found
+}

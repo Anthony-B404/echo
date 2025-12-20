@@ -103,12 +103,17 @@
     "member_delete_failed": "Erreur lors du retrait du membre"
   },
   "audio": {
-    "no_file_uploaded": "Aucun fichier audio n'a été uploade",
+    "no_file_uploaded": "Aucun fichier audio n'a été uploadé",
     "invalid_file": "Le fichier audio est invalide",
     "file_upload_error": "Erreur lors de l'upload du fichier",
-    "transcription_empty": "Impossible de transcrire le fichier audio. Veuillez reessayer avec un fichier de meilleure qualite.",
+    "transcription_empty": "Impossible de transcrire le fichier audio. Veuillez réessayer avec un fichier de meilleure qualité.",
     "processing_error": "Une erreur est survenue lors du traitement de l'audio",
-    "processing_started": "Le traitement audio a demarre. Consultez le statut pour suivre la progression.",
-    "job_not_found": "Tache de traitement introuvable"
+    "processing_started": "Le traitement audio a démarré. Consultez le statut pour suivre la progression.",
+    "job_not_found": "Tâche de traitement introuvable",
+    "not_found": "Audio introuvable",
+    "deleted": "Audio supprimé avec succès",
+    "access_denied": "Vous n'avez pas accès à cet audio",
+    "created": "Audio créé avec succès",
+    "file_not_found": "Fichier audio introuvable dans le stockage"
   }
 }

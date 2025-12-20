@@ -33,6 +33,9 @@ export default class Transcription extends BaseModel {
   @column()
   declare confidence: number | null
 
+  @column()
+  declare analysis: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

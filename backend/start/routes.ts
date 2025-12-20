@@ -20,6 +20,7 @@ const BillingController = () => import('#controllers/billing_controller')
 const WebhooksController = () => import('#controllers/webhooks_controller')
 const ContactController = () => import('#controllers/contact_controller')
 const AudioController = () => import('#controllers/audio_controller')
+const AudiosController = () => import('#controllers/audios_controller')
 
 router.get('/', async () => {
   return {
@@ -115,6 +116,12 @@ router
     // Audio analysis routes
     router.post('/audio/process', [AudioController, 'process'])
     router.get('/audio/status/:jobId', [AudioController, 'status'])
+
+    // Audio CRUD routes
+    router.get('/audios', [AudiosController, 'index'])
+    router.get('/audios/:id', [AudiosController, 'show'])
+    router.get('/audios/:id/file', [AudiosController, 'file'])
+    router.delete('/audios/:id', [AudiosController, 'destroy'])
   })
   .use(middleware.auth({ guards: ['api'] }))
   .use(middleware.trialGuard())
