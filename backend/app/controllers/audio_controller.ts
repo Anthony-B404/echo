@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { audioProcessValidator, ALLOWED_AUDIO_EXTENSIONS, MAX_AUDIO_SIZE } from '#validators/audio'
 import QueueService from '#services/queue_service'
 import storageService from '#services/storage_service'
+import Audio, { AudioStatus } from '#models/audio'
 import { errors } from '@vinejs/vine'
 import { randomUUID } from 'node:crypto'
 
@@ -47,6 +48,18 @@ export default class AudioController {
       // Store file in persistent storage
       const storedFile = await storageService.storeAudioFile(audioFile, organizationId)
 
+      // Create Audio record in database
+      const audio = await Audio.create({
+        organizationId,
+        userId: user.id,
+        title: storedFile.originalName.replace(/\.[^/.]+$/, ''), // Remove extension for title
+        fileName: storedFile.originalName,
+        filePath: storedFile.path,
+        fileSize: storedFile.size,
+        mimeType: storedFile.mimeType,
+        status: AudioStatus.Pending,
+      })
+
       // Generate job ID and queue the job
       const jobId = randomUUID()
       const queueService = QueueService.getInstance()
@@ -55,6 +68,7 @@ export default class AudioController {
         jobId,
         userId: user.id,
         organizationId,
+        audioId: audio.id,
         audioFilePath: storedFile.path,
         audioFileName: storedFile.originalName,
         prompt,
@@ -63,6 +77,7 @@ export default class AudioController {
 
       return response.accepted({
         jobId,
+        audioId: audio.id,
         message: i18n.t('messages.audio.processing_started'),
         statusUrl: `/audio/status/${jobId}`,
       })

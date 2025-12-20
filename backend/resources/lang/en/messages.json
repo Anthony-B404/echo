@@ -109,6 +109,10 @@
     "transcription_empty": "Unable to transcribe the audio file. Please try again with a better quality file.",
     "processing_error": "An error occurred while processing the audio",
     "processing_started": "Audio processing has started. Check the status to track progress.",
-    "job_not_found": "Processing job not found"
+    "job_not_found": "Processing job not found",
+    "not_found": "Audio not found",
+    "deleted": "Audio deleted successfully",
+    "access_denied": "You do not have access to this audio",
+    "created": "Audio created successfully"
   }
 }

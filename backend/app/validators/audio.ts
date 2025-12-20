@@ -35,3 +35,14 @@ export const ALLOWED_AUDIO_EXTENSIONS = ['mp3', 'wav', 'm4a', 'ogg', 'flac']
  * Maximum file size in bytes (25MB)
  */
 export const MAX_AUDIO_SIZE = 25 * 1024 * 1024
+
+/**
+ * Validator for audio list (index) request with pagination and filters
+ */
+export const audioIndexValidator = vine.compile(
+  vine.object({
+    page: vine.number().positive().optional(),
+    limit: vine.number().positive().max(100).optional(),
+    status: vine.enum(['pending', 'processing', 'completed', 'failed']).optional(),
+  })
+)
