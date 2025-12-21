@@ -97,6 +97,12 @@ export const useAudioStore = defineStore('audio', {
      * Fetch single audio with transcription
      */
     async fetchAudio(id: number): Promise<Audio | null> {
+      // Validate ID before API call
+      if (!Number.isInteger(id) || id <= 0) {
+        console.warn('fetchAudio called with invalid ID:', id)
+        return null
+      }
+
       this.loading = true
       this.error = null
 

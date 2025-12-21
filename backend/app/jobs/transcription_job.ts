@@ -52,12 +52,14 @@ async function processTranscriptionJob(
     await job.updateProgress(20)
     console.log(`[Job ${job.id}] Starting transcription...`)
 
-    const transcription = await mistralService.transcribe(tempPath, audioFileName)
+    const transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
 
     await job.updateProgress(50)
-    console.log(`[Job ${job.id}] Transcription complete (${transcription.length} chars)`)
+    console.log(
+      `[Job ${job.id}] Transcription complete (${transcriptionResult.text.length} chars, ${transcriptionResult.segments.length} segments)`
+    )
 
-    if (!transcription || transcription.trim() === '') {
+    if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
       throw new Error('Transcription returned empty result')
     }
 
@@ -65,7 +67,7 @@ async function processTranscriptionJob(
     await job.updateProgress(60)
     console.log(`[Job ${job.id}] Starting analysis...`)
 
-    const analysis = await mistralService.analyze(transcription, prompt)
+    const analysis = await mistralService.analyze(transcriptionResult.text, prompt)
 
     await job.updateProgress(90)
     console.log(`[Job ${job.id}] Analysis complete (${analysis.length} chars)`)
@@ -74,8 +76,9 @@ async function processTranscriptionJob(
     if (audio) {
       await Transcription.create({
         audioId: audio.id,
-        rawText: transcription,
-        language: 'fr', // Default to French, could be detected later
+        rawText: transcriptionResult.text,
+        timestamps: transcriptionResult.segments,
+        language: transcriptionResult.language || 'fr',
         analysis: analysis,
       })
       console.log(`[Job ${job.id}] Transcription and analysis saved to database`)
@@ -94,7 +97,7 @@ async function processTranscriptionJob(
     console.log(`[Job ${job.id}] Job completed successfully`)
 
     return {
-      transcription,
+      transcription: transcriptionResult.text,
       analysis,
     }
   } catch (error) {

@@ -100,7 +100,8 @@
     "email_already_used": "Cette adresse email est déjà utilisée",
     "invitation_delete_failed": "Erreur lors de la suppression de l'invitation",
     "user_delete_failed": "Erreur lors de la suppression de l'utilisateur",
-    "member_delete_failed": "Erreur lors du retrait du membre"
+    "member_delete_failed": "Erreur lors du retrait du membre",
+    "invalid_id": "Identifiant invalide"
   },
   "audio": {
     "no_file_uploaded": "Aucun fichier audio n'a été uploadé",

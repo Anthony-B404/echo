@@ -1,6 +1,16 @@
 import { Mistral } from '@mistralai/mistralai'
 import env from '#start/env'
 import { readFile } from 'node:fs/promises'
+import type { TranscriptionTimestamp } from '#models/transcription'
+
+/**
+ * Result of audio transcription with timestamps
+ */
+export interface TranscriptionResult {
+  text: string
+  segments: TranscriptionTimestamp[]
+  language: string | null
+}
 
 export default class MistralService {
   private client: Mistral
@@ -12,9 +22,9 @@ export default class MistralService {
   }
 
   /**
-   * Transcribe audio file using Voxtral model
+   * Transcribe audio file using Voxtral model with timestamps
    */
-  async transcribe(filePath: string, fileName: string): Promise<string> {
+  async transcribe(filePath: string, fileName: string): Promise<TranscriptionResult> {
     const fileBuffer = await readFile(filePath)
     const blob = new Blob([fileBuffer], { type: 'audio/mpeg' })
     const file = new File([blob], fileName)
@@ -22,9 +32,21 @@ export default class MistralService {
     const result = await this.client.audio.transcriptions.complete({
       model: 'voxtral-mini-latest',
       file: file,
+      timestampGranularities: ['segment'],
     })
 
-    return result.text || ''
+    // Map Mistral segments to our TranscriptionTimestamp format
+    const segments: TranscriptionTimestamp[] = (result.segments || []).map((seg) => ({
+      start: seg.start,
+      end: seg.end,
+      text: seg.text,
+    }))
+
+    return {
+      text: result.text || '',
+      segments,
+      language: result.language || null,
+    }
   }
 
   /**

@@ -100,7 +100,8 @@
     "email_already_used": "This email address is already in use",
     "invitation_delete_failed": "Error deleting invitation",
     "user_delete_failed": "Error deleting user",
-    "member_delete_failed": "Error removing member"
+    "member_delete_failed": "Error removing member",
+    "invalid_id": "Invalid ID provided"
   },
   "audio": {
     "no_file_uploaded": "No audio file was uploaded",

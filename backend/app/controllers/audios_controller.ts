@@ -46,7 +46,15 @@ export default class AudiosController {
    * GET /api/audios/:id
    */
   async show({ params, response, bouncer, i18n }: HttpContext) {
-    const audio = await Audio.find(params.id)
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
 
     if (!audio) {
       return response.notFound({
@@ -73,7 +81,15 @@ export default class AudiosController {
    * GET /api/audios/:id/file
    */
   async file({ params, response, bouncer, i18n }: HttpContext) {
-    const audio = await Audio.find(params.id)
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
 
     if (!audio) {
       return response.notFound({
@@ -113,7 +129,15 @@ export default class AudiosController {
    * DELETE /api/audios/:id
    */
   async destroy({ params, response, bouncer, i18n }: HttpContext) {
-    const audio = await Audio.find(params.id)
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
 
     if (!audio) {
       return response.notFound({

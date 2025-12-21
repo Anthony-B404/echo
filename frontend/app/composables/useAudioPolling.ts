@@ -81,20 +81,28 @@ export function useAudioPolling(options: UseAudioPollingOptions = {}) {
 
     // Handle completion
     if (status.status === 'completed') {
+      // Save values before stopPolling nulls them
+      const jobId = currentJobId.value!
+      const audioId = currentAudioId.value!
+
       stopPolling()
-      audioStore.removeJob(currentJobId.value!, currentAudioId.value!)
-      audioStore.updateAudioStatus(currentAudioId.value!, 'completed' as AudioStatus)
+      audioStore.removeJob(jobId, audioId)
+      audioStore.updateAudioStatus(audioId, 'completed' as AudioStatus)
       // Refresh the audio to get transcription
-      await audioStore.fetchAudio(currentAudioId.value!)
+      await audioStore.fetchAudio(audioId)
       onComplete?.(status)
       return
     }
 
     // Handle failure
     if (status.status === 'failed') {
+      // Save values before stopPolling nulls them
+      const jobId = currentJobId.value!
+      const audioId = currentAudioId.value!
+
       stopPolling()
-      audioStore.removeJob(currentJobId.value!, currentAudioId.value!)
-      audioStore.updateAudioStatus(currentAudioId.value!, 'failed' as AudioStatus, status.error)
+      audioStore.removeJob(jobId, audioId)
+      audioStore.updateAudioStatus(audioId, 'failed' as AudioStatus, status.error)
       onError?.(new Error(status.error || 'Processing failed'))
       return
     }

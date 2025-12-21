@@ -27,7 +27,16 @@ export default class Transcription extends BaseModel {
   @column()
   declare language: string
 
-  @column()
+  @column({
+    prepare: (value: TranscriptionTimestamp[] | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: TranscriptionTimestamp[] | string | null) => {
+      if (!value) return null
+      // PostgreSQL with pg driver returns JSONB as objects already
+      if (typeof value === 'object') return value
+      return JSON.parse(value)
+    },
+  })
   declare timestamps: TranscriptionTimestamp[] | null
 
   @column()

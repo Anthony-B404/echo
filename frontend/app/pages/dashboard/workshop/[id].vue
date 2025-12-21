@@ -37,6 +37,15 @@ const deleteModalOpen = ref(false)
 const audioFileUrl = ref<string | null>(null)
 const audioFileLoading = ref(false)
 
+// Audio player ref and current time for segment sync
+const audioPlayerRef = ref<InstanceType<typeof WorkshopAudioPlayer> | null>(null)
+const currentTime = ref(0)
+
+// Check if timestamps are available
+const hasTimestamps = computed(
+  () => (audio.value?.transcription?.timestamps?.length ?? 0) > 0
+)
+
 // Markdown rendering
 const { renderMarkdown } = useMarkdown()
 const renderedTranscription = computed(() =>
@@ -136,6 +145,16 @@ function downloadTranscription() {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+// Handle time update from audio player
+function onTimeUpdate(time: number) {
+  currentTime.value = time
+}
+
+// Handle seek from transcription segment click
+function handleSegmentSeek(time: number) {
+  audioPlayerRef.value?.seekTo(time)
 }
 
 // Format duration
@@ -263,8 +282,10 @@ const tabItems = computed(() => [
             <!-- Audio player -->
             <WorkshopAudioPlayer
               v-if="audioFileUrl"
+              ref="audioPlayerRef"
               :src="audioFileUrl"
               :duration="audio.duration"
+              @timeupdate="onTimeUpdate"
             />
 
             <!-- Status badge for processing -->
@@ -306,7 +327,17 @@ const tabItems = computed(() => [
 
             <!-- Transcription content -->
             <div v-show="activeTab === 'transcription'">
+              <!-- Segments with timestamps (clickable) -->
+              <WorkshopTranscriptionSegments
+                v-if="hasTimestamps"
+                :segments="audio.transcription.timestamps!"
+                :current-time="currentTime"
+                @seek="handleSegmentSeek"
+              />
+
+              <!-- Fallback to markdown for legacy transcriptions -->
               <div
+                v-else
                 class="markdown-content text-sm"
                 v-html="renderedTranscription"
               />

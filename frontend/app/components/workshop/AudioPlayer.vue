@@ -4,6 +4,10 @@ const props = defineProps<{
   duration?: number | null
 }>()
 
+const emit = defineEmits<{
+  (e: 'timeupdate', time: number): void
+}>()
+
 const audioRef = ref<HTMLAudioElement | null>(null)
 const isPlaying = ref(false)
 const currentTime = ref(0)
@@ -36,6 +40,7 @@ function toggleMute() {
 function handleTimeUpdate() {
   if (audioRef.value) {
     currentTime.value = audioRef.value.currentTime
+    emit('timeupdate', currentTime.value)
   }
 }
 
@@ -84,6 +89,12 @@ watch(
     currentTime.value = 0
   }
 )
+
+// Expose methods for parent component
+defineExpose({
+  seekTo: handleSeek,
+  currentTime,
+})
 </script>
 
 <template>
