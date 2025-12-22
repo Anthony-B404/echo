@@ -22,7 +22,7 @@ const ALLOWED_TYPES = [
 
 const ALLOWED_EXTENSIONS = /\.(mp3|wav|m4a|ogg|flac)$/i
 
-const MAX_SIZE = 25 * 1024 * 1024 // 25MB
+const MAX_SIZE = 512 * 1024 * 1024 // 512MB
 
 export function useAudioUpload(options: UseAudioUploadOptions = {}) {
   const { authenticatedFetch } = useAuth()
@@ -47,7 +47,7 @@ export function useAudioUpload(options: UseAudioUploadOptions = {}) {
     if (file.size > MAX_SIZE) {
       return {
         valid: false,
-        error: 'File too large. Maximum size is 25MB',
+        error: 'File too large. Maximum size is 512MB',
       }
     }
 

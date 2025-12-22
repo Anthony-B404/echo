@@ -115,9 +115,12 @@ export default class AudiosController {
     // Stream the file
     const stream = await storageService.getFileStream(audio.filePath)
 
-    // Set appropriate headers
-    response.header('Content-Type', audio.mimeType || 'audio/mpeg')
-    response.header('Content-Disposition', `inline; filename="${audio.fileName}"`)
+    // Set appropriate headers (sanitize values to prevent header injection)
+    const mimeType = audio.mimeType || 'audio/mpeg'
+    const safeFileName = (audio.fileName || 'audio.mp3').replace(/[^\w.-]/g, '_')
+
+    response.header('Content-Type', mimeType)
+    response.header('Content-Disposition', `inline; filename="${safeFileName}"`)
     response.header('Accept-Ranges', 'bytes')
 
     return response.stream(stream)

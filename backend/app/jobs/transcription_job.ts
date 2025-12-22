@@ -1,9 +1,10 @@
 import { Worker, Job } from 'bullmq'
 import queueConfig from '#config/queue'
-import MistralService from '#services/mistral_service'
+import MistralService, { type TranscriptionResult } from '#services/mistral_service'
+import AudioChunkingService, { type ChunkingResult } from '#services/audio_chunking_service'
 import storageService from '#services/storage_service'
 import Audio, { AudioStatus } from '#models/audio'
-import Transcription from '#models/transcription'
+import Transcription, { type TranscriptionTimestamp } from '#models/transcription'
 import type { TranscriptionJobData, TranscriptionJobResult } from '#services/queue_service'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -11,12 +12,101 @@ import { writeFile, unlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 
 /**
- * Process transcription jobs.
+ * Context for merging transcription chunks
+ */
+interface MergeContext {
+  lastEndTime: number
+  segments: TranscriptionTimestamp[]
+  fullText: string
+  language: string | null
+}
+
+/**
+ * Calculate progress percentage for chunk processing
+ * Transcription phase: 10% to 70% (60% range distributed across chunks)
+ */
+function calculateChunkProgress(currentChunk: number, totalChunks: number): number {
+  const TRANSCRIPTION_START = 10
+  const TRANSCRIPTION_END = 70
+  const TRANSCRIPTION_RANGE = TRANSCRIPTION_END - TRANSCRIPTION_START
+
+  const perChunkRange = TRANSCRIPTION_RANGE / totalChunks
+  return Math.round(TRANSCRIPTION_START + (currentChunk + 1) * perChunkRange)
+}
+
+/**
+ * Deduplicate segments in overlap zone
+ * Filters out segments that start before the previous chunk ended
+ */
+function deduplicateOverlap(
+  prevSegments: TranscriptionTimestamp[],
+  nextSegments: TranscriptionTimestamp[]
+): TranscriptionTimestamp[] {
+  if (prevSegments.length === 0 || nextSegments.length === 0) {
+    return nextSegments
+  }
+
+  // Get the end time of previous segments
+  const prevEnd = prevSegments[prevSegments.length - 1]?.end || 0
+
+  // Keep only segments that start at or after where previous chunk ended
+  // This removes any overlapping content regardless of how Mistral segmented it
+  return nextSegments.filter((seg) => seg.start >= prevEnd)
+}
+
+/**
+ * Merge chunk transcription into context with timestamp adjustment
+ */
+function mergeChunkTranscription(
+  context: MergeContext,
+  chunkResult: TranscriptionResult,
+  chunkIndex: number,
+  chunkStartTime: number // Position du chunk dans l'audio original
+): MergeContext {
+  // First chunk: use timestamps as-is
+  if (chunkIndex === 0) {
+    const lastSegment = chunkResult.segments[chunkResult.segments.length - 1]
+    return {
+      lastEndTime: lastSegment?.end || 0,
+      segments: [...chunkResult.segments],
+      fullText: chunkResult.text,
+      language: chunkResult.language,
+    }
+  }
+
+  // Subsequent chunks: use chunk's actual start time in original audio as offset
+  const offset = chunkStartTime
+  const adjustedSegments = chunkResult.segments.map((seg) => ({
+    start: seg.start + offset,
+    end: seg.end + offset,
+    text: seg.text,
+    speaker: seg.speaker,
+  }))
+
+  // Deduplicate segments in overlap zone
+  const deduplicatedSegments = deduplicateOverlap(
+    context.segments,
+    adjustedSegments
+  )
+
+  const newLastEndTime = deduplicatedSegments[deduplicatedSegments.length - 1]?.end || context.lastEndTime
+
+  return {
+    lastEndTime: newLastEndTime,
+    segments: [...context.segments, ...deduplicatedSegments],
+    fullText: context.fullText + ' ' + chunkResult.text.trim(),
+    language: context.language || chunkResult.language,
+  }
+}
+
+/**
+ * Process transcription jobs with chunking support for long audio files.
  *
  * Progress stages:
- * - 0-10%: Downloading file from storage
- * - 10-50%: Transcribing audio with Mistral
- * - 50-90%: Analyzing with AI
+ * - 0-5%: Downloading file from storage
+ * - 5-10%: Getting metadata and chunking if needed
+ * - 10-70%: Transcribing audio chunks with Mistral
+ * - 70-90%: Analyzing with AI
  * - 90-100%: Cleanup and completion
  */
 async function processTranscriptionJob(
@@ -33,28 +123,98 @@ async function processTranscriptionJob(
     await audio.save()
   }
 
-  // Stage 1: Download file from storage (0-10%)
-  await job.updateProgress(5)
+  // Stage 1: Download file from storage (0-5%)
+  await job.updateProgress(2)
 
   const fileBuffer = await storageService.getFileBuffer(audioFilePath)
 
-  // Write to temp file for Mistral API
-  const tempPath = join(tmpdir(), `${randomUUID()}-${audioFileName}`)
+  // Write to temp file for processing
+  const tempDir = tmpdir()
+  const tempPath = join(tempDir, `${randomUUID()}-${audioFileName}`)
   await writeFile(tempPath, fileBuffer)
 
-  await job.updateProgress(10)
+  await job.updateProgress(5)
   console.log(`[Job ${job.id}] File downloaded to temp path`)
 
+  // Initialize chunking service and result tracking
+  const chunkingService = new AudioChunkingService()
+  let chunkingResult: ChunkingResult | null = null
+
   try {
-    // Stage 2: Transcribe audio (10-50%)
+    // Stage 2: Get metadata and chunk if needed (5-10%)
+    await job.updateProgress(7)
+    console.log(`[Job ${job.id}] Analyzing audio metadata...`)
+
+    chunkingResult = await chunkingService.splitIntoChunks(tempPath, tempDir)
+
+    // Update audio duration in database
+    if (audio) {
+      audio.duration = Math.round(chunkingResult.metadata.duration)
+      await audio.save()
+    }
+
+    await job.updateProgress(10)
+
+    if (chunkingResult.needsChunking) {
+      console.log(
+        `[Job ${job.id}] Audio requires chunking: ${chunkingResult.metadata.duration.toFixed(1)}s → ${chunkingResult.chunks.length} chunks`
+      )
+    } else {
+      console.log(
+        `[Job ${job.id}] Audio under threshold: ${chunkingResult.metadata.duration.toFixed(1)}s, no chunking needed`
+      )
+    }
+
+    // Stage 3: Transcribe audio chunks (10-70%)
     const mistralService = new MistralService()
+    let transcriptionResult: TranscriptionResult
 
-    await job.updateProgress(20)
-    console.log(`[Job ${job.id}] Starting transcription...`)
+    if (chunkingResult.needsChunking) {
+      // Process multiple chunks
+      let mergeContext: MergeContext = {
+        lastEndTime: 0,
+        segments: [],
+        fullText: '',
+        language: null,
+      }
 
-    const transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
+      for (let i = 0; i < chunkingResult.chunks.length; i++) {
+        const chunk = chunkingResult.chunks[i]
+        console.log(
+          `[Job ${job.id}] Transcribing chunk ${i + 1}/${chunkingResult.chunks.length} (${chunk.duration.toFixed(1)}s)...`
+        )
 
-    await job.updateProgress(50)
+        const chunkFileName = `chunk_${i}_${audioFileName}`
+        const chunkTranscription = await mistralService.transcribe(chunk.path, chunkFileName)
+
+        console.log(
+          `[Job ${job.id}] Chunk ${i + 1} transcribed: ${chunkTranscription.text.length} chars, ${chunkTranscription.segments.length} segments`
+        )
+
+        // Merge with timestamp adjustment using chunk's position in original audio
+        mergeContext = mergeChunkTranscription(mergeContext, chunkTranscription, i, chunk.startTime)
+
+        // Update progress
+        const progress = calculateChunkProgress(i, chunkingResult.chunks.length)
+        await job.updateProgress(progress)
+      }
+
+      transcriptionResult = {
+        text: mergeContext.fullText.trim(),
+        segments: mergeContext.segments,
+        language: mergeContext.language,
+      }
+
+      console.log(
+        `[Job ${job.id}] All chunks merged: ${transcriptionResult.text.length} chars, ${transcriptionResult.segments.length} total segments`
+      )
+    } else {
+      // Single file transcription (no chunking)
+      console.log(`[Job ${job.id}] Starting transcription...`)
+      transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
+      await job.updateProgress(70)
+    }
+
     console.log(
       `[Job ${job.id}] Transcription complete (${transcriptionResult.text.length} chars, ${transcriptionResult.segments.length} segments)`
     )
@@ -63,8 +223,8 @@ async function processTranscriptionJob(
       throw new Error('Transcription returned empty result')
     }
 
-    // Stage 3: Analyze with AI (50-90%)
-    await job.updateProgress(60)
+    // Stage 4: Analyze with AI (70-90%)
+    await job.updateProgress(75)
     console.log(`[Job ${job.id}] Starting analysis...`)
 
     const analysis = await mistralService.analyze(transcriptionResult.text, prompt)
@@ -84,8 +244,20 @@ async function processTranscriptionJob(
       console.log(`[Job ${job.id}] Transcription and analysis saved to database`)
     }
 
-    // Stage 4: Cleanup and finalize (90-100%)
-    await unlink(tempPath)
+    // Stage 5: Cleanup and finalize (90-100%)
+    await job.updateProgress(95)
+
+    // Cleanup original temp file
+    try {
+      await unlink(tempPath)
+    } catch {
+      // Ignore cleanup errors
+    }
+
+    // Cleanup chunk files if chunking was used
+    if (chunkingResult.needsChunking) {
+      await chunkingService.cleanupChunks(chunkingResult.chunks)
+    }
 
     // Update audio status to completed
     if (audio) {
@@ -114,6 +286,12 @@ async function processTranscriptionJob(
     } catch {
       // Ignore cleanup errors
     }
+
+    // Cleanup chunk files on error
+    if (chunkingResult?.needsChunking) {
+      await chunkingService.cleanupChunks(chunkingResult.chunks)
+    }
+
     console.error(`[Job ${job.id}] Job failed:`, error)
     throw error
   }

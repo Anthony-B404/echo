@@ -32,9 +32,9 @@ export const ALLOWED_AUDIO_TYPES = [
 export const ALLOWED_AUDIO_EXTENSIONS = ['mp3', 'wav', 'm4a', 'ogg', 'flac']
 
 /**
- * Maximum file size in bytes (25MB)
+ * Maximum file size in bytes (512MB)
  */
-export const MAX_AUDIO_SIZE = 25 * 1024 * 1024
+export const MAX_AUDIO_SIZE = 512 * 1024 * 1024
 
 /**
  * Validator for audio list (index) request with pagination and filters

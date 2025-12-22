@@ -58,19 +58,21 @@
     "@adonisjs/bouncer": "^3.1.6",
     "@adonisjs/core": "^6.19.1",
     "@adonisjs/cors": "^2.2.1",
+    "@adonisjs/drive": "^3.4.1",
     "@adonisjs/i18n": "^2.2.3",
     "@adonisjs/lucid": "^21.8.1",
     "@adonisjs/mail": "^9.2.2",
     "@mistralai/mistralai": "^1.11.0",
     "@vinejs/vine": "^4.1.0",
+    "bullmq": "^5.66.2",
     "edge.js": "^6.3.0",
+    "ffmpeg-static": "^5.3.0",
+    "ffprobe-static": "^3.1.0",
+    "ioredis": "^5.8.2",
     "luxon": "^3.7.2",
     "mjml": "^4.16.1",
     "pg": "^8.16.3",
-    "reflect-metadata": "^0.2.2",
-    "@adonisjs/drive": "^3.4.1",
-    "bullmq": "^5.66.2",
-    "ioredis": "^5.8.2"
+    "reflect-metadata": "^0.2.2"
   },
   "hotHook": {
     "boundaries": [
