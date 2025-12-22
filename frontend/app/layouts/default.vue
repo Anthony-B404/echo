@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from "@nuxt/ui";
+import type { NavigationMenuItem, DropdownMenuItem } from "@nuxt/ui";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -11,68 +11,8 @@ const { canAccessOrganization, canAccessBilling } = useSettingsPermissions();
 const open = ref(false);
 const contactModalOpen = ref(false);
 
-const links = computed(() => {
-  // Build settings children based on permissions
-  const settingsChildren: NavigationMenuItem[] = [
-    {
-      label: t("pages.dashboard.settings.navigation.general"),
-      to: localePath("/dashboard/settings"),
-      exact: true,
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-  ];
-
-  // Organization - Owner only
-  if (canAccessOrganization.value) {
-    settingsChildren.push({
-      label: t("pages.dashboard.settings.navigation.organization"),
-      to: localePath("/dashboard/settings/organization"),
-      onSelect: () => {
-        open.value = false;
-      },
-    });
-  }
-
-  // Members - All roles can view
-  settingsChildren.push({
-    label: t("pages.dashboard.settings.navigation.members"),
-    to: localePath("/dashboard/settings/members"),
-    onSelect: () => {
-      open.value = false;
-    },
-  });
-
-  // Notifications - All roles
-  settingsChildren.push({
-    label: t("pages.dashboard.settings.navigation.notifications"),
-    to: localePath("/dashboard/settings/notifications"),
-    onSelect: () => {
-      open.value = false;
-    },
-  });
-
-  // Security - All roles
-  settingsChildren.push({
-    label: t("pages.dashboard.settings.navigation.security"),
-    to: localePath("/dashboard/settings/security"),
-    onSelect: () => {
-      open.value = false;
-    },
-  });
-
-  // Billing - Owner only
-  if (canAccessBilling.value) {
-    settingsChildren.push({
-      label: t("pages.dashboard.settings.navigation.billing"),
-      to: localePath("/dashboard/settings/billing"),
-      onSelect: () => {
-        open.value = false;
-      },
-    });
-  }
-
+// 1. Navigation principale (Gauche Desktop / Haut Mobile)
+const mainLinks = computed<NavigationMenuItem[][]>(() => {
   return [
     [
       {
@@ -83,56 +23,76 @@ const links = computed(() => {
           open.value = false;
         },
       },
-      {
-        label: t("layouts.default.navigation.settings"),
-        to: localePath("/dashboard/settings"),
-        icon: "i-lucide-settings",
-        defaultOpen: true,
-        type: "trigger",
-        children: settingsChildren,
-      },
     ],
-    [
-      {
-        label: t("layouts.default.navigation.feedback"),
-        icon: "i-lucide-message-circle",
-        to: "https://github.com/nuxt-ui-templates/dashboard",
-        target: "_blank",
-      },
-      {
-        label: t("layouts.default.navigation.helpSupport"),
-        icon: "i-lucide-info",
-        onSelect: () => {
-          contactModalOpen.value = true;
-        },
-      },
-    ],
-  ] satisfies NavigationMenuItem[][];
+  ];
 });
 
-const groups = computed(() => [
-  {
-    id: "links",
-    label: t("layouts.default.search.goTo"),
-    items: links.value.flat(),
-  },
-  {
-    id: "code",
-    label: t("layouts.default.search.code"),
-    items: [
-      {
-        id: "source",
-        label: t("layouts.default.search.viewPageSource"),
-        icon: "i-simple-icons-github",
-        to: `https://github.com/nuxt-ui-templates/dashboard/blob/main/app/pages${route.path === "/" ? "/index" : route.path}.vue`,
-        target: "_blank",
+// 2. Items des paramètres (Contenu du Dropdown Droite / Bas Mobile)
+const settingsItems = computed(() => {
+  const items: DropdownMenuItem[] = [
+    {
+      label: t("pages.dashboard.settings.navigation.general"),
+      to: localePath("/dashboard/settings"),
+      icon: "i-lucide-sliders", 
+      onSelect: () => {
+        open.value = false;
       },
-    ],
-  },
-]);
+    },
+  ];
+
+  if (canAccessOrganization.value) {
+    items.push({
+      label: t("pages.dashboard.settings.navigation.organization"),
+      to: localePath("/dashboard/settings/organization"),
+      icon: "i-lucide-building",
+      onSelect: () => {
+        open.value = false;
+      },
+    });
+  }
+
+  items.push({
+    label: t("pages.dashboard.settings.navigation.members"),
+    to: localePath("/dashboard/settings/members"),
+    icon: "i-lucide-users",
+    onSelect: () => {
+      open.value = false;
+    },
+  });
+
+  items.push({
+    label: t("pages.dashboard.settings.navigation.notifications"),
+    to: localePath("/dashboard/settings/notifications"),
+    icon: "i-lucide-bell",
+    onSelect: () => {
+      open.value = false;
+    },
+  });
+
+  items.push({
+    label: t("pages.dashboard.settings.navigation.security"),
+    to: localePath("/dashboard/settings/security"),
+    icon: "i-lucide-shield",
+    onSelect: () => {
+      open.value = false;
+    },
+  });
+
+  if (canAccessBilling.value) {
+    items.push({
+      label: t("pages.dashboard.settings.navigation.billing"),
+      to: localePath("/dashboard/settings/billing"),
+      icon: "i-lucide-credit-card",
+      onSelect: () => {
+        open.value = false;
+      },
+    });
+  }
+
+  return [items];
+});
 
 onMounted(async () => {
-  // Fetch trial status if not already loaded
   if (!trialStore.loaded) {
     await trialStore.fetchTrialStatus();
   }
@@ -166,66 +126,103 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UDashboardGroup unit="rem">
-    <UDashboardSidebar
-      id="default"
-      v-model:open="open"
-      collapsible
-      resizable
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
-    >
-      <template #header="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
-      </template>
+  <div class="relative min-h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
+    <!-- Background Blobs -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <!-- Top Left Blob -->
+      <div 
+        class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-20 blur-3xl bg-gradient-to-br from-indigo-400 to-blue-500 animate-pulse"
+        style="animation-duration: 8s;"
+      ></div>
+      <!-- Bottom Right Blob -->
+      <div 
+        class="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full opacity-15 blur-3xl bg-gradient-to-tl from-indigo-500 to-purple-500 animate-pulse"
+        style="animation-duration: 12s;"
+      ></div>
+    </div>
 
-      <template #default="{ collapsed }">
-        <UDashboardSearchButton
-          :collapsed="collapsed"
-          class="ring-default bg-transparent"
-        />
+    <!-- Top Navigation Bar -->
+    <header class="relative z-50 border-b border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Left Side: Logo + Navigation -->
+          <div class="flex items-center gap-6">
+            <div class="flex-shrink-0 flex items-center">
+              <TeamsMenu />
+            </div>
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[0]"
-          orientation="vertical"
-          tooltip
-          popover
-        />
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex">
+              <UNavigationMenu
+                :items="mainLinks[0]"
+                orientation="horizontal"
+                class="border-none"
+              />
+            </nav>
+          </div>
 
-        <!-- Bottom section: Trial banner + feedback/help links -->
-        <div class="mt-auto">
-          <!-- Trial Banner (only show when on trial and not collapsed) -->
-          <BillingTrialBanner
-            v-if="trialStore.isOnTrial && !collapsed"
-            :days-remaining="trialStore.trialDaysRemaining"
-            :trial-ends-at="trialStore.trialEndsAt"
-          />
+          <!-- Right Side Actions -->
+          <div class="hidden md:flex items-center gap-2">
+            <!-- Settings Dropdown (Icon Only) -->
+            <UDropdownMenu
+              :items="settingsItems"
+              :content="{ align: 'end' }"
+            >
+              <UButton
+                icon="i-lucide-settings"
+                color="neutral"
+                variant="ghost"
+                class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              />
+            </UDropdownMenu>
 
-          <UNavigationMenu
-            :collapsed="collapsed"
-            :items="links[1]"
-            orientation="vertical"
-            tooltip
-          />
+            <UserMenu :collapsed="true" />
+          </div>
+
+          <!-- Mobile menu button (Hamburger) -->
+          <div class="flex md:hidden">
+             <UButton icon="i-lucide-menu" color="neutral" variant="ghost" @click="open = true" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <slot />
+    </main>
+
+    <!-- Global Components -->
+    <BillingAccessBlockedModal v-if="trialStore.loaded && !trialStore.hasAccess" />
+    <ContactSupportModal v-model:open="contactModalOpen" />
+
+    <!-- Mobile Slideover -->
+    <USlideover v-model:open="open" title="Menu">
+      <template #body>
+        <div class="flex flex-col gap-4 h-full">
+           <TeamsMenu />
+           
+           <div class="space-y-4">
+             <div class="font-semibold text-sm text-gray-500 px-2">{{ t("layouts.default.navigation.workshop") }}</div>
+             <UNavigationMenu :items="mainLinks[0]" orientation="vertical" />
+           </div>
+
+           <USeparator />
+
+           <div class="space-y-4">
+             <div class="font-semibold text-sm text-gray-500 px-2">{{ t("layouts.default.navigation.settings") }}</div>
+              <!-- Reusing settingsItems logic for mobile nav -->
+              <UNavigationMenu 
+                :items="settingsItems[0] as any" 
+                orientation="vertical" 
+              />
+           </div>
+
+           <div class="mt-auto">
+              <UserMenu />
+           </div>
         </div>
       </template>
-
-      <template #footer="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
-      </template>
-    </UDashboardSidebar>
-
-    <UDashboardSearch :groups="groups" />
-
-    <slot />
-
-    <NotificationsSlideover />
-
-    <!-- Access blocked modal (shows when trial expired or subscription ended) -->
-    <BillingAccessBlockedModal v-if="trialStore.loaded && !trialStore.hasAccess" />
-
-    <!-- Contact support modal -->
-    <ContactSupportModal v-model:open="contactModalOpen" />
-  </UDashboardGroup>
+    </USlideover>
+  </div>
 </template>

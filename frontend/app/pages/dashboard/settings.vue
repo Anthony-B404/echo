@@ -63,26 +63,33 @@ const links = computed(() => {
 </script>
 
 <template>
-  <UDashboardPanel id="settings" :ui="{ body: 'lg:py-12' }">
-    <template #header>
-      <UDashboardNavbar :title="t('pages.dashboard.settings.title')">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-      </UDashboardNavbar>
-
-      <UDashboardToolbar>
-        <!-- NOTE: The `-mx-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
-        <UNavigationMenu :items="links" highlight class="-mx-1 flex-1" />
-      </UDashboardToolbar>
-    </template>
-
-    <template #body>
-      <div
-        class="mx-auto flex w-full flex-col gap-4 sm:gap-6 lg:max-w-2xl lg:gap-12"
-      >
-        <NuxtPage />
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+         <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <UIcon name="i-lucide-settings-2" class="text-primary-500" />
+            {{ t('pages.dashboard.settings.title') }}
+         </h1>
       </div>
-    </template>
-  </UDashboardPanel>
+      
+      <!-- Navigation Tabs -->
+      <div class="border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
+         <UNavigationMenu 
+            :items="links as any" 
+            orientation="horizontal"
+            class="pb-0"
+            :ui="{ 
+                list: 'gap-4',
+                link: 'pb-3 rounded-none border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-700 hover:bg-transparent px-2 data-[active=true]:border-primary-500 data-[active=true]:text-primary-500 data-[active=true]:font-semibold text-gray-500 dark:text-gray-400'
+            }"
+         />
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="mt-8 max-w-4xl">
+      <NuxtPage />
+    </div>
+  </div>
 </template>

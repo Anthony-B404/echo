@@ -490,6 +490,16 @@
           "processingFailed": "Le traitement a échoué"
         }
       },
+      "analyze": {
+        "promptPlaceholder": "Décrivez ce que vous souhaitez analyser (ex: résumé, points clés...)",
+        "examplesTitle": "Exemples de prompts :",
+        "examples": {
+          "summary": "Résumé audio",
+          "keyPoints": "Points clés",
+          "participants": "Intervenants",
+          "sentiment": "Analyse sentiment"
+        }
+      },
       "settings": {
         "title": "Paramètres",
         "navigation": {

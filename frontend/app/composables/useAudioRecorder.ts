@@ -10,10 +10,18 @@ export function useAudioRecorder() {
     error: null,
   })
 
-  let mediaRecorder: MediaRecorder | null = null
-  let audioChunks: Blob[] = []
-  let durationInterval: ReturnType<typeof setInterval> | null = null
+  // Audio Context & Processor refs
+  let audioContext: AudioContext | null = null
+  let mediaStreamSource: MediaStreamAudioSourceNode | null = null
+  let scriptProcessor: ScriptProcessorNode | null = null
   let stream: MediaStream | null = null
+
+  // Data buffers
+  let leftChannel: Float32Array[] = []
+  let recordingLength = 0
+  let sampleRate = 44100
+
+  let durationInterval: ReturnType<typeof setInterval> | null = null
 
   /**
    * Check if recording is supported
@@ -23,30 +31,10 @@ export function useAudioRecorder() {
     return (
       typeof navigator !== 'undefined' &&
       'mediaDevices' in navigator &&
-      'getUserMedia' in navigator.mediaDevices
+      'getUserMedia' in navigator.mediaDevices &&
+      (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined')
     )
   })
-
-  /**
-   * Get best supported MIME type
-   */
-  function getBestMimeType(): string {
-    if (typeof MediaRecorder === 'undefined') return 'audio/wav'
-
-    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-      return 'audio/webm;codecs=opus'
-    }
-    if (MediaRecorder.isTypeSupported('audio/webm')) {
-      return 'audio/webm'
-    }
-    if (MediaRecorder.isTypeSupported('audio/mp4')) {
-      return 'audio/mp4'
-    }
-    if (MediaRecorder.isTypeSupported('audio/ogg')) {
-      return 'audio/ogg'
-    }
-    return 'audio/wav'
-  }
 
   /**
    * Start recording
@@ -58,6 +46,7 @@ export function useAudioRecorder() {
     }
 
     try {
+      // 1. Get User Media
       stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -66,41 +55,47 @@ export function useAudioRecorder() {
         },
       })
 
-      const mimeType = getBestMimeType()
+      // 2. Init Audio Context
+      const AudioCtor = (window.AudioContext || (window as any).webkitAudioContext)
+      audioContext = new AudioCtor()
+      sampleRate = audioContext.sampleRate
 
-      mediaRecorder = new MediaRecorder(stream, { mimeType })
-      audioChunks = []
+      // 3. Create Source & Processor
+      // Buffer size 4096 = ~92ms latency at 44.1kHz
+      mediaStreamSource = audioContext.createMediaStreamSource(stream)
+      scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1)
+
+      // 4. Reset buffers
+      leftChannel = []
+      recordingLength = 0
       state.duration = 0
       state.error = null
       state.audioBlob = null
       state.audioUrl = null
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.push(event.data)
-        }
+      // 5. Processing logic
+      scriptProcessor.onaudioprocess = (e) => {
+        if (!state.isRecording || state.isPaused) return
+
+        const left = e.inputBuffer.getChannelData(0)
+        // Clone buffer to avoid reference issues
+        leftChannel.push(new Float32Array(left))
+        recordingLength += left.length
       }
 
-      mediaRecorder.onstop = () => {
-        const mimeType = mediaRecorder?.mimeType || 'audio/webm'
-        const blob = new Blob(audioChunks, { type: mimeType })
-        state.audioBlob = blob
-        state.audioUrl = URL.createObjectURL(blob)
-        stopDurationTimer()
-      }
+      // 6. Connect graph
+      mediaStreamSource.connect(scriptProcessor)
+      scriptProcessor.connect(audioContext.destination)
 
-      mediaRecorder.onerror = (event: any) => {
-        state.error = event.error?.message || 'Recording error occurred'
-        stop()
-      }
-
-      mediaRecorder.start(1000) // Collect data every second
+      // Start state
       state.isRecording = true
       state.isPaused = false
       startDurationTimer()
 
       return true
+
     } catch (err: any) {
+      console.error('Recording error:', err)
       if (err.name === 'NotAllowedError') {
         state.error = 'Microphone access denied. Please allow microphone access.'
       } else if (err.name === 'NotFoundError') {
@@ -116,10 +111,12 @@ export function useAudioRecorder() {
    * Pause recording
    */
   function pause() {
-    if (mediaRecorder?.state === 'recording') {
-      mediaRecorder.pause()
+    if (state.isRecording && !state.isPaused) {
       state.isPaused = true
       stopDurationTimer()
+      if (audioContext && audioContext.state === 'running') {
+        audioContext.suspend()
+      }
     }
   }
 
@@ -127,10 +124,12 @@ export function useAudioRecorder() {
    * Resume recording
    */
   function resume() {
-    if (mediaRecorder?.state === 'paused') {
-      mediaRecorder.resume()
+    if (state.isRecording && state.isPaused) {
       state.isPaused = false
       startDurationTimer()
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume()
+      }
     }
   }
 
@@ -138,20 +137,90 @@ export function useAudioRecorder() {
    * Stop recording
    */
   function stop() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop()
-    }
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop())
-      stream = null
-    }
+    if (!state.isRecording) return
+
+    stopDurationTimer()
     state.isRecording = false
     state.isPaused = false
-    stopDurationTimer()
+
+    // Stop streams/processors
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      stream = null
+    }
+
+    if (scriptProcessor && mediaStreamSource) {
+      scriptProcessor.disconnect()
+      mediaStreamSource.disconnect()
+    }
+
+    if (audioContext) {
+      // We don't necessarily need to close, but good practice if single use
+      // audioContext.close(); 
+    }
+
+    // Encode WAV
+    const blob = encodeWAV(leftChannel, recordingLength, sampleRate)
+    state.audioBlob = blob
+    state.audioUrl = URL.createObjectURL(blob)
   }
 
   /**
-   * Reset to initial state
+   * Manual WAV Encoding
+   */
+  function encodeWAV(samples: Float32Array[], totalLength: number, sampleRate: number) {
+    const buffer = new ArrayBuffer(44 + totalLength * 2)
+    const view = new DataView(buffer)
+
+    // Flatten buffers
+    const result = new Float32Array(totalLength)
+    let offset = 0
+    for (let i = 0; i < samples.length; i++) {
+      result.set(samples[i], offset)
+      offset += samples[i].length
+    }
+
+    // Write WAV Header
+    // RIFF chunk descriptor
+    writeString(view, 0, 'RIFF')
+    view.setUint32(4, 36 + totalLength * 2, true)
+    writeString(view, 8, 'WAVE')
+    // fmt sub-chunk
+    writeString(view, 12, 'fmt ')
+    view.setUint32(16, 16, true)
+    view.setUint16(20, 1, true) // PCM (linear quantization)
+    view.setUint16(22, 1, true) // Mono
+    view.setUint32(24, sampleRate, true)
+    view.setUint32(28, sampleRate * 2, true)
+    view.setUint16(32, 2, true)
+    view.setUint16(34, 16, true)
+    // data sub-chunk
+    writeString(view, 36, 'data')
+    view.setUint32(40, totalLength * 2, true)
+
+    // Write PCM samples
+    floatTo16BitPCM(view, 44, result)
+
+    return new Blob([view], { type: 'audio/wav' })
+  }
+
+  function floatTo16BitPCM(output: DataView, offset: number, input: Float32Array) {
+    for (let i = 0; i < input.length; i++, offset += 2) {
+      let s = Math.max(-1, Math.min(1, input[i]))
+      // Convert float to 16-bit PCM
+      // s < 0 ? s * 0x8000 : s * 0x7FFF
+      output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true)
+    }
+  }
+
+  function writeString(view: DataView, offset: number, string: string) {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i))
+    }
+  }
+
+  /**
+   * Reset
    */
   function reset() {
     stop()
@@ -162,12 +231,10 @@ export function useAudioRecorder() {
     state.audioUrl = null
     state.duration = 0
     state.error = null
-    audioChunks = []
+    leftChannel = []
+    recordingLength = 0
   }
 
-  /**
-   * Start duration timer
-   */
   function startDurationTimer() {
     stopDurationTimer()
     durationInterval = setInterval(() => {
@@ -175,9 +242,6 @@ export function useAudioRecorder() {
     }, 1000)
   }
 
-  /**
-   * Stop duration timer
-   */
   function stopDurationTimer() {
     if (durationInterval) {
       clearInterval(durationInterval)
@@ -186,52 +250,35 @@ export function useAudioRecorder() {
   }
 
   /**
-   * Get recorded audio as File
+   * Get file
    */
   function getFile(): File | null {
     if (!state.audioBlob) return null
-
-    const mimeType = state.audioBlob.type
-    let extension = 'webm'
-
-    if (mimeType.includes('mp4')) {
-      extension = 'm4a'
-    } else if (mimeType.includes('ogg')) {
-      extension = 'ogg'
-    } else if (mimeType.includes('wav')) {
-      extension = 'wav'
-    }
-
-    return new File([state.audioBlob], `recording-${Date.now()}.${extension}`, {
-      type: state.audioBlob.type,
+    return new File([state.audioBlob], `recording-${Date.now()}.wav`, {
+      type: 'audio/wav'
     })
   }
 
-  /**
-   * Format duration for display (mm:ss or hh:mm:ss)
-   */
   function formatDuration(seconds: number): string {
     const hours = Math.floor(seconds / 3600)
     const mins = Math.floor((seconds % 3600) / 60)
     const secs = seconds % 60
-
     if (hours > 0) {
       return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     }
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Cleanup on unmount
   onUnmounted(() => {
     reset()
+    if (audioContext) {
+      audioContext.close()
+    }
   })
 
   return {
-    // State
     state: readonly(state),
     isSupported,
-
-    // Methods
     start,
     pause,
     resume,

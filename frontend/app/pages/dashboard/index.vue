@@ -166,120 +166,127 @@ const tabItems = computed(() => [
 
 <template>
   <div>
-    <UDashboardPanel id="workshop">
-    <template #header>
-      <UDashboardNavbar :title="t('pages.dashboard.workshop.title')">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-      </UDashboardNavbar>
-    </template>
+  <div class="space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('pages.dashboard.workshop.title') }}</h1>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Gérez vos fichiers audio et générez des analyses.</p>
+      </div>
+    </div>
 
-    <template #body>
-      <div class="p-6">
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <!-- Left: Upload/Record section -->
-          <div class="space-y-6">
-            <UPageCard
-              :title="t('pages.dashboard.workshop.newAudio')"
-              variant="subtle"
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <!-- Left: Upload/Record section -->
+      <div class="space-y-6">
+        <UCard
+          class="transition-all duration-300 hover:-translate-y-1 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-2 hover:ring-primary-500/50 dark:hover:ring-primary-400/50 shadow-lg hover:shadow-xl dark:shadow-none"
+        >
+          <template #header>
+             <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+               <UIcon name="i-lucide-sparkles" class="text-primary-500" />
+               {{ t('pages.dashboard.workshop.newAudio') }}
+             </h3>
+          </template>
+
+          <!-- Tabs for Upload/Record -->
+          <UTabs v-model="activeTab" :items="tabItems" class="mb-6" />
+
+          <!-- Upload tab -->
+          <div v-show="activeTab === 'upload'">
+            <div v-if="!selectedFile">
+              <WorkshopAudioUploadZone
+                :disabled="uploading"
+                :loading="uploading"
+                @file-selected="handleFileSelected"
+                class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300 rounded-xl bg-gray-50/50 dark:bg-gray-800/20"
+              />
+            </div>
+
+            <!-- Selected file preview -->
+            <div
+              v-else
+              class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 flex items-center gap-4 rounded-xl p-4 shadow-sm"
             >
-              <!-- Tabs for Upload/Record -->
-              <UTabs v-model="activeTab" :items="tabItems" class="mb-6" />
-
-              <!-- Upload tab -->
-              <div v-show="activeTab === 'upload'">
-                <div v-if="!selectedFile">
-                  <WorkshopAudioUploadZone
-                    :disabled="uploading"
-                    :loading="uploading"
-                    @file-selected="handleFileSelected"
-                  />
-                </div>
-
-                <!-- Selected file preview -->
-                <div
-                  v-else
-                  class="bg-elevated border-default flex items-center gap-4 rounded-lg border p-4"
-                >
-                  <div
-                    class="bg-primary/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
-                  >
-                    <UIcon name="i-lucide-music" class="text-primary h-6 w-6" />
-                  </div>
-
-                  <div class="min-w-0 flex-1">
-                    <p class="text-highlighted truncate font-medium">
-                      {{ selectedFile.name }}
-                    </p>
-                    <p class="text-muted text-sm">
-                      {{ formatFileSize(selectedFile.size) }}
-                    </p>
-                  </div>
-
-                  <UButton
-                    icon="i-lucide-x"
-                    color="neutral"
-                    variant="ghost"
-                    size="sm"
-                    :disabled="uploading"
-                    @click="removeFile"
-                  />
-                </div>
+              <div
+                class="bg-primary-100 dark:bg-primary-900/30 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+              >
+                <UIcon name="i-lucide-music" class="text-primary-600 dark:text-primary-400 h-6 w-6" />
               </div>
 
-              <!-- Record tab -->
-              <div v-show="activeTab === 'record'">
-                <WorkshopAudioRecorder
-                  :disabled="uploading"
-                  @recording-complete="handleRecordingComplete"
-                />
+              <div class="min-w-0 flex-1">
+                <p class="text-gray-900 dark:text-white truncate font-medium">
+                  {{ selectedFile.name }}
+                </p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                  {{ formatFileSize(selectedFile.size) }}
+                </p>
               </div>
 
-              <!-- Prompt input -->
-              <div v-if="selectedFile" class="mt-6 space-y-4">
-                <AudioPromptInput v-model="prompt" :disabled="uploading" />
-
-                <!-- Processing status -->
-                <WorkshopProcessingStatus
-                  v-if="uploading || polling"
-                  :status="{
-                    jobId: '',
-                    status: uploading ? 'processing' : 'pending',
-                    progress: progress.percentage,
-                  }"
-                />
-
-                <!-- Submit button -->
-                <UButton
-                  :label="t('pages.dashboard.workshop.processButton')"
-                  icon="i-lucide-sparkles"
-                  color="primary"
-                  size="lg"
-                  block
-                  :loading="uploading"
-                  :disabled="!prompt.trim()"
-                  @click="handleUpload"
-                />
-              </div>
-            </UPageCard>
+              <UButton
+                icon="i-lucide-x"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                :disabled="uploading"
+                @click="removeFile"
+              />
+            </div>
           </div>
 
-          <!-- Right: Audio list -->
-          <div>
-            <WorkshopAudioList
-              :audios="audioStore.audios"
-              :loading="audioStore.loading"
-              @select="handleSelectAudio"
-              @delete="handleDeleteRequest"
-              @load-more="handleLoadMore"
+          <!-- Record tab -->
+          <div v-show="activeTab === 'record'">
+            <WorkshopAudioRecorder
+              :disabled="uploading"
+              @recording-complete="handleRecordingComplete"
             />
           </div>
-        </div>
-      </div>
-    </template>
 
-  </UDashboardPanel>
+          <!-- Prompt input -->
+          <div v-if="selectedFile" class="mt-6 space-y-4">
+            <AudioPromptInput 
+              v-model="prompt" 
+              :disabled="uploading"
+              class="bg-white dark:bg-slate-900" 
+            />
+
+            <!-- Processing status -->
+            <WorkshopProcessingStatus
+              v-if="uploading || polling"
+              :status="{
+                jobId: '',
+                status: uploading ? 'processing' : 'pending',
+                progress: progress.percentage,
+              }"
+            />
+
+            <!-- Submit button -->
+            <UButton
+              :label="t('pages.dashboard.workshop.processButton')"
+              icon="i-lucide-sparkles"
+              color="primary"
+              size="lg"
+              block
+              :loading="uploading"
+              :disabled="!prompt.trim()"
+              class="rounded-xl shadow-md hover:shadow-lg transition-shadow"
+              @click="handleUpload"
+            />
+          </div>
+        </UCard>
+      </div>
+
+      <!-- Right: Audio list -->
+      <div>
+        <WorkshopAudioList
+          :audios="audioStore.audios"
+          :loading="audioStore.loading"
+          @select="handleSelectAudio"
+          @delete="handleDeleteRequest"
+          @load-more="handleLoadMore"
+        />
+      </div>
+    </div>
+  </div>
 
   <!-- Delete modal -->
   <WorkshopAudioDeleteModal
