@@ -1,14 +1,21 @@
 import drive from '@adonisjs/drive/services/main'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
 import { randomUUID } from 'node:crypto'
-import { extname } from 'node:path'
-import { readFile } from 'node:fs/promises'
+import { extname, basename } from 'node:path'
+import { readFile, stat } from 'node:fs/promises'
 
 export interface StoredFileInfo {
   path: string
   originalName: string
   size: number
   mimeType: string
+}
+
+export interface StoreFromPathOptions {
+  /** Original filename to preserve */
+  originalName?: string
+  /** Custom MIME type override */
+  mimeType?: string
 }
 
 /**
@@ -39,6 +46,36 @@ class StorageService {
       originalName: file.clientName,
       size: file.size,
       mimeType: file.type || 'audio/mpeg',
+    }
+  }
+
+  /**
+   * Store audio file from a local path with organization scoping.
+   * Useful for storing converted/processed audio files.
+   * Path format: audios/{organizationId}/{uuid}{ext}
+   */
+  async storeAudioFromPath(
+    filePath: string,
+    organizationId: number,
+    options: StoreFromPathOptions = {}
+  ): Promise<StoredFileInfo> {
+    const ext = extname(filePath)
+    const fileName = `${randomUUID()}${ext}`
+    const storagePath = `audios/${organizationId}/${fileName}`
+
+    const fileBuffer = await readFile(filePath)
+    const fileStats = await stat(filePath)
+    const disk = drive.use()
+    await disk.put(storagePath, fileBuffer)
+
+    const originalName = options.originalName || basename(filePath)
+    const mimeType = options.mimeType || this.getMimeType(ext)
+
+    return {
+      path: storagePath,
+      originalName,
+      size: fileStats.size,
+      mimeType,
     }
   }
 
@@ -125,6 +162,8 @@ class StorageService {
       '.m4a': 'audio/mp4',
       '.ogg': 'audio/ogg',
       '.flac': 'audio/flac',
+      '.opus': 'audio/opus',
+      '.webm': 'audio/webm',
     }
     return mimeTypes[ext.toLowerCase()] || 'application/octet-stream'
   }

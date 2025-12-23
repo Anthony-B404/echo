@@ -2,9 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { audioProcessValidator, ALLOWED_AUDIO_EXTENSIONS, MAX_AUDIO_SIZE } from '#validators/audio'
 import QueueService from '#services/queue_service'
 import storageService from '#services/storage_service'
+import AudioConverterService from '#services/audio_converter_service'
 import Audio, { AudioStatus } from '#models/audio'
 import { errors } from '@vinejs/vine'
 import { randomUUID } from 'node:crypto'
+import app from '@adonisjs/core/services/app'
+import { unlink } from 'node:fs/promises'
 
 export default class AudioController {
   /**
@@ -45,8 +48,30 @@ export default class AudioController {
         })
       }
 
-      // Store file in persistent storage
-      const storedFile = await storageService.storeAudioFile(audioFile, organizationId)
+      // Move uploaded file to temp directory for processing
+      const tempFileName = `${randomUUID()}.${audioFile.extname}`
+      await audioFile.move(app.tmpPath(), { name: tempFileName })
+      const tempFilePath = app.tmpPath(tempFileName)
+
+      // Convert to Opus format for optimal storage
+      const converter = new AudioConverterService()
+      const conversionResult = await converter.convertToOpus(tempFilePath, 'voice')
+
+      // Store converted file in persistent storage
+      const storedFile = await storageService.storeAudioFromPath(
+        conversionResult.path,
+        organizationId,
+        {
+          originalName: audioFile.clientName.replace(/\.[^/.]+$/, '.opus'),
+          mimeType: 'audio/opus',
+        }
+      )
+
+      // Cleanup temp files
+      await Promise.all([
+        unlink(tempFilePath).catch(() => {}),
+        converter.cleanup(conversionResult.path),
+      ])
 
       // Generate job ID first so we can store it with the audio
       const jobId = randomUUID()
@@ -55,11 +80,12 @@ export default class AudioController {
       const audio = await Audio.create({
         organizationId,
         userId: user.id,
-        title: storedFile.originalName.replace(/\.[^/.]+$/, ''), // Remove extension for title
+        title: audioFile.clientName.replace(/\.[^/.]+$/, ''), // Remove extension for title
         fileName: storedFile.originalName,
         filePath: storedFile.path,
         fileSize: storedFile.size,
         mimeType: storedFile.mimeType,
+        duration: Math.round(conversionResult.duration),
         status: AudioStatus.Pending,
         currentJobId: jobId, // Store job ID for progress tracking
       })

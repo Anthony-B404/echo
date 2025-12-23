@@ -116,8 +116,10 @@ export default class AudioChunkingService {
     await mkdir(chunkDir, { recursive: true })
 
     const chunks: ChunkInfo[] = []
-    const ext = extname(filePath) || '.mp3'
-    const baseName = basename(filePath, ext)
+    // Always output as .mp3 since we use libmp3lame codec
+    const inputExt = extname(filePath)
+    const baseName = basename(filePath, inputExt)
+    const outputExt = '.mp3'
 
     let currentStart = 0
     let chunkIndex = 0
@@ -133,7 +135,7 @@ export default class AudioChunkingService {
 
       const chunkPath = join(
         chunkDir,
-        `${CHUNKING_CONFIG.TEMP_CHUNK_PREFIX}${baseName}_${chunkIndex}${ext}`
+        `${CHUNKING_CONFIG.TEMP_CHUNK_PREFIX}${baseName}_${chunkIndex}${outputExt}`
       )
 
       // Use ffmpeg to extract chunk
