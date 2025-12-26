@@ -120,6 +120,23 @@
     "created": "Audio créé avec succès",
     "file_not_found": "Fichier audio introuvable dans le stockage"
   },
+  "export": {
+    "no_transcription": "Aucune transcription disponible pour l'export",
+    "no_analysis": "Aucune analyse disponible pour l'export",
+    "no_content": "Aucun contenu disponible pour l'export",
+    "invalid_format": "Format d'export invalide",
+    "generation_failed": "Erreur lors de la génération du fichier",
+    "document_title": "Transcription Audio",
+    "transcription_section": "Transcription",
+    "analysis_section": "Analyse",
+    "metadata": {
+      "duration": "Durée",
+      "language": "Langue",
+      "confidence": "Confiance",
+      "exported_on": "Exporté le",
+      "filename": "Fichier source"
+    }
+  },
   "prompt": {
     "created": "Prompt créé avec succès",
     "updated": "Prompt mis à jour avec succès",

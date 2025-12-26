@@ -427,6 +427,25 @@
       "deleteModal": {
         "title": "Supprimer l'audio",
         "description": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
+      },
+      "export": {
+        "title": "Exporter",
+        "downloading": "Génération en cours...",
+        "error": "Erreur lors de l'export",
+        "success": "Document téléchargé avec succès",
+        "format": {
+          "label": "Format",
+          "pdf": "Document PDF",
+          "docx": "Document Word",
+          "txt": "Fichier texte",
+          "md": "Markdown"
+        },
+        "content": {
+          "label": "Contenu",
+          "transcription": "Transcription uniquement",
+          "analysis": "Analyse uniquement",
+          "both": "Les deux"
+        }
       }
     }
   },

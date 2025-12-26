@@ -125,6 +125,7 @@ router
     router.get('/audios/:id', [AudiosController, 'show'])
     router.get('/audios/:id/file', [AudiosController, 'file'])
     router.put('/audios/:id', [AudiosController, 'update'])
+    router.post('/audios/:id/export', [AudiosController, 'export'])
     router.delete('/audios/batch', [AudiosController, 'destroyMultiple'])
     router.delete('/audios/:id', [AudiosController, 'destroy'])
 

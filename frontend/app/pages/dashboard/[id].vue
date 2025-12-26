@@ -161,6 +161,17 @@ async function copyTranscription() {
   })
 }
 
+// Copy analysis to clipboard
+async function copyAnalysis() {
+  if (!audio.value?.transcription?.analysis) return
+
+  await navigator.clipboard.writeText(audio.value.transcription.analysis)
+  toast.add({
+    title: t('pages.dashboard.workshop.detail.copiedToClipboard'),
+    color: 'success',
+  })
+}
+
 // Title editing functions
 function startEditingTitle() {
   if (!audio.value) return
@@ -426,8 +437,9 @@ const tabItems = computed(() => [
             <div class="flex items-center justify-between mb-4">
               <UTabs v-model="activeTab" :items="tabItems" />
 
-              <div v-if="activeTab === 'transcription'" class="flex items-center gap-2">
+              <div class="flex items-center gap-2">
                 <UButton
+                  v-if="activeTab === 'transcription'"
                   icon="i-lucide-copy"
                   color="neutral"
                   variant="ghost"
@@ -435,11 +447,18 @@ const tabItems = computed(() => [
                   @click="copyTranscription"
                 />
                 <UButton
-                  icon="i-lucide-download"
+                  v-if="activeTab === 'analysis' && audio.transcription?.analysis"
+                  icon="i-lucide-copy"
                   color="neutral"
                   variant="ghost"
                   size="sm"
-                  @click="downloadTranscription"
+                  @click="copyAnalysis"
+                />
+                <WorkshopExportDropdown
+                  :audio-id="audio.id"
+                  :audio-title="audio.title || audio.fileName"
+                  :has-transcription="!!audio.transcription?.rawText"
+                  :has-analysis="!!audio.transcription?.analysis"
                 />
               </div>
             </div>

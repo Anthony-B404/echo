@@ -2,7 +2,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Audio from '#models/audio'
 import AudioPolicy from '#policies/audio_policy'
 import storageService from '#services/storage_service'
-import { audioIndexValidator, audioBatchDeleteValidator, audioUpdateValidator } from '#validators/audio'
+import exportService from '#services/export_service'
+import {
+  audioIndexValidator,
+  audioBatchDeleteValidator,
+  audioUpdateValidator,
+  audioExportValidator,
+} from '#validators/audio'
 
 export default class AudiosController {
   /**
@@ -277,5 +283,65 @@ export default class AudiosController {
       message: i18n.t('messages.audio.batch_deleted', { count: deletedCount }),
       deletedCount,
     })
+  }
+
+  /**
+   * Export audio transcription/analysis to various formats (PDF, DOCX, TXT, MD).
+   *
+   * POST /api/audios/:id/export
+   */
+  async export({ params, request, response, bouncer, i18n }: HttpContext) {
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
+
+    if (!audio) {
+      return response.notFound({
+        message: i18n.t('messages.audio.not_found'),
+      })
+    }
+
+    // Check authorization
+    if (await bouncer.with(AudioPolicy).denies('viewAudio', audio)) {
+      return response.forbidden({
+        message: i18n.t('messages.audio.access_denied'),
+      })
+    }
+
+    // Load transcription relationship
+    await audio.load('transcription')
+
+    // Validate request body
+    const { format, content } = await request.validateUsing(audioExportValidator)
+
+    try {
+      // Generate export
+      const result = await exportService.generate({
+        audio,
+        format,
+        content,
+        i18n,
+      })
+
+      // Set response headers
+      const safeFilename = result.filename.replace(/[^\w.-]/g, '_')
+      response.header('Content-Type', result.mimeType)
+      response.header('Content-Disposition', `attachment; filename="${safeFilename}"`)
+      response.header('Content-Length', result.buffer.length.toString())
+
+      return response.send(result.buffer)
+    } catch (error) {
+      console.error('Export generation failed:', error)
+      return response.internalServerError({
+        message:
+          error instanceof Error ? error.message : i18n.t('messages.export.generation_failed'),
+      })
+    }
   }
 }

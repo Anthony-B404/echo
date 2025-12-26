@@ -67,3 +67,23 @@ export const audioUpdateValidator = vine.compile(
     title: vine.string().trim().minLength(1).maxLength(255),
   })
 )
+
+/**
+ * Export format options
+ */
+export type ExportFormat = 'pdf' | 'docx' | 'txt' | 'md'
+
+/**
+ * Export content options
+ */
+export type ExportContent = 'transcription' | 'analysis' | 'both'
+
+/**
+ * Validator for audio export request
+ */
+export const audioExportValidator = vine.compile(
+  vine.object({
+    format: vine.enum(['pdf', 'docx', 'txt', 'md'] as const),
+    content: vine.enum(['transcription', 'analysis', 'both'] as const),
+  })
+)

@@ -120,6 +120,23 @@
     "created": "Audio created successfully",
     "file_not_found": "Audio file not found in storage"
   },
+  "export": {
+    "no_transcription": "No transcription available for export",
+    "no_analysis": "No analysis available for export",
+    "no_content": "No content available for export",
+    "invalid_format": "Invalid export format",
+    "generation_failed": "Error generating file",
+    "document_title": "Audio Transcription",
+    "transcription_section": "Transcription",
+    "analysis_section": "Analysis",
+    "metadata": {
+      "duration": "Duration",
+      "language": "Language",
+      "confidence": "Confidence",
+      "exported_on": "Exported on",
+      "filename": "Source file"
+    }
+  },
   "prompt": {
     "created": "Prompt created successfully",
     "updated": "Prompt updated successfully",

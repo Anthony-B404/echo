@@ -425,6 +425,25 @@
       "deleteModal": {
         "title": "Delete audio",
         "description": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+      },
+      "export": {
+        "title": "Export",
+        "downloading": "Generating...",
+        "error": "Export error",
+        "success": "Document downloaded successfully",
+        "format": {
+          "label": "Format",
+          "pdf": "PDF Document",
+          "docx": "Word Document",
+          "txt": "Text File",
+          "md": "Markdown"
+        },
+        "content": {
+          "label": "Content",
+          "transcription": "Transcription only",
+          "analysis": "Analysis only",
+          "both": "Both"
+        }
       }
     }
   },
