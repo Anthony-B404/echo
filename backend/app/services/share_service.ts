@@ -57,11 +57,11 @@ class ShareService {
       })
     }
 
-    // Generate PDF with both transcription and analysis
+    // Generate PDF with analysis only (summary)
     const exportResult = await exportService.generate({
       audio,
       format: 'pdf',
-      content: 'both',
+      content: 'analysis',
       i18n,
     })
 
