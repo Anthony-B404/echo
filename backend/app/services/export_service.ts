@@ -173,24 +173,24 @@ class ExportService {
     lines.push('-'.repeat(50))
     lines.push('')
 
-    // Transcription
-    if ((content === 'transcription' || content === 'both') && audio.transcription?.rawText) {
-      lines.push(i18n.t('messages.export.transcription_section').toUpperCase())
-      lines.push('')
-      lines.push(audio.transcription.rawText)
-      lines.push('')
-    }
-
     // Analysis
     if ((content === 'analysis' || content === 'both') && audio.transcription?.analysis) {
-      if (content === 'both') {
-        lines.push('-'.repeat(50))
-        lines.push('')
-      }
       lines.push(i18n.t('messages.export.analysis_section').toUpperCase())
       lines.push('')
       // Strip markdown for plain text
       lines.push(this.stripMarkdown(audio.transcription.analysis))
+      lines.push('')
+    }
+
+    // Transcription
+    if ((content === 'transcription' || content === 'both') && audio.transcription?.rawText) {
+      if (content === 'both') {
+        lines.push('-'.repeat(50))
+        lines.push('')
+      }
+      lines.push(i18n.t('messages.export.transcription_section').toUpperCase())
+      lines.push('')
+      lines.push(audio.transcription.rawText)
       lines.push('')
     }
 
@@ -248,20 +248,20 @@ class ExportService {
     lines.push('---')
     lines.push('')
 
-    // Transcription
-    if ((content === 'transcription' || content === 'both') && audio.transcription?.rawText) {
-      lines.push(`## ${i18n.t('messages.export.transcription_section')}`)
-      lines.push('')
-      lines.push(audio.transcription.rawText)
-      lines.push('')
-    }
-
     // Analysis
     if ((content === 'analysis' || content === 'both') && audio.transcription?.analysis) {
       lines.push(`## ${i18n.t('messages.export.analysis_section')}`)
       lines.push('')
       // Keep markdown formatting for MD export
       lines.push(audio.transcription.analysis)
+      lines.push('')
+    }
+
+    // Transcription
+    if ((content === 'transcription' || content === 'both') && audio.transcription?.rawText) {
+      lines.push(`## ${i18n.t('messages.export.transcription_section')}`)
+      lines.push('')
+      lines.push(audio.transcription.rawText)
       lines.push('')
     }
 

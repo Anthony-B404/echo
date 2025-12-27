@@ -41,12 +41,12 @@ class PdfGeneratorService {
       this.generateHeader(doc, audio, i18n)
       this.generateMetadata(doc, audio, i18n)
 
-      if (content === 'transcription' || content === 'both') {
-        this.generateTranscriptionSection(doc, audio, i18n)
-      }
-
       if (content === 'analysis' || content === 'both') {
         this.generateAnalysisSection(doc, audio, i18n)
+      }
+
+      if (content === 'transcription' || content === 'both') {
+        this.generateTranscriptionSection(doc, audio, i18n)
       }
 
       // Add page numbers and flush all buffered pages

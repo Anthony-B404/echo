@@ -45,14 +45,14 @@ class DocxGeneratorService {
     // Separator
     sections.push(new Paragraph({ spacing: { after: 400 } }))
 
-    // Transcription section
-    if (content === 'transcription' || content === 'both') {
-      sections.push(...this.createTranscriptionSection(audio, i18n))
-    }
-
     // Analysis section
     if (content === 'analysis' || content === 'both') {
       sections.push(...this.createAnalysisSection(audio, i18n))
+    }
+
+    // Transcription section
+    if (content === 'transcription' || content === 'both') {
+      sections.push(...this.createTranscriptionSection(audio, i18n))
     }
 
     const doc = new Document({
