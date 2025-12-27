@@ -9,7 +9,7 @@ const props = defineProps<{
   hasAnalysis: boolean
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const { token } = useAuth()
 const config = useRuntimeConfig()
@@ -92,10 +92,13 @@ async function exportDocument(format: ExportFormat) {
   open.value = false
 
   try {
+    // Note: Using native fetch for blob response (useApi/$fetch auto-parses to JSON)
+    // Accept-Language header added for i18n consistency with useApi pattern
     const response = await fetch(`${config.public.apiUrl}/audios/${props.audioId}/export`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': locale.value,
         'Authorization': `Bearer ${token.value}`,
       },
       body: JSON.stringify({
