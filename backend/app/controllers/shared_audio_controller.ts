@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import shareService from '#services/share_service'
 import exportService from '#services/export_service'
+import storageService from '#services/storage_service'
 
 export default class SharedAudioController {
   /**
@@ -48,12 +49,14 @@ export default class SharedAudioController {
         duration: audio.duration,
         fileSize: audio.fileSize,
         createdAt: audio.createdAt,
+        status: audio.status,
         transcription: audio.transcription
           ? {
               rawText: audio.transcription.rawText,
               analysis: audio.transcription.analysis,
               language: audio.transcription.language,
               confidence: audio.transcription.confidence,
+              timestamps: audio.transcription.timestamps,
             }
           : null,
       },
@@ -113,5 +116,52 @@ export default class SharedAudioController {
         message: i18n.t('messages.export.generation_failed'),
       })
     }
+  }
+
+  /**
+   * Stream shared audio file (public endpoint)
+   * GET /shared/:identifier/audio
+   */
+  public async audio({ response, params, i18n }: HttpContext) {
+    const { identifier } = params
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(identifier)) {
+      return response.badRequest({
+        message: i18n.t('messages.share.invalid_link'),
+      })
+    }
+
+    const share = await shareService.getByIdentifierForExport(identifier)
+
+    if (!share) {
+      return response.notFound({
+        message: i18n.t('messages.share.not_found'),
+      })
+    }
+
+    const audio = share.audio
+
+    // Check if file exists
+    const exists = await storageService.fileExists(audio.filePath)
+    if (!exists) {
+      return response.notFound({
+        message: i18n.t('messages.audio.file_not_found'),
+      })
+    }
+
+    // Stream the file
+    const stream = await storageService.getFileStream(audio.filePath)
+
+    // Set appropriate headers
+    const mimeType = audio.mimeType || 'audio/mpeg'
+    const safeFileName = (audio.fileName || 'audio.mp3').replace(/[^\w.-]/g, '_')
+
+    response.header('Content-Type', mimeType)
+    response.header('Content-Disposition', `inline; filename="${safeFileName}"`)
+    response.header('Accept-Ranges', 'bytes')
+
+    return response.stream(stream)
   }
 }

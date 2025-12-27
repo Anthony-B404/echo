@@ -62,6 +62,7 @@ router.post('/webhooks/lemonsqueezy', [WebhooksController, 'handleLemonSqueezy']
 // Public routes for shared audios (no auth required)
 router.get('/shared/:identifier', [SharedAudioController, 'show'])
 router.get('/shared/:identifier/export', [SharedAudioController, 'export'])
+router.get('/shared/:identifier/audio', [SharedAudioController, 'audio'])
 
 // Protected routes WITHOUT trial guard (always accessible when authenticated)
 router

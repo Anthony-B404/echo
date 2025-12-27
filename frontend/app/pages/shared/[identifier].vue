@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: "default",
+  layout: false,
 });
 
 const route = useRoute();
@@ -21,6 +21,20 @@ const share = computed(() => data.value?.share);
 const audio = computed(() => data.value?.audio);
 
 const activeTab = ref<"transcription" | "analysis">("transcription");
+
+// Audio player ref and current time for segment sync
+const audioPlayerRef = ref<InstanceType<typeof WorkshopAudioPlayer> | null>(null);
+const currentTime = ref(0);
+
+// Audio URL (public endpoint)
+const audioUrl = computed(
+  () => `${runtimeConfig.public.apiUrl}/shared/${identifier.value}/audio`
+);
+
+// Check if timestamps are available
+const hasTimestamps = computed(
+  () => (audio.value?.transcription?.timestamps?.length ?? 0) > 0
+);
 
 // Markdown rendering
 const { renderMarkdown } = useMarkdown();
@@ -70,6 +84,16 @@ async function downloadPdf() {
     `${runtimeConfig.public.apiUrl}/shared/${identifier.value}/export`,
     "_blank",
   );
+}
+
+// Handle time update from audio player
+function onTimeUpdate(time: number) {
+  currentTime.value = time;
+}
+
+// Handle seek from transcription segment click
+function handleSegmentSeek(time: number) {
+  audioPlayerRef.value?.seekTo(time);
 }
 
 useSeoMeta({
@@ -150,6 +174,15 @@ useSeoMeta({
               @click="downloadPdf"
             />
           </div>
+
+          <!-- Audio player -->
+          <WorkshopAudioPlayer
+            v-if="audio.status === 'completed'"
+            ref="audioPlayerRef"
+            :src="audioUrl"
+            :duration="audio.duration"
+            @timeupdate="onTimeUpdate"
+          />
         </UPageCard>
 
         <!-- Transcription/Analysis tabs -->
@@ -160,8 +193,17 @@ useSeoMeta({
 
           <!-- Transcription content -->
           <div v-show="activeTab === 'transcription'">
+            <!-- Segments with timestamps (clickable) -->
+            <WorkshopTranscriptionSegments
+              v-if="hasTimestamps"
+              :segments="audio.transcription.timestamps!"
+              :current-time="currentTime"
+              @seek="handleSegmentSeek"
+            />
+
+            <!-- Fallback to markdown for legacy transcriptions -->
             <div
-              v-if="audio.transcription.rawText"
+              v-else-if="audio.transcription.rawText"
               class="markdown-content text-sm"
               v-html="renderedTranscription"
             />
