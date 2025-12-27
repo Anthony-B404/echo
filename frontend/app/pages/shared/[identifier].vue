@@ -5,6 +5,7 @@ definePageMeta({
 
 const route = useRoute();
 const { t } = useI18n();
+const toast = useToast();
 const runtimeConfig = useRuntimeConfig();
 
 const identifier = computed(() => route.params.identifier as string);
@@ -78,12 +79,31 @@ const senderName = computed(() => {
   return share.value.sharedBy.fullName || share.value.sharedBy.firstName || "";
 });
 
-// Download PDF
-async function downloadPdf() {
-  window.open(
-    `${runtimeConfig.public.apiUrl}/shared/${identifier.value}/export`,
-    "_blank",
-  );
+// Check if current tab content can be copied
+const canCopy = computed(() => {
+  if (activeTab.value === "transcription") {
+    return !!audio.value?.transcription?.rawText;
+  }
+  return !!audio.value?.transcription?.analysis;
+});
+
+// Copy active tab content to clipboard
+async function copyContent() {
+  if (activeTab.value === "transcription") {
+    if (!audio.value?.transcription?.rawText) return;
+    await navigator.clipboard.writeText(audio.value.transcription.rawText);
+    toast.add({
+      title: t("pages.shared.transcriptionCopied"),
+      color: "success",
+    });
+  } else if (activeTab.value === "analysis") {
+    if (!audio.value?.transcription?.analysis) return;
+    await navigator.clipboard.writeText(audio.value.transcription.analysis);
+    toast.add({
+      title: t("pages.shared.analysisCopied"),
+      color: "success",
+    });
+  }
 }
 
 // Handle time update from audio player
@@ -164,15 +184,6 @@ useSeoMeta({
                 </span>
               </div>
             </div>
-
-            <!-- Download PDF button -->
-            <UButton
-              icon="i-lucide-download"
-              color="primary"
-              variant="soft"
-              :label="t('pages.shared.downloadPdf')"
-              @click="downloadPdf"
-            />
           </div>
 
           <!-- Audio player -->
@@ -189,6 +200,23 @@ useSeoMeta({
         <UPageCard v-if="audio.transcription" variant="subtle">
           <div class="mb-4 flex items-center justify-between">
             <UTabs v-model="activeTab" :items="tabItems" />
+
+            <div class="flex items-center gap-2">
+              <UButton
+                icon="i-lucide-copy"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                :disabled="!canCopy"
+                @click="copyContent"
+              />
+              <WorkshopSharedExportDropdown
+                :identifier="identifier"
+                :audio-title="audio.title || audio.fileName"
+                :has-transcription="!!audio.transcription?.rawText"
+                :has-analysis="!!audio.transcription?.analysis"
+              />
+            </div>
           </div>
 
           <!-- Transcription content -->

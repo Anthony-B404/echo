@@ -811,6 +811,8 @@
       "sharedBy": "Shared by {name}",
       "sharedVia": "Shared via Alexia",
       "downloadPdf": "Download PDF",
+      "transcriptionCopied": "Transcription copied to clipboard",
+      "analysisCopied": "Analysis copied to clipboard",
       "tabs": {
         "transcription": "Transcription",
         "analysis": "Analysis"

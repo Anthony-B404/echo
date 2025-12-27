@@ -46,7 +46,13 @@ function handleTimeUpdate() {
 
 function handleLoadedMetadata() {
   if (audioRef.value) {
-    totalDuration.value = audioRef.value.duration
+    const audioDuration = audioRef.value.duration
+    // Use browser duration if valid, otherwise fallback to prop duration
+    if (Number.isFinite(audioDuration) && audioDuration > 0) {
+      totalDuration.value = audioDuration
+    } else if (props.duration && props.duration > 0) {
+      totalDuration.value = props.duration
+    }
   }
 }
 
@@ -87,6 +93,16 @@ watch(
   () => {
     isPlaying.value = false
     currentTime.value = 0
+  }
+)
+
+// Update duration when prop changes (in case it loads after metadata event)
+watch(
+  () => props.duration,
+  (newDuration) => {
+    if (newDuration && newDuration > 0 && (!totalDuration.value || totalDuration.value === 0)) {
+      totalDuration.value = newDuration
+    }
   }
 )
 

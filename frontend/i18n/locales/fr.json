@@ -813,6 +813,8 @@
       "sharedBy": "Partagé par {name}",
       "sharedVia": "Partagé via Alexia",
       "downloadPdf": "Télécharger le PDF",
+      "transcriptionCopied": "Transcription copiée dans le presse-papiers",
+      "analysisCopied": "Analyse copiée dans le presse-papiers",
       "tabs": {
         "transcription": "Transcription",
         "analysis": "Analyse"

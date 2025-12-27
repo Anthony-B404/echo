@@ -64,10 +64,10 @@ export default class SharedAudioController {
   }
 
   /**
-   * Export shared audio as PDF (public endpoint)
-   * GET /shared/:identifier/export
+   * Export shared audio (public endpoint)
+   * GET /shared/:identifier/export?format=pdf&content=both
    */
-  public async export({ response, params, i18n }: HttpContext) {
+  public async export({ response, params, request, i18n }: HttpContext) {
     const { identifier } = params
 
     // Validate UUID format
@@ -88,19 +88,45 @@ export default class SharedAudioController {
 
     const audio = share.audio
 
-    // Check if audio has content to export
-    if (!audio.transcription?.rawText && !audio.transcription?.analysis) {
+    // Get format and content from query params (with defaults for backward compatibility)
+    const format = (request.input('format', 'pdf') as 'pdf' | 'docx' | 'txt' | 'md') || 'pdf'
+    const content =
+      (request.input('content', 'both') as 'transcription' | 'analysis' | 'both') || 'both'
+
+    // Validate format
+    const validFormats = ['pdf', 'docx', 'txt', 'md']
+    if (!validFormats.includes(format)) {
+      return response.badRequest({
+        message: i18n.t('messages.export.invalid_format'),
+      })
+    }
+
+    // Check if audio has content to export based on selected content
+    const hasTranscription = !!audio.transcription?.rawText
+    const hasAnalysis = !!audio.transcription?.analysis
+
+    if (content === 'transcription' && !hasTranscription) {
+      return response.badRequest({
+        message: i18n.t('messages.share.no_content'),
+      })
+    }
+    if (content === 'analysis' && !hasAnalysis) {
+      return response.badRequest({
+        message: i18n.t('messages.share.no_content'),
+      })
+    }
+    if (content === 'both' && !hasTranscription && !hasAnalysis) {
       return response.badRequest({
         message: i18n.t('messages.share.no_content'),
       })
     }
 
     try {
-      // Generate PDF with both transcription and analysis
+      // Generate export with specified format and content
       const result = await exportService.generate({
         audio,
-        format: 'pdf',
-        content: 'both',
+        format,
+        content,
         i18n,
       })
 
