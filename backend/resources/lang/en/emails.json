@@ -66,5 +66,17 @@
     "subject_label": "Subject:",
     "message_label": "Message:",
     "footer": "This email was sent via the application contact form."
+  },
+  "audio_share": {
+    "subject": "{senderName} shared an audio analysis with you",
+    "preview": "{senderName} shared \"{audioTitle}\" with you",
+    "title": "Audio Analysis Shared",
+    "greeting": "Hello",
+    "intro": "{senderName} shared the analysis \"{audioTitle}\" with you.",
+    "button": "View Analysis",
+    "note": "The PDF of the analysis is also attached to this email.",
+    "closing": "Best regards",
+    "footer": "This link allows you to access the analysis without creating an account.",
+    "copyright": "All rights reserved."
   }
 }

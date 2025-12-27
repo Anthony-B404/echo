@@ -446,6 +446,19 @@
           "analysis": "Analyse uniquement",
           "both": "Les deux"
         }
+      },
+      "shareModal": {
+        "title": "Partager par email",
+        "description": "Envoyez l'analyse par email avec le PDF en pièce jointe.",
+        "emailLabel": "Email du destinataire",
+        "emailPlaceholder": "exemple{'@'}email.com",
+        "send": "Envoyer",
+        "success": "Analyse partagée avec succès",
+        "error": "Erreur lors du partage",
+        "validation": {
+          "emailRequired": "L'email est requis",
+          "invalidEmail": "Email invalide"
+        }
       }
     }
   },
@@ -788,6 +801,24 @@
       "subscribe": "S'abonner",
       "logout": "Se déconnecter",
       "error": "Impossible de créer la session de paiement"
+    },
+    "shared": {
+      "seoTitle": "Analyse partagée",
+      "seoDescription": "Consultez l'analyse audio partagée avec vous",
+      "loading": "Chargement...",
+      "notFound": "Lien de partage introuvable",
+      "notFoundDescription": "Ce lien de partage n'existe pas ou a été révoqué.",
+      "sharedBy": "Partagé par {name}",
+      "sharedVia": "Partagé via Alexia",
+      "downloadPdf": "Télécharger le PDF",
+      "tabs": {
+        "transcription": "Transcription",
+        "analysis": "Analyse"
+      },
+      "language": "Langue",
+      "confidence": "Confiance",
+      "noTranscription": "Aucune transcription disponible",
+      "noAnalysis": "Aucune analyse disponible"
     },
     "createOrganization": {
       "seoTitle": "Créer une organisation",

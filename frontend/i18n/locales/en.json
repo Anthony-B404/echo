@@ -444,6 +444,19 @@
           "analysis": "Analysis only",
           "both": "Both"
         }
+      },
+      "shareModal": {
+        "title": "Share by email",
+        "description": "Send the analysis by email with the PDF attached.",
+        "emailLabel": "Recipient email",
+        "emailPlaceholder": "example{'@'}email.com",
+        "send": "Send",
+        "success": "Analysis shared successfully",
+        "error": "Error sharing analysis",
+        "validation": {
+          "emailRequired": "Email is required",
+          "invalidEmail": "Invalid email"
+        }
       }
     }
   },
@@ -786,6 +799,24 @@
       "subscribe": "Subscribe",
       "logout": "Log out",
       "error": "Failed to create checkout session"
+    },
+    "shared": {
+      "seoTitle": "Shared Analysis",
+      "seoDescription": "View the audio analysis shared with you",
+      "loading": "Loading...",
+      "notFound": "Share link not found",
+      "notFoundDescription": "This share link does not exist or has been revoked.",
+      "sharedBy": "Shared by {name}",
+      "sharedVia": "Shared via Alexia",
+      "downloadPdf": "Download PDF",
+      "tabs": {
+        "transcription": "Transcription",
+        "analysis": "Analysis"
+      },
+      "language": "Language",
+      "confidence": "Confidence",
+      "noTranscription": "No transcription available",
+      "noAnalysis": "No analysis available"
     },
     "createOrganization": {
       "seoTitle": "Create Organization",

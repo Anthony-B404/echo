@@ -24,6 +24,8 @@ const AudiosController = () => import('#controllers/audios_controller')
 const PromptsController = () => import('#controllers/prompts_controller')
 const PromptCategoriesController = () => import('#controllers/prompt_categories_controller')
 const CreditsController = () => import('#controllers/credits_controller')
+const AudioSharesController = () => import('#controllers/audio_shares_controller')
+const SharedAudioController = () => import('#controllers/shared_audio_controller')
 
 router.get('/', async () => {
   return {
@@ -56,6 +58,10 @@ router.get('/auth/google/callback', [SocialAuthController, 'googleCallback'])
 
 // Webhook routes (public - signature verified in controller)
 router.post('/webhooks/lemonsqueezy', [WebhooksController, 'handleLemonSqueezy'])
+
+// Public routes for shared audios (no auth required)
+router.get('/shared/:identifier', [SharedAudioController, 'show'])
+router.get('/shared/:identifier/export', [SharedAudioController, 'export'])
 
 // Protected routes WITHOUT trial guard (always accessible when authenticated)
 router
@@ -128,6 +134,11 @@ router
     router.post('/audios/:id/export', [AudiosController, 'export'])
     router.delete('/audios/batch', [AudiosController, 'destroyMultiple'])
     router.delete('/audios/:id', [AudiosController, 'destroy'])
+
+    // Audio share routes
+    router.post('/audios/:id/share', [AudioSharesController, 'share'])
+    router.get('/audios/:id/shares', [AudioSharesController, 'index'])
+    router.delete('/shares/:id', [AudioSharesController, 'destroy'])
 
     // Prompt categories routes
     router.get('/prompt-categories', [PromptCategoriesController, 'index'])

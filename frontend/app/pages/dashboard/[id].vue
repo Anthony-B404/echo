@@ -45,6 +45,7 @@ const isProcessing = computed(
 
 const activeTab = ref<'transcription' | 'analysis'>('transcription')
 const deleteModalOpen = ref(false)
+const shareModalOpen = ref(false)
 const audioFileUrl = ref<string | null>(null)
 const audioFileLoading = ref(false)
 
@@ -342,13 +343,20 @@ const tabItems = computed(() => [
         </button>
       </div>
 
-      <UButton
-        v-if="audio"
-        icon="i-lucide-trash-2"
-        color="error"
-        variant="ghost"
-        @click="deleteModalOpen = true"
-      />
+      <div v-if="audio" class="flex items-center gap-2">
+        <UButton
+          icon="i-lucide-share-2"
+          color="primary"
+          variant="ghost"
+          @click="shareModalOpen = true"
+        />
+        <UButton
+          icon="i-lucide-trash-2"
+          color="error"
+          variant="ghost"
+          @click="deleteModalOpen = true"
+        />
+      </div>
     </div>
 
     <!-- Content (scrollable) -->
@@ -532,6 +540,14 @@ const tabItems = computed(() => [
       v-model:open="deleteModalOpen"
       :audio="audio"
       @confirm="handleDeleteConfirm"
+    />
+
+    <!-- Share modal -->
+    <WorkshopShareModal
+      v-if="audio"
+      v-model:open="shareModalOpen"
+      :audio-id="audio.id"
+      :audio-title="audio.title || audio.fileName"
     />
   </div>
 </template>

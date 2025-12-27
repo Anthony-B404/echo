@@ -66,5 +66,17 @@
     "subject_label": "Sujet :",
     "message_label": "Message :",
     "footer": "Cet email a été envoyé via le formulaire de contact de l'application."
+  },
+  "audio_share": {
+    "subject": "{senderName} vous a partagé une analyse audio",
+    "preview": "{senderName} a partagé « {audioTitle} » avec vous",
+    "title": "Analyse audio partagée",
+    "greeting": "Bonjour",
+    "intro": "{senderName} a partagé l'analyse « {audioTitle} » avec vous.",
+    "button": "Voir l'analyse",
+    "note": "Le PDF de l'analyse est également joint à cet email.",
+    "closing": "Cordialement",
+    "footer": "Ce lien vous permet d'accéder à l'analyse sans créer de compte.",
+    "copyright": "Tous droits réservés."
   }
 }

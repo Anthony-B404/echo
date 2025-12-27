@@ -154,5 +154,13 @@
     "not_found": "Category not found",
     "has_prompts": "Cannot delete a category that contains prompts",
     "reordered": "Categories reordered successfully"
+  },
+  "share": {
+    "sent_success": "Analysis shared successfully",
+    "send_error": "Error sending share",
+    "not_found": "Share link not found",
+    "invalid_link": "Invalid share link",
+    "no_content": "No content to share",
+    "revoked": "Share revoked successfully"
   }
 }

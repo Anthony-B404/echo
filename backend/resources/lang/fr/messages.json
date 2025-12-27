@@ -154,5 +154,13 @@
     "not_found": "Catégorie introuvable",
     "has_prompts": "Impossible de supprimer une catégorie contenant des prompts",
     "reordered": "Catégories réorganisées avec succès"
+  },
+  "share": {
+    "sent_success": "Analyse partagée avec succès",
+    "send_error": "Erreur lors de l'envoi du partage",
+    "not_found": "Lien de partage introuvable",
+    "invalid_link": "Lien de partage invalide",
+    "no_content": "Aucun contenu à partager",
+    "revoked": "Partage révoqué avec succès"
   }
 }
