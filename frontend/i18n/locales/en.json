@@ -511,6 +511,8 @@
           "processingComplete": "Processing complete",
           "processingError": "Processing error",
           "copiedToClipboard": "Copied to clipboard",
+          "transcriptionCopied": "Transcription copied",
+          "analysisCopied": "Analysis copied",
           "playerPlaceholder": "Audio player will be available soon",
           "tabs": {
             "transcription": "Transcription",

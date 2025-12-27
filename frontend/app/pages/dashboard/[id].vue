@@ -151,26 +151,31 @@ async function handleDeleteConfirm() {
   deleteModalOpen.value = false
 }
 
-// Copy transcription to clipboard
-async function copyTranscription() {
-  if (!audio.value?.transcription?.rawText) return
+// Check if current tab content can be copied
+const canCopy = computed(() => {
+  if (activeTab.value === 'transcription') {
+    return !!audio.value?.transcription?.rawText
+  }
+  return !!audio.value?.transcription?.analysis
+})
 
-  await navigator.clipboard.writeText(audio.value.transcription.rawText)
-  toast.add({
-    title: t('pages.dashboard.workshop.detail.copiedToClipboard'),
-    color: 'success',
-  })
-}
-
-// Copy analysis to clipboard
-async function copyAnalysis() {
-  if (!audio.value?.transcription?.analysis) return
-
-  await navigator.clipboard.writeText(audio.value.transcription.analysis)
-  toast.add({
-    title: t('pages.dashboard.workshop.detail.copiedToClipboard'),
-    color: 'success',
-  })
+// Copy active tab content to clipboard
+async function copyContent() {
+  if (activeTab.value === 'transcription') {
+    if (!audio.value?.transcription?.rawText) return
+    await navigator.clipboard.writeText(audio.value.transcription.rawText)
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.transcriptionCopied'),
+      color: 'success',
+    })
+  } else if (activeTab.value === 'analysis') {
+    if (!audio.value?.transcription?.analysis) return
+    await navigator.clipboard.writeText(audio.value.transcription.analysis)
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.analysisCopied'),
+      color: 'success',
+    })
+  }
 }
 
 // Title editing functions
@@ -447,20 +452,12 @@ const tabItems = computed(() => [
 
               <div class="flex items-center gap-2">
                 <UButton
-                  v-if="activeTab === 'transcription'"
                   icon="i-lucide-copy"
                   color="neutral"
                   variant="ghost"
                   size="sm"
-                  @click="copyTranscription"
-                />
-                <UButton
-                  v-if="activeTab === 'analysis' && audio.transcription?.analysis"
-                  icon="i-lucide-copy"
-                  color="neutral"
-                  variant="ghost"
-                  size="sm"
-                  @click="copyAnalysis"
+                  :disabled="!canCopy"
+                  @click="copyContent"
                 />
                 <WorkshopExportDropdown
                   :audio-id="audio.id"

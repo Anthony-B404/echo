@@ -513,6 +513,8 @@
           "processingComplete": "Traitement terminé",
           "processingError": "Erreur de traitement",
           "copiedToClipboard": "Copié dans le presse-papiers",
+          "transcriptionCopied": "Transcription copiée",
+          "analysisCopied": "Analyse copiée",
           "playerPlaceholder": "Le lecteur audio sera disponible prochainement",
           "tabs": {
             "transcription": "Transcription",
