@@ -74,14 +74,7 @@ export default class AudioConverterService {
    * Get audio duration in seconds using ffprobe
    */
   async getDuration(filePath: string): Promise<number> {
-    const args = [
-      '-v',
-      'quiet',
-      '-print_format',
-      'json',
-      '-show_format',
-      filePath,
-    ]
+    const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', filePath]
 
     const { stdout } = await execFileAsync(ffprobePath.path, args)
     const data = JSON.parse(stdout)
@@ -104,10 +97,7 @@ export default class AudioConverterService {
    * @param preset - Opus encoding preset (default: 'voice')
    * @returns Conversion result with paths and size info
    */
-  async convertToOpus(
-    inputPath: string,
-    preset: OpusPreset = 'voice'
-  ): Promise<ConversionResult> {
+  async convertToOpus(inputPath: string, preset: OpusPreset = 'voice'): Promise<ConversionResult> {
     if (!ffmpegPath) {
       throw new Error('ffmpeg-static path not found')
     }

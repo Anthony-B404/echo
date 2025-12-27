@@ -23,7 +23,15 @@ export default class extends BaseSchema {
 
       // Subscription status
       table
-        .enum('status', ['active', 'cancelled', 'expired', 'paused', 'past_due', 'unpaid', 'on_trial'])
+        .enum('status', [
+          'active',
+          'cancelled',
+          'expired',
+          'paused',
+          'past_due',
+          'unpaid',
+          'on_trial',
+        ])
         .defaultTo('active')
         .notNullable()
 

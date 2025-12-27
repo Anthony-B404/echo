@@ -133,10 +133,7 @@ export default class AuthController {
 
         if (firstError) {
           // Traduire le nom du champ
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
 
           // Injecter le nom traduit dans le message d'erreur
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })
@@ -289,10 +286,7 @@ export default class AuthController {
 
         if (firstError) {
           // Traduire le nom du champ
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
 
           // Injecter le nom traduit dans le message d'erreur
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })
@@ -373,10 +367,7 @@ export default class AuthController {
 
         if (firstError) {
           // Traduire le nom du champ
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
 
           // Injecter le nom traduit dans le message d'erreur
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })

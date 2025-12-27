@@ -21,9 +21,7 @@ export default class extends BaseSchema {
       table.text('description').nullable()
 
       // Category for grouping
-      table
-        .enum('category', ['medical', 'legal', 'commercial', 'general'])
-        .notNullable()
+      table.enum('category', ['medical', 'legal', 'commercial', 'general']).notNullable()
 
       // Template structure definition
       table.jsonb('schema').notNullable() // Sections definition

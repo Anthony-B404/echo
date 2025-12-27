@@ -120,21 +120,14 @@ class DocxGeneratorService {
     const rows: TableRow[] = []
 
     // Source file
-    rows.push(
-      this.createMetadataRow(
-        i18n.t('messages.export.metadata.filename'),
-        audio.fileName
-      )
-    )
+    rows.push(this.createMetadataRow(i18n.t('messages.export.metadata.filename'), audio.fileName))
 
     // Duration
     if (audio.duration) {
       const minutes = Math.floor(audio.duration / 60)
       const seconds = Math.round(audio.duration % 60)
       const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`
-      rows.push(
-        this.createMetadataRow(i18n.t('messages.export.metadata.duration'), durationStr)
-      )
+      rows.push(this.createMetadataRow(i18n.t('messages.export.metadata.duration'), durationStr))
     }
 
     // Language

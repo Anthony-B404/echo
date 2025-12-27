@@ -48,9 +48,7 @@ export default class AudiosController {
     // Apply search filter if provided (search in title and fileName)
     if (search) {
       query.where((subQuery) => {
-        subQuery
-          .whereILike('title', `%${search}%`)
-          .orWhereILike('fileName', `%${search}%`)
+        subQuery.whereILike('title', `%${search}%`).orWhereILike('fileName', `%${search}%`)
       })
     }
 

@@ -14,10 +14,7 @@ export default class AudioSharesController {
     const user = auth.user!
 
     // Load the audio
-    const audio = await Audio.query()
-      .where('id', params.id)
-      .preload('transcription')
-      .first()
+    const audio = await Audio.query().where('id', params.id).preload('transcription').first()
 
     if (!audio) {
       return response.notFound({

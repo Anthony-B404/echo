@@ -88,7 +88,10 @@ router
     router.post('/organizations/:id/switch', [OrganizationsController, 'switchOrganization'])
 
     // List accessible organizations (for blocked modal to show switch options)
-    router.get('/organizations/accessible', [OrganizationsController, 'listAccessibleOrganizations'])
+    router.get('/organizations/accessible', [
+      OrganizationsController,
+      'listAccessibleOrganizations',
+    ])
 
     // Billing routes (must work even when trial expired for subscription)
     router.get('/billing/status', [BillingController, 'getSubscriptionStatus'])

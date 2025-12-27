@@ -39,11 +39,13 @@ export const promptCategoryIndexValidator = vine.compile(
  */
 export const promptCategoryReorderValidator = vine.compile(
   vine.object({
-    categories: vine.array(
-      vine.object({
-        id: vine.number().positive(),
-        sortOrder: vine.number().min(0),
-      })
-    ).minLength(1),
+    categories: vine
+      .array(
+        vine.object({
+          id: vine.number().positive(),
+          sortOrder: vine.number().min(0),
+        })
+      )
+      .minLength(1),
   })
 )

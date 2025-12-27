@@ -322,7 +322,10 @@ export default class BillingController {
     }
 
     // Check if subscription has expired
-    if (user.subscription.currentPeriodEnd && user.subscription.currentPeriodEnd.toJSDate() < new Date()) {
+    if (
+      user.subscription.currentPeriodEnd &&
+      user.subscription.currentPeriodEnd.toJSDate() < new Date()
+    ) {
       return response.status(400).json({
         message: i18n.t('messages.billing.cannot_reactivate'),
       })
@@ -334,9 +337,9 @@ export default class BillingController {
         {
           method: 'PATCH',
           headers: {
-            Authorization: `Bearer ${env.get('LEMON_SQUEEZY_API_KEY')}`,
+            'Authorization': `Bearer ${env.get('LEMON_SQUEEZY_API_KEY')}`,
             'Content-Type': 'application/vnd.api+json',
-            Accept: 'application/vnd.api+json',
+            'Accept': 'application/vnd.api+json',
           },
           body: JSON.stringify({
             data: {

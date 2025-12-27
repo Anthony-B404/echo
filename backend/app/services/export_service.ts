@@ -106,11 +106,7 @@ class ExportService {
   /**
    * Generate filename for export
    */
-  private generateFilename(
-    audio: Audio,
-    content: ExportContent,
-    format: ExportFormat
-  ): string {
+  private generateFilename(audio: Audio, content: ExportContent, format: ExportFormat): string {
     // Use title if available, otherwise use original filename without extension
     const baseName = audio.title || audio.fileName.replace(/\.[^/.]+$/, '')
 

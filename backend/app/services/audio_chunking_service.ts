@@ -63,15 +63,7 @@ export default class AudioChunkingService {
    * Get audio metadata using ffprobe
    */
   async getMetadata(filePath: string): Promise<AudioMetadata> {
-    const args = [
-      '-v',
-      'quiet',
-      '-print_format',
-      'json',
-      '-show_format',
-      '-show_streams',
-      filePath,
-    ]
+    const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath]
 
     const { stdout } = await execFileAsync(ffprobePath.path, args)
     const data = JSON.parse(stdout)

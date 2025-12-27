@@ -85,12 +85,10 @@ function mergeChunkTranscription(
   }))
 
   // Deduplicate segments in overlap zone
-  const deduplicatedSegments = deduplicateOverlap(
-    context.segments,
-    adjustedSegments
-  )
+  const deduplicatedSegments = deduplicateOverlap(context.segments, adjustedSegments)
 
-  const newLastEndTime = deduplicatedSegments[deduplicatedSegments.length - 1]?.end || context.lastEndTime
+  const newLastEndTime =
+    deduplicatedSegments[deduplicatedSegments.length - 1]?.end || context.lastEndTime
 
   return {
     lastEndTime: newLastEndTime,
@@ -170,7 +168,9 @@ async function processTranscriptionJob(
     const durationMinutes = Math.ceil(chunkingResult.metadata.duration / 60)
     const creditsNeeded = Math.max(1, durationMinutes) // Minimum 1 credit
 
-    console.log(`[Job ${job.id}] Credits needed: ${creditsNeeded} (${chunkingResult.metadata.duration.toFixed(1)}s)`)
+    console.log(
+      `[Job ${job.id}] Credits needed: ${creditsNeeded} (${chunkingResult.metadata.duration.toFixed(1)}s)`
+    )
 
     // Load user and check credits
     const user = await User.find(job.data.userId)
@@ -186,7 +186,9 @@ async function processTranscriptionJob(
         audio.currentJobId = null
         await audio.save()
       }
-      throw new Error(`Insufficient credits. Required: ${creditsNeeded}, Available: ${user.credits}`)
+      throw new Error(
+        `Insufficient credits. Required: ${creditsNeeded}, Available: ${user.credits}`
+      )
     }
 
     // Deduct credits

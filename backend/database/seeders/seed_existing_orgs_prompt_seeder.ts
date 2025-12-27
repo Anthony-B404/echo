@@ -17,10 +17,14 @@ export default class extends BaseSeeder {
 
       if (wasSeeded) {
         seededCount++
-        console.log(`✓ Seeded prompts for organization: ${organization.name} (ID: ${organization.id})`)
+        console.log(
+          `✓ Seeded prompts for organization: ${organization.name} (ID: ${organization.id})`
+        )
       } else {
         skippedCount++
-        console.log(`- Skipped organization: ${organization.name} (ID: ${organization.id}) - already has prompts`)
+        console.log(
+          `- Skipped organization: ${organization.name} (ID: ${organization.id}) - already has prompts`
+        )
       }
     }
 

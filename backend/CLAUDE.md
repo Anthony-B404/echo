@@ -204,18 +204,18 @@ export enum UserRole {
 ```typescript
 // MemberPolicy - Granular member management permissions
 manageMember(user, targetUser, organizationId)
-  // Owner: can manage anyone (except themselves)
-  // Admin: can only manage Members (not Owner, other Admins, or themselves)
-  // Member: cannot manage anyone
+// Owner: can manage anyone (except themselves)
+// Admin: can only manage Members (not Owner, other Admins, or themselves)
+// Member: cannot manage anyone
 
 changeRole(user, targetUser, organizationId, newRole)
-  // Owner: can change any role (except to Owner)
-  // Admin: can only change Member's role
-  // Member: cannot change roles
-  // Nobody can change their own role or assign Owner role
+// Owner: can change any role (except to Owner)
+// Admin: can only change Member's role
+// Member: cannot change roles
+// Nobody can change their own role or assign Owner role
 
 deleteMember(user, targetUser, organizationId)
-  // Same rules as manageMember
+// Same rules as manageMember
 ```
 
 ### Organization Management
@@ -308,9 +308,11 @@ Protects routes that require active trial or subscription:
 
 ```typescript
 // In routes
-router.group(() => {
-  // Protected routes here
-}).middleware([middleware.trialGuard()])
+router
+  .group(() => {
+    // Protected routes here
+  })
+  .middleware([middleware.trialGuard()])
 
 // Middleware behavior:
 // 1. If Owner: checks own hasAccess()
@@ -322,29 +324,31 @@ router.group(() => {
 
 ```typescript
 // Get subscription status
-GET /api/billing/status
+GET / api / billing / status
 
 // Create checkout session
-POST /api/billing/checkout
+POST / api / billing / checkout
 // Body: { billingName?: string }
 // Returns: { checkoutUrl: string }
 
 // Cancel subscription
-POST /api/billing/cancel
+POST / api / billing / cancel
 
 // Reactivate cancelled subscription
-POST /api/billing/reactivate
+POST / api / billing / reactivate
 ```
 
 ### Checkout Localization
 
 Checkout URLs automatically include billing country based on user locale:
+
 - `fr` → France
 - `en` → US (default)
 
 ### Webhook Handling (WebhooksController)
 
 Lemon Squeezy webhooks sync subscription status:
+
 - `subscription_created` → Creates/updates Subscription record
 - `subscription_updated` → Updates status, card info, period end
 - Validates webhook signature with `LEMON_SQUEEZY_WEBHOOK_SECRET`

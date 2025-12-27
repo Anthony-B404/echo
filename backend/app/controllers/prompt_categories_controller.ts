@@ -93,7 +93,9 @@ export default class PromptCategoriesController {
     }
 
     // Validate request body
-    const { name, description, color, icon } = await request.validateUsing(createPromptCategoryValidator)
+    const { name, description, color, icon } = await request.validateUsing(
+      createPromptCategoryValidator
+    )
 
     // Get the max sort order for the organization
     const maxSortOrder = await PromptCategory.query()
@@ -148,7 +150,9 @@ export default class PromptCategoriesController {
     }
 
     // Validate request body
-    const { name, description, color, icon, sortOrder } = await request.validateUsing(updatePromptCategoryValidator)
+    const { name, description, color, icon, sortOrder } = await request.validateUsing(
+      updatePromptCategoryValidator
+    )
 
     // Update category fields
     if (name !== undefined) category.name = name
@@ -226,7 +230,9 @@ export default class PromptCategoriesController {
     }
 
     // Validate request body
-    const { categories: categoriesToReorder } = await request.validateUsing(promptCategoryReorderValidator)
+    const { categories: categoriesToReorder } = await request.validateUsing(
+      promptCategoryReorderValidator
+    )
 
     // Fetch all categories to reorder (only from user's current organization)
     const categoryIds = categoriesToReorder.map((c) => c.id)

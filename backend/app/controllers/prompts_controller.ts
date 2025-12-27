@@ -56,9 +56,7 @@ export default class PromptsController {
     // Apply search filter if provided (search in title and content)
     if (search) {
       query.where((subQuery) => {
-        subQuery
-          .whereILike('title', `%${search}%`)
-          .orWhereILike('content', `%${search}%`)
+        subQuery.whereILike('title', `%${search}%`).orWhereILike('content', `%${search}%`)
       })
     }
 
@@ -122,7 +120,8 @@ export default class PromptsController {
     }
 
     // Validate request body
-    const { title, content, categoryId, isFavorite } = await request.validateUsing(createPromptValidator)
+    const { title, content, categoryId, isFavorite } =
+      await request.validateUsing(createPromptValidator)
 
     // If categoryId is provided, verify it belongs to the same organization
     if (categoryId) {
@@ -193,7 +192,8 @@ export default class PromptsController {
     }
 
     // Validate request body
-    const { title, content, categoryId, isFavorite, sortOrder } = await request.validateUsing(updatePromptValidator)
+    const { title, content, categoryId, isFavorite, sortOrder } =
+      await request.validateUsing(updatePromptValidator)
 
     // If categoryId is provided, verify it belongs to the same organization
     if (categoryId !== undefined && categoryId !== null) {

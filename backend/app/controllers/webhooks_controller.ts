@@ -113,7 +113,9 @@ export default class WebhooksController {
       lemonSqueezyCustomerId: String(subscriptionData.customer_id),
       lemonSqueezyVariantId: String(subscriptionData.variant_id),
       status: status,
-      currentPeriodEnd: subscriptionData.renews_at ? DateTime.fromISO(subscriptionData.renews_at) : null,
+      currentPeriodEnd: subscriptionData.renews_at
+        ? DateTime.fromISO(subscriptionData.renews_at)
+        : null,
     })
 
     // End trial period now that user has a subscription
@@ -135,7 +137,10 @@ export default class WebhooksController {
     const lemonSqueezySubscriptionId = String(payload.data.id)
 
     // Find existing subscription
-    const subscription = await Subscription.findBy('lemonSqueezySubscriptionId', lemonSqueezySubscriptionId)
+    const subscription = await Subscription.findBy(
+      'lemonSqueezySubscriptionId',
+      lemonSqueezySubscriptionId
+    )
 
     if (!subscription) {
       console.error('Subscription not found for ID:', lemonSqueezySubscriptionId)

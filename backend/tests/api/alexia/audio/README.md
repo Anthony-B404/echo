@@ -25,10 +25,10 @@ Configurez la variable `token` dans l'environnement Bruno (local.bru).
 
 ## Routes testees
 
-| Route | Methode | Description |
-|-------|---------|-------------|
-| `/audio/process` | POST | Soumet un fichier audio pour traitement async |
-| `/audio/status/:jobId` | GET | Recupere le statut d'un job |
+| Route                  | Methode | Description                                   |
+| ---------------------- | ------- | --------------------------------------------- |
+| `/audio/process`       | POST    | Soumet un fichier audio pour traitement async |
+| `/audio/status/:jobId` | GET     | Recupere le statut d'un job                   |
 
 ## Flow de test
 
@@ -38,8 +38,8 @@ Configurez la variable `token` dans l'environnement Bruno (local.bru).
 
 ## Variables d'environnement
 
-| Variable | Description |
-|----------|-------------|
+| Variable  | Description                                      |
+| --------- | ------------------------------------------------ |
 | `baseUrl` | URL de base de l'API (ex: http://localhost:3333) |
-| `token` | Token JWT d'authentification |
-| `jobId` | ID du job (auto-set par ProcessAudio) |
+| `token`   | Token JWT d'authentification                     |
+| `jobId`   | ID du job (auto-set par ProcessAudio)            |

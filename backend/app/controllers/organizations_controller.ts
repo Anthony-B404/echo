@@ -65,7 +65,6 @@ export default class OrganizationsController {
     return response.json(organizations)
   }
 
-
   public async listAccessibleOrganizations({ response, auth }: HttpContext) {
     const authUser = auth.user!
 
@@ -251,10 +250,7 @@ export default class OrganizationsController {
 
         if (firstError) {
           // Traduire le nom du champ (ex: "name" → "nom" en français)
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
 
           // Injecter le nom traduit dans le message d'erreur
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })
@@ -334,10 +330,9 @@ export default class OrganizationsController {
       }
 
       // Valider les données avec le validator d'update
-      const validatedData = await updateOrganizationValidator(
-        user.id,
-        organization.id
-      ).validate(inputData)
+      const validatedData = await updateOrganizationValidator(user.id, organization.id).validate(
+        inputData
+      )
 
       await organization.merge(validatedData).save()
 
@@ -356,10 +351,7 @@ export default class OrganizationsController {
 
         if (firstError) {
           // Traduire le nom du champ (ex: "name" → "nom" en français)
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
 
           // Injecter le nom traduit dans le message d'erreur
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })

@@ -30,10 +30,7 @@ class ShareService {
     const { audioId, email, userId, i18n } = options
 
     // Load audio with transcription
-    const audio = await Audio.query()
-      .where('id', audioId)
-      .preload('transcription')
-      .firstOrFail()
+    const audio = await Audio.query().where('id', audioId).preload('transcription').firstOrFail()
 
     // Load the user who is sharing
     const sharedByUser = await User.findOrFail(userId)

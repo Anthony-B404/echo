@@ -4,26 +4,26 @@ import vine from '@vinejs/vine'
  * Validator for audio processing request
  */
 export const audioProcessValidator = vine.compile(
-    vine.object({
-        prompt: vine.string().minLength(5).maxLength(1000),
-    })
+  vine.object({
+    prompt: vine.string().minLength(5).maxLength(1000),
+  })
 )
 
 /**
  * Allowed audio mime types
  */
 export const ALLOWED_AUDIO_TYPES = [
-    'audio/mpeg',
-    'audio/mp3',
-    'audio/wav',
-    'audio/wave',
-    'audio/x-wav',
-    'audio/m4a',
-    'audio/x-m4a',
-    'audio/mp4',
-    'audio/ogg',
-    'audio/flac',
-    'audio/x-flac',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/wave',
+  'audio/x-wav',
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/mp4',
+  'audio/ogg',
+  'audio/flac',
+  'audio/x-flac',
 ]
 
 /**

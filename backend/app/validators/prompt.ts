@@ -54,11 +54,13 @@ export const promptBatchDeleteValidator = vine.compile(
  */
 export const promptReorderValidator = vine.compile(
   vine.object({
-    prompts: vine.array(
-      vine.object({
-        id: vine.number().positive(),
-        sortOrder: vine.number().min(0),
-      })
-    ).minLength(1),
+    prompts: vine
+      .array(
+        vine.object({
+          id: vine.number().positive(),
+          sortOrder: vine.number().min(0),
+        })
+      )
+      .minLength(1),
   })
 )

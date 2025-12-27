@@ -87,10 +87,7 @@ export default class InvitationsController {
       if (error instanceof errors.E_VALIDATION_ERROR) {
         const firstError = error.messages[0]
         if (firstError) {
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })
 
           return response.status(422).json({
@@ -266,10 +263,7 @@ export default class InvitationsController {
       if (error instanceof errors.E_VALIDATION_ERROR) {
         const firstError = error.messages[0]
         if (firstError) {
-          const translatedField = i18n.t(
-            `validation.fields.${firstError.field}`,
-            firstError.field
-          )
+          const translatedField = i18n.t(`validation.fields.${firstError.field}`, firstError.field)
           const translatedMessage = i18n.t(firstError.message, { field: translatedField })
 
           return response.status(422).json({
