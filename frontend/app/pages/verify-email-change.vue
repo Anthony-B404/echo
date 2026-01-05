@@ -27,7 +27,7 @@ onMounted(async () => {
       description: t("auth.verifyEmailChange.noToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
     return;
   }
 
@@ -51,7 +51,7 @@ onMounted(async () => {
       description: error.data?.message || t("auth.verifyEmailChange.invalidToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
   } finally {
     isVerifying.value = false;
   }

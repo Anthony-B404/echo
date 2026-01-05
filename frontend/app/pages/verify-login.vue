@@ -26,7 +26,7 @@ onMounted(async () => {
       description: t("auth.verifyLogin.noToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
     return;
   }
 
@@ -54,7 +54,7 @@ onMounted(async () => {
       description: error.data?.message || t("auth.verifyLogin.invalidToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
   } finally {
     isVerifying.value = false;
   }

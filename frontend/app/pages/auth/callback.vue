@@ -41,7 +41,7 @@ onMounted(async () => {
       color: "error",
     });
 
-    await router.push($localePath("login"));
+    await router.push($localePath("index"));
     return;
   }
 
@@ -75,7 +75,7 @@ onMounted(async () => {
       color: "error",
     });
 
-    await router.push($localePath("login"));
+    await router.push($localePath("index"));
   }
 });
 </script>

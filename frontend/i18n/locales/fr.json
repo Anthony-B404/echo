@@ -132,6 +132,10 @@
     "builtWith": "Créé avec Nuxt UI"
   },
   "seo": {
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "description": "Consultez nos conditions d'utilisation"
+    },
     "login": {
       "title": "Connexion",
       "description": "Connectez-vous à votre compte pour continuer"
@@ -728,6 +732,25 @@
       "validation": {
         "nameTooShort": "Le nom doit contenir au moins 2 caractères",
         "invalidEmail": "Email invalide"
+      }
+    }
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "lastUpdated": "Dernière mise à jour : Janvier 2025",
+    "backToHome": "Retour à l'accueil",
+    "sections": {
+      "usage": {
+        "title": "Conditions d'utilisation",
+        "content": "En utilisant notre service, vous acceptez de respecter nos conditions d'utilisation. Ce service est destiné à un usage professionnel pour la transcription et l'analyse de contenus audio."
+      },
+      "privacy": {
+        "title": "Protection des données",
+        "content": "Nous prenons la protection de vos données au sérieux. Vos fichiers audio et analyses sont traités de manière confidentielle et ne sont jamais partagés avec des tiers sans votre consentement."
+      },
+      "limitations": {
+        "title": "Limitations de responsabilité",
+        "content": "Notre service est fourni \"tel quel\". Nous ne garantissons pas une exactitude parfaite des transcriptions et analyses. L'utilisateur est responsable de la vérification des contenus générés."
       }
     }
   }

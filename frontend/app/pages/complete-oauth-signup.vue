@@ -40,7 +40,7 @@ onMounted(async () => {
       description: t("auth.completeSignup.noToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
     return;
   }
 
@@ -128,7 +128,7 @@ onMounted(async () => {
       description: error.data?.message || t("auth.completeSignup.invalidToken"),
       color: "error",
     });
-    router.push($localePath("login"));
+    router.push($localePath("index"));
   }
 });
 

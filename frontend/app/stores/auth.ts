@@ -144,7 +144,7 @@ export const useAuthStore = defineStore("auth", {
 
       // Redirect to login
       const { $localePath } = useNuxtApp();
-      await navigateTo($localePath("login"));
+      await navigateTo($localePath("index"));
     },
 
     /**

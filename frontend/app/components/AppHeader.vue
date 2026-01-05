@@ -50,22 +50,6 @@ nuxtApp.hooks.hookOnce("page:finish", () => {
       <UColorModeButton />
 
       <UButton
-        icon="i-lucide-log-in"
-        color="neutral"
-        variant="ghost"
-        :to="$localePath('login')"
-        class="lg:hidden"
-      />
-
-      <UButton
-        label="Sign in"
-        color="neutral"
-        variant="outline"
-        :to="$localePath('login')"
-        class="hidden lg:inline-flex"
-      />
-
-      <UButton
         label="Sign up"
         color="neutral"
         trailing-icon="i-lucide-arrow-right"
@@ -79,14 +63,6 @@ nuxtApp.hooks.hookOnce("page:finish", () => {
 
       <USeparator class="my-6" />
 
-      <UButton
-        label="Sign in"
-        color="neutral"
-        variant="subtle"
-        :to="$localePath('login')"
-        block
-        class="mb-3"
-      />
       <UButton
         label="Sign up"
         color="neutral"

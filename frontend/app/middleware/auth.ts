@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // If user is not authenticated, redirect to login
   if (!isAuthenticated.value) {
     return navigateTo({
-      path: $localePath("login"),
+      path: $localePath("index"),
       query: {
         redirect: to.fullPath, // Save intended destination
       },

@@ -130,6 +130,10 @@
     }
   },
   "seo": {
+    "terms": {
+      "title": "Terms of Service",
+      "description": "View our terms of service"
+    },
     "login": {
       "title": "Login",
       "description": "Login to your account to continue"
@@ -726,6 +730,25 @@
       "validation": {
         "nameTooShort": "Name must be at least 2 characters",
         "invalidEmail": "Invalid email"
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: January 2025",
+    "backToHome": "Back to home",
+    "sections": {
+      "usage": {
+        "title": "Terms of Use",
+        "content": "By using our service, you agree to comply with our terms of use. This service is intended for professional use for transcription and analysis of audio content."
+      },
+      "privacy": {
+        "title": "Data Protection",
+        "content": "We take the protection of your data seriously. Your audio files and analyses are processed confidentially and are never shared with third parties without your consent."
+      },
+      "limitations": {
+        "title": "Limitation of Liability",
+        "content": "Our service is provided \"as is\". We do not guarantee perfect accuracy of transcriptions and analyses. The user is responsible for verifying the generated content."
       }
     }
   }
