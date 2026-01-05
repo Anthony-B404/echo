@@ -36,18 +36,23 @@ const statusOptions = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-highlighted">
-        {{ t('components.workshop.list.title') }}
-        <UBadge color="neutral" variant="subtle" class="ml-2">
-          {{ audioStore.pagination.total }}
-        </UBadge>
-      </h2>
-
-      <USelect v-model="statusFilter" :items="statusOptions" size="sm" class="w-40" />
-    </div>
+  <UCard
+    class="transition-all duration-300 hover:-translate-y-1 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-2 hover:ring-primary-500/50 dark:hover:ring-primary-400/50 shadow-lg hover:shadow-xl dark:shadow-none"
+  >
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <UIcon name="i-lucide-library" class="text-primary-500" />
+          {{ t('components.workshop.list.title') }}
+        </h3>
+        <div class="flex items-center gap-2">
+          <UBadge color="neutral" variant="subtle">
+            {{ audioStore.pagination.total }}
+          </UBadge>
+          <USelect v-model="statusFilter" :items="statusOptions" size="sm" class="w-40" />
+        </div>
+      </div>
+    </template>
 
     <!-- Loading state -->
     <div v-if="loading && audios.length === 0" class="space-y-3">
@@ -85,5 +90,5 @@ const statusOptions = computed(() => [
         />
       </div>
     </div>
-  </div>
+  </UCard>
 </template>
