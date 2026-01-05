@@ -21,10 +21,6 @@ frontend/
 │   │   └── css/           # Global styles
 │   │       └── main.css
 │   ├── components/        # Auto-imported Vue components
-│   │   └── billing/       # Billing-related components
-│   │       ├── TrialBanner.vue
-│   │       ├── CancelSubscriptionModal.vue
-│   │       └── AccessBlockedModal.vue
 │   ├── composables/       # Composition API functions
 │   │   ├── useApi.ts
 │   │   ├── useAuth.ts
@@ -37,13 +33,11 @@ frontend/
 │   ├── pages/             # File-based routing
 │   │   └── dashboard/
 │   │       └── settings/  # Settings pages with RBAC
-│   │           ├── billing.vue    # Owner only
 │   │           ├── organization.vue # Owner only
 │   │           ├── members.vue    # Owner + Admin
 │   │           ├── security.vue   # All users
 │   │           └── notifications.vue # All users
 │   ├── stores/            # Pinia stores
-│   │   └── trial.ts       # Trial state management
 │   └── app.vue            # Root component
 ├── public/                # Static assets
 ├── nuxt.config.ts         # Nuxt configuration
@@ -133,7 +127,6 @@ const {
   isAdministrator,
   isMember,
   canAccessOrganization,  // Owner only
-  canAccessBilling,       // Owner only
   canManageMembers,       // Owner + Administrator
 } = useSettingsPermissions()
 ```
@@ -154,60 +147,57 @@ const {
 
 | Page | Route | Access |
 |------|-------|--------|
-| Billing | `/dashboard/settings/billing` | Owner only |
 | Organization | `/dashboard/settings/organization` | Owner only |
 | Members | `/dashboard/settings/members` | Owner + Administrator |
 | Security | `/dashboard/settings/security` | All authenticated |
 | Notifications | `/dashboard/settings/notifications` | All authenticated |
+| Credits | `/dashboard/credits` | All authenticated |
 
 **Usage in pages**:
 ```vue
 <script setup lang="ts">
-const { canAccessBilling, isOwner } = useSettingsPermissions()
+const { canAccessOrganization, isOwner } = useSettingsPermissions()
 
 // Redirect if no access
-if (!canAccessBilling.value) {
+if (!canAccessOrganization.value) {
   navigateTo('/dashboard')
 }
 </script>
 ```
 
-## Billing & Trial System
+## Credits System
 
-### Trial Store (`app/stores/trial.ts`)
+### Credits Store (`app/stores/credits.ts`)
 
-Manages trial state and subscription status:
+Manages user credits state:
 
 ```typescript
-const trialStore = useTrialStore()
+const creditsStore = useCreditsStore()
 
 // State
-trialStore.isOnTrial
-trialStore.trialDaysRemaining
-trialStore.hasAccess
-trialStore.subscriptionStatus
+creditsStore.credits          // Current credit balance
+creditsStore.transactions     // Transaction history
 
 // Actions
-await trialStore.fetchTrialStatus()
+await creditsStore.fetchBalance()
+await creditsStore.fetchTransactions()
 ```
 
-### Billing Components
+### Credits Page
 
-**TrialBanner.vue**: Shows remaining trial days, displayed in app layout
+Located at `/dashboard/credits`, shows:
+- Current credit balance
+- Transaction history (usage, purchases, bonuses, refunds)
 
-**CancelSubscriptionModal.vue**: Confirmation modal for subscription cancellation
+### Handling Insufficient Credits
 
-**AccessBlockedModal.vue**: Shown when user loses access (trial expired, no subscription)
-
-### Handling 402 Responses
-
-When API returns 402 with `code: 'SUBSCRIPTION_ENDED'`:
+When API returns error with `code: 'INSUFFICIENT_CREDITS'`:
 
 ```typescript
-// In useAuth or API interceptor
-if (error.status === 402 && error.data?.code === 'SUBSCRIPTION_ENDED') {
-  // Show AccessBlockedModal
-  // Redirect to billing page (if owner)
+// In audio processing
+if (error.data?.code === 'INSUFFICIENT_CREDITS') {
+  // Show error message with credits needed vs available
+  // Redirect to credits page
 }
 ```
 
@@ -262,7 +252,7 @@ export const useExampleStore = defineStore('example', {
 ### Key Stores
 
 - **`useOrganizationStore`**: Current organization context, user role in org
-- **`useTrialStore`**: Trial status, subscription state, access control
+- **`useCreditsStore`**: Credit balance, transaction history
 
 ## Validation with Zod
 
@@ -423,17 +413,14 @@ const { isOwner, canManageMembers } = useSettingsPermissions()
 </template>
 ```
 
-### Billing UI Patterns
+### Credits UI Patterns
 
 ```vue
-<!-- Show trial banner -->
-<TrialBanner v-if="trialStore.isOnTrial" />
-
-<!-- Handle access blocked -->
-<AccessBlockedModal
-  v-if="showAccessBlocked"
-  @close="showAccessBlocked = false"
-/>
+<!-- Show credits badge in header -->
+<NuxtLink :to="localePath('/dashboard/credits')">
+  <UIcon name="i-lucide-coins" />
+  <span>{{ credits }}</span>
+</NuxtLink>
 ```
 
 ## Testing

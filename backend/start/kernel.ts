@@ -45,5 +45,4 @@ router.use([
  */
 export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
-  trialGuard: () => import('#middleware/trial_guard_middleware'),
 })

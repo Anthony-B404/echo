@@ -37,7 +37,6 @@ Alexia is a B2B SaaS application that transforms audio recordings (meetings, dic
 - **Authorization**: @adonisjs/bouncer v3 with policies
 - **Validation**: VineJS (@vinejs/vine)
 - **Email**: @adonisjs/mail with Resend integration
-- **Billing**: Lemon Squeezy integration for subscriptions
 - **i18n**: @adonisjs/i18n v2.2.3 with French and English support
 - **Templating**: Edge.js for email templates, MJML for email layouts
 
@@ -101,40 +100,19 @@ node ace generate:key               # Generate APP_KEY
   - **Existing Users**: Adds organization to user's organizations (user can belong to multiple orgs)
 - **Email Notifications**: Automatically sent via Resend when invitation created
 
-### Billing & Trial System (Lemon Squeezy)
+### Credits System
 
-- **Trial Period**: New users get a trial period (configurable days)
-- **Subscription Provider**: Lemon Squeezy for payment processing
-- **Access Control**: `TrialGuardMiddleware` checks user access (trial OR active subscription)
-- **Owner-Based Access**: Members inherit access from their organization owner's subscription
-- **Subscription States**: `active`, `cancelled`, `expired`, `paused`, `past_due`, `unpaid`, `on_trial`
-
-**User Trial Fields**:
-- `trialStartedAt`, `trialEndsAt`, `trialUsed`
-- Methods: `isOnTrial()`, `getTrialDaysRemaining()`, `isTrialExpired()`, `hasAccess()`
-
-**Subscription Model**:
-- `lemonSqueezySubscriptionId`, `lemonSqueezyCustomerId`, `lemonSqueezyVariantId`
-- `status`, `cardBrand`, `cardLastFour`, `currentPeriodEnd`
-- Method: `isActive()` - returns true for `active` or `on_trial` status
-
-**Access Check Flow**:
-1. User requests protected resource
-2. `TrialGuardMiddleware` checks access:
-   - If Owner: checks own `hasAccess()` (trial OR subscription)
-   - If Member/Admin: checks organization owner's `hasAccess()`
-3. Returns 402 with `SUBSCRIPTION_ENDED` code if no access
-
-**Checkout Localization**:
-- Automatically maps user locale to billing country (FR → France, EN → US)
-- Checkout URLs include `checkout[billing_address][country]` parameter
+- **Credit-Based**: Users have credits for audio processing (1 credit = 1 minute of audio)
+- **Credit Check**: Verification happens only at audio transcription time in `transcription_job.ts`
+- **No Access Control**: Users always have access to the application; credits are deducted on usage
+- **User Fields**: `credits` field stores current credit balance
+- **Methods**: `hasEnoughCredits(minutes)`, `deductCredits(amount)`, `addCredits(amount)`
 
 ### Role-Based Access Control (RBAC)
 
 **Frontend Permissions** (`useSettingsPermissions` composable):
 ```typescript
 canAccessOrganization  // Owner only
-canAccessBilling       // Owner only
 canManageMembers       // Owner + Administrator
 ```
 
@@ -146,11 +124,11 @@ canManageMembers       // Owner + Administrator
 **Settings Page Access**:
 | Page | Access |
 |------|--------|
-| `/dashboard/settings/billing` | Owner only |
 | `/dashboard/settings/organization` | Owner only |
 | `/dashboard/settings/members` | Owner + Administrator |
 | `/dashboard/settings/security` | All authenticated users |
 | `/dashboard/settings/notifications` | All authenticated users |
+| `/dashboard/credits` | All authenticated users |
 
 ### Internationalization (i18n)
 
@@ -203,30 +181,32 @@ const data = await authenticatedFetch('/protected-endpoint')
 
 ### Backend Architecture (AdonisJS)
 
-- **Controllers**: Thin controllers in `app/controllers/` (UsersController, OrganizationsController, InvitationsController, BillingController, WebhooksController)
+- **Controllers**: Thin controllers in `app/controllers/` (UsersController, OrganizationsController, InvitationsController, CreditsController, AudioController)
 - **Validators**: VineJS schemas in `app/validators/` - always validate user input
-- **Models**: Lucid models in `app/models/` (User, Organization, OrganizationUser, Invitation, Subscription)
+- **Models**: Lucid models in `app/models/` (User, Organization, OrganizationUser, Invitation, CreditTransaction, Audio)
 - **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy, MemberPolicy)
-- **Middleware**: Custom middleware in `app/middleware/` (auth, trial_guard, detect_user_locale, initialize_bouncer)
+- **Middleware**: Custom middleware in `app/middleware/` (auth, detect_user_locale, initialize_bouncer)
 - **Import Aliases**: Use `#controllers/*`, `#models/*`, `#validators/*`, etc. (defined in package.json)
 
 ## Database Schema
 
 ### Core Tables
 
-- **users**: Users with `currentOrganizationId` (active organization context), trial fields (`trialStartedAt`, `trialEndsAt`, `trialUsed`)
+- **users**: Users with `currentOrganizationId` (active organization context), `credits` field for credit balance
 - **organizations**: Organization entities with `name`, `logo`, `email`
 - **organization_user**: Pivot table linking users to organizations with `role` per organization (1=Owner, 2=Administrator, 3=Member)
 - **invitations**: Pending invitations with `identifier` (UUID), `organizationId`, `role`, `expiresAt`
-- **subscriptions**: Lemon Squeezy subscription data (`lemonSqueezySubscriptionId`, `status`, `cardBrand`, `cardLastFour`, `currentPeriodEnd`)
+- **credit_transactions**: Credit usage history (`userId`, `amount`, `type`, `description`)
+- **audios**: Audio files with transcription and analysis data
 - **access_tokens**: API authentication tokens managed by AdonisJS Auth
 
 ### Key Relationships
 
 - User ↔ Organization (many-to-many via `organization_user` pivot)
 - User → Current Organization (belongs to via `currentOrganizationId`)
-- User → Subscription (has one)
+- User → CreditTransactions (has many)
 - Invitation → Organization (many-to-one)
+- Audio → Organization (belongs to, multi-tenant)
 - Access Token → User (tokenable polymorphic)
 
 ### User Roles (per organization)
@@ -259,12 +239,6 @@ DB_DATABASE=alexia_db
 
 # Email (Resend)
 RESEND_API_KEY=            # From resend.com for emails
-
-# Billing (Lemon Squeezy)
-LEMON_SQUEEZY_API_KEY=     # From lemonsqueezy.com
-LEMON_SQUEEZY_STORE_ID=    # Your store ID
-LEMON_SQUEEZY_VARIANT_ID=  # Product variant ID
-LEMON_SQUEEZY_WEBHOOK_SECRET=  # Webhook signing secret
 
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000
@@ -328,15 +302,13 @@ API_URL=http://localhost:3333
 - Pass `i18n` to Edge templates when rendering emails: `htmlView('emails/template', { i18n })`
 - Test with different `Accept-Language` headers to verify translations work
 - Translation keys follow pattern: `{file}.{category}.{message}` (e.g., `messages.auth.invalid_credentials`)
-- Billing messages in `messages.billing.*` and `messages.trial.*` namespaces
 
-### Billing & Subscription Issues
+### Credits System
 
-- **Trial Access**: Check `user.hasAccess()` which returns true if on trial OR has active subscription
-- **Member Access**: Members don't have their own subscriptions - they inherit from organization owner
-- **Webhook Sync**: Lemon Squeezy webhooks update subscription status automatically via `WebhooksController`
-- **402 Response**: When access is denied, API returns 402 with `code: 'SUBSCRIPTION_ENDED'`
-- **Frontend Handling**: Use `trial` store and `AccessBlockedModal` component to handle access denial
+- **Credit Check**: Credits are verified only at audio processing time (`transcription_job.ts`)
+- **Credit Methods**: Use `user.hasEnoughCredits(minutes)` before processing, `user.deductCredits(amount)` after
+- **Insufficient Credits**: Returns error with `code: 'INSUFFICIENT_CREDITS'` when user doesn't have enough credits
+- **Frontend Handling**: Credits page at `/dashboard/credits` shows balance and transaction history
 
 ## Feature: Audio Analysis with Mistral AI
 

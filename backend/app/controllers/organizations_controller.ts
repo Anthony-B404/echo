@@ -26,81 +26,17 @@ export default class OrganizationsController {
       query.pivotColumns(['role'])
     })
 
-    const organizations: Array<{
-      id: number
-      name: string
-      logo: string | null
-      email: string
-      role: number
-      isOwner: boolean
-      isCurrent: boolean
-      hasAccess: boolean
-    }> = []
-
-    for (const org of authUser.organizations) {
-      const isOwner = org.$extras.pivot_role === UserRole.Owner
-
-      let hasAccess: boolean
-      if (isOwner) {
-        // Owner: check own access
-        hasAccess = await authUser.hasAccess()
-      } else {
-        // Member: check owner's access for this org
-        const owner = await org.getOwner()
-        hasAccess = owner ? await owner.hasAccess() : false
-      }
-
-      organizations.push({
-        id: org.id,
-        name: org.name,
-        logo: org.logo ? `organization-logo/${org.logo}` : null,
-        email: org.email,
-        role: org.$extras.pivot_role,
-        isOwner,
-        isCurrent: org.id === authUser.currentOrganizationId,
-        hasAccess,
-      })
-    }
+    const organizations = authUser.organizations.map((org) => ({
+      id: org.id,
+      name: org.name,
+      logo: org.logo ? `organization-logo/${org.logo}` : null,
+      email: org.email,
+      role: org.$extras.pivot_role,
+      isOwner: org.$extras.pivot_role === UserRole.Owner,
+      isCurrent: org.id === authUser.currentOrganizationId,
+    }))
 
     return response.json(organizations)
-  }
-
-  public async listAccessibleOrganizations({ response, auth }: HttpContext) {
-    const authUser = auth.user!
-
-    await authUser.load('organizations', (query) => {
-      query.pivotColumns(['role'])
-    })
-
-    const accessibleOrgs: Array<{
-      id: number
-      name: string
-      logo: string | null
-    }> = []
-
-    for (const org of authUser.organizations) {
-      const isOwner = org.$extras.pivot_role === UserRole.Owner
-
-      let hasAccess: boolean
-      if (isOwner) {
-        // Owner: check own access
-        hasAccess = await authUser.hasAccess()
-      } else {
-        // Member: check owner's access for this org
-        const owner = await org.getOwner()
-        hasAccess = owner ? await owner.hasAccess() : false
-      }
-
-      if (hasAccess) {
-        accessibleOrgs.push({
-          id: org.id,
-          name: org.name,
-          logo: org.logo ? `organization-logo/${org.logo}` : null,
-        })
-      }
-    }
-
-    return response.json(accessibleOrgs)
   }
 
   /**
@@ -218,20 +154,9 @@ export default class OrganizationsController {
       // Seed default prompts for the new organization
       await defaultPromptsService.seedForOrganization(organization.id)
 
-      // If user has never used their trial, initialize it now
-      if (!authUser.trialUsed) {
-        authUser.trialStartedAt = DateTime.now()
-        authUser.trialEndsAt = DateTime.now().plus({ days: 14 })
-        authUser.trialUsed = true
-      }
-
-      // Always switch to the new organization
+      // Switch to the new organization
       authUser.currentOrganizationId = organization.id
       await authUser.save()
-
-      // Determine if user needs to checkout (trial already used and no active subscription)
-      const needsCheckout =
-        authUser.trialUsed && !authUser.isOnTrial() && !(await authUser.hasActiveSubscription())
 
       return response.status(201).json({
         message: i18n.t('messages.organization.created'),
@@ -241,7 +166,6 @@ export default class OrganizationsController {
           logo: organization.logo ? `organization-logo/${organization.logo}` : null,
           email: organization.email,
         },
-        needsCheckout,
       })
     } catch (error) {
       if (error instanceof errors.E_VALIDATION_ERROR) {

@@ -1,9 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, belongsTo, hasOne, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import Organization from './organization.js'
-import type { ManyToMany, BelongsTo, HasOne, HasMany } from '@adonisjs/lucid/types/relations'
-import Subscription from '#models/subscription'
+import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import CreditTransaction, { CreditTransactionType } from './credit_transaction.js'
 
 export enum UserRole {
@@ -54,9 +53,6 @@ export default class User extends BaseModel {
   })
   declare currentOrganization: BelongsTo<typeof Organization>
 
-  @hasOne(() => Subscription)
-  declare subscription: HasOne<typeof Subscription>
-
   @column()
   declare onboardingCompleted: boolean
 
@@ -77,15 +73,6 @@ export default class User extends BaseModel {
 
   @column.dateTime()
   declare emailChangeExpiresAt: DateTime | null
-
-  @column.dateTime()
-  declare trialStartedAt: DateTime | null
-
-  @column.dateTime()
-  declare trialEndsAt: DateTime | null
-
-  @column()
-  declare trialUsed: boolean
 
   @column()
   declare credits: number
@@ -112,68 +99,6 @@ export default class User extends BaseModel {
   async hasOrganization(organizationId: number): Promise<boolean> {
     await this.load('organizations')
     return this.organizations.some((o) => o.id === organizationId)
-  }
-
-  /**
-   * Check if user has an active subscription
-   */
-  async hasActiveSubscription(): Promise<boolean> {
-    await this.load('subscription')
-    return this.subscription?.isActive() ?? false
-  }
-
-  /**
-   * Check if user is currently on trial
-   */
-  isOnTrial(): boolean {
-    if (!this.trialEndsAt) return false
-    return DateTime.now() < this.trialEndsAt
-  }
-
-  /**
-   * Get number of trial days remaining
-   */
-  getTrialDaysRemaining(): number {
-    if (!this.trialEndsAt) return 0
-    const diff = this.trialEndsAt.diff(DateTime.now(), 'days').days
-    return Math.max(0, Math.ceil(diff))
-  }
-
-  /**
-   * Check if trial has expired
-   */
-  isTrialExpired(): boolean {
-    if (!this.trialUsed) return false
-    if (!this.trialEndsAt) return false
-    return DateTime.now() >= this.trialEndsAt
-  }
-
-  /**
-   * Check if user has access (either on trial or has active subscription)
-   */
-  async hasAccess(): Promise<boolean> {
-    if (this.isOnTrial()) return true
-    return await this.hasActiveSubscription()
-  }
-
-  /**
-   * Get the organization owner's access status for the current organization
-   * Used to check if a member should have access based on the owner's subscription
-   */
-  async getOrganizationOwnerAccess(): Promise<{ hasAccess: boolean; owner: User | null }> {
-    if (!this.currentOrganizationId) {
-      return { hasAccess: false, owner: null }
-    }
-
-    await this.load('currentOrganization')
-    const owner = await this.currentOrganization.getOwner()
-
-    if (!owner) {
-      return { hasAccess: false, owner: null }
-    }
-
-    const ownerHasAccess = await owner.hasAccess()
-    return { hasAccess: ownerHasAccess, owner }
   }
 
   /**

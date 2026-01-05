@@ -21,7 +21,6 @@ export const useSettingsPermissions = () => {
 
   // Page access permissions
   const canAccessOrganization = computed(() => isOwner.value);
-  const canAccessBilling = computed(() => isOwner.value);
   const canManageMembers = computed(
     () => isOwner.value || isAdministrator.value
   );
@@ -32,7 +31,6 @@ export const useSettingsPermissions = () => {
     isAdministrator,
     isMember,
     canAccessOrganization,
-    canAccessBilling,
     canManageMembers,
   };
 };

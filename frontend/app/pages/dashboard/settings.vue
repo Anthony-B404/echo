@@ -7,7 +7,7 @@ definePageMeta({
 
 const { t } = useI18n();
 const localePath = useLocalePath();
-const { canAccessOrganization, canAccessBilling } = useSettingsPermissions();
+const { canAccessOrganization } = useSettingsPermissions();
 
 const links = computed(() => {
   const mainLinks: NavigationMenuItem[] = [
@@ -48,15 +48,6 @@ const links = computed(() => {
     icon: "i-lucide-shield",
     to: localePath("/dashboard/settings/security"),
   });
-
-  // Billing - Owner only
-  if (canAccessBilling.value) {
-    mainLinks.push({
-      label: t("pages.dashboard.settings.navigation.billing"),
-      icon: "i-lucide-credit-card",
-      to: localePath("/dashboard/settings/billing"),
-    });
-  }
 
   return [mainLinks] satisfies NavigationMenuItem[][];
 });

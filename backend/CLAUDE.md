@@ -10,7 +10,6 @@ This file provides guidance to Claude Code when working with the AdonisJS v6 bac
 - **Authorization**: @adonisjs/bouncer v3 with policies
 - **Validation**: VineJS (@vinejs/vine)
 - **Email**: @adonisjs/mail with Resend integration
-- **Billing**: Lemon Squeezy integration for subscriptions
 - **i18n**: @adonisjs/i18n v2.2.3 (French and English)
 - **Templating**: Edge.js for email templates, MJML for email layouts
 - **TypeScript**: Strict mode enabled
@@ -100,22 +99,17 @@ node ace generate:key               # Generate APP_KEY
 - `pendingEmail` - Email pending change (optional)
 - `emailChangeToken` - Token for email change confirmation (optional)
 - `emailChangeExpiresAt` - Expiration date for email change token
-- `trialStartedAt` - Trial period start date
-- `trialEndsAt` - Trial period end date
-- `trialUsed` - Boolean flag if user has used trial
+- `credits` - Credit balance for audio processing
 - `disabled` - Boolean flag if user is disabled
 
-**subscriptions**
+**credit_transactions**
 
 - `id` - Primary key
 - `userId` - Foreign key to users
-- `lemonSqueezySubscriptionId` - Lemon Squeezy subscription ID
-- `lemonSqueezyCustomerId` - Lemon Squeezy customer ID
-- `lemonSqueezyVariantId` - Lemon Squeezy variant ID
-- `status` - Enum: `active`, `cancelled`, `expired`, `paused`, `past_due`, `unpaid`, `on_trial`
-- `cardBrand` - Card brand (optional)
-- `cardLastFour` - Last four digits of card (optional)
-- `currentPeriodEnd` - Current billing period end date
+- `amount` - Credit amount (positive for additions, negative for deductions)
+- `type` - Transaction type: `usage`, `purchase`, `bonus`, `refund`
+- `description` - Optional description
+- `createdAt` - Transaction timestamp
 
 **organizations**
 
@@ -161,18 +155,15 @@ declare organizations: ManyToMany<typeof Organization>
 })
 declare currentOrganization: BelongsTo<typeof Organization>
 
-@hasOne(() => Subscription)
-declare subscription: HasOne<typeof Subscription>
+@hasMany(() => CreditTransaction)
+declare creditTransactions: HasMany<typeof CreditTransaction>
 
 // Helper methods
 async isOwnerOf(organizationId: number): Promise<boolean>
 async hasOrganization(organizationId: number): Promise<boolean>
-async hasActiveSubscription(): Promise<boolean>
-isOnTrial(): boolean
-getTrialDaysRemaining(): number
-isTrialExpired(): boolean
-async hasAccess(): Promise<boolean>  // true if on trial OR has active subscription
-async getOrganizationOwnerAccess(): Promise<{ hasAccess: boolean; owner: User | null }>
+hasEnoughCredits(minutes: number): boolean
+async deductCredits(amount: number, description?: string): Promise<void>
+async addCredits(amount: number, type: string, description?: string): Promise<void>
 
 // Organization model
 @manyToMany(() => User, {
@@ -195,7 +186,7 @@ export enum UserRole {
 }
 ```
 
-- **Owner**: Full control of organization (create, update, delete, billing, settings)
+- **Owner**: Full control of organization (create, update, delete, settings)
 - **Administrator**: Can manage users (members only) and some settings
 - **Member**: Basic access to organization resources
 
@@ -254,104 +245,59 @@ user.currentOrganizationId = organization.id
 await user.save()
 ```
 
-## Billing & Trial System (Lemon Squeezy)
+## Credits System
 
 ### Overview
 
-- **Provider**: Lemon Squeezy for payment processing
-- **Trial Period**: Configurable trial days for new users
-- **Access Control**: `TrialGuardMiddleware` checks access on protected routes
-- **Owner-Based Access**: Members inherit access from organization owner
+- **Credit-Based**: Users have credits for audio processing (1 credit = 1 minute of audio)
+- **No Access Control**: Users always have access; credits are verified only at processing time
+- **Credit Check**: Happens in `transcription_job.ts` before processing audio
 
-### Subscription Model
+### User Credit Methods
 
 ```typescript
-export enum SubscriptionStatus {
-  Active = 'active',
-  Cancelled = 'cancelled',
-  Expired = 'expired',
-  Paused = 'paused',
-  PastDue = 'past_due',
-  Unpaid = 'unpaid',
-  OnTrial = 'on_trial',
+// Check if user has enough credits for audio duration
+user.hasEnoughCredits(minutes: number): boolean
+
+// Deduct credits after processing
+await user.deductCredits(amount: number, description?: string): Promise<void>
+
+// Add credits (purchase, bonus, refund)
+await user.addCredits(amount: number, type: string, description?: string): Promise<void>
+```
+
+### CreditTransaction Model
+
+```typescript
+export enum CreditTransactionType {
+  Usage = 'usage',
+  Purchase = 'purchase',
+  Bonus = 'bonus',
+  Refund = 'refund',
+}
+```
+
+### CreditsController Endpoints
+
+```typescript
+// Get credit balance
+GET /api/credits/balance
+
+// Get transaction history
+GET /api/credits/transactions
+```
+
+### Credit Check in Transcription Job
+
+```typescript
+// Before processing audio
+if (!user.hasEnoughCredits(audioDurationMinutes)) {
+  throw new Error('INSUFFICIENT_CREDITS')
 }
 
-// Check if subscription is active
-subscription.isActive() // true for 'active' or 'on_trial'
+// After successful processing
+await user.deductCredits(audioDurationMinutes, `Audio: ${audioTitle}`)
 ```
-
-### User Access Methods
-
-```typescript
-// Check if user is on trial
-user.isOnTrial(): boolean
-
-// Get remaining trial days
-user.getTrialDaysRemaining(): number
-
-// Check if trial expired
-user.isTrialExpired(): boolean
-
-// Check if user has access (trial OR active subscription)
-await user.hasAccess(): Promise<boolean>
-
-// Check if user has active subscription
-await user.hasActiveSubscription(): Promise<boolean>
-
-// Get organization owner's access (for members)
-await user.getOrganizationOwnerAccess(): Promise<{ hasAccess: boolean; owner: User | null }>
-```
-
-### TrialGuardMiddleware
-
-Protects routes that require active trial or subscription:
-
-```typescript
-// In routes
-router
-  .group(() => {
-    // Protected routes here
-  })
-  .middleware([middleware.trialGuard()])
-
-// Middleware behavior:
-// 1. If Owner: checks own hasAccess()
-// 2. If Member/Admin: checks organization owner's hasAccess()
-// 3. Returns 402 with code: 'SUBSCRIPTION_ENDED' if no access
-```
-
-### BillingController Endpoints
-
-```typescript
-// Get subscription status
-GET / api / billing / status
-
-// Create checkout session
-POST / api / billing / checkout
-// Body: { billingName?: string }
-// Returns: { checkoutUrl: string }
-
-// Cancel subscription
-POST / api / billing / cancel
-
-// Reactivate cancelled subscription
-POST / api / billing / reactivate
-```
-
-### Checkout Localization
-
-Checkout URLs automatically include billing country based on user locale:
-
-- `fr` → France
-- `en` → US (default)
-
-### Webhook Handling (WebhooksController)
-
-Lemon Squeezy webhooks sync subscription status:
-
-- `subscription_created` → Creates/updates Subscription record
-- `subscription_updated` → Updates status, card info, period end
-- Validates webhook signature with `LEMON_SQUEEZY_WEBHOOK_SECRET`
 
 ## Authentication & Authorization
 
@@ -837,12 +783,6 @@ DB_DATABASE=alexia_db
 # Email
 RESEND_API_KEY=            # From resend.com
 
-# Billing (Lemon Squeezy)
-LEMON_SQUEEZY_API_KEY=     # From lemonsqueezy.com
-LEMON_SQUEEZY_STORE_ID=    # Your store ID
-LEMON_SQUEEZY_VARIANT_ID=  # Product variant ID
-LEMON_SQUEEZY_WEBHOOK_SECRET=  # Webhook signing secret
-
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000
 
@@ -1071,4 +1011,3 @@ Deployment considerations:
 - Generate APP_KEY: `node ace generate:key`
 - Configure PostgreSQL connection
 - Set up Resend API key
-- Configure Lemon Squeezy credentials and webhook URL

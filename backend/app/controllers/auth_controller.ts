@@ -259,13 +259,6 @@ export default class AuthController {
       user.magicLinkToken = null
       user.magicLinkExpiresAt = null
 
-      // Initialize 14-day trial for new users
-      if (!user.trialUsed) {
-        user.trialStartedAt = DateTime.now()
-        user.trialEndsAt = DateTime.now().plus({ days: 14 })
-        user.trialUsed = true
-      }
-
       await user.save()
 
       // Seed default prompts for the organization (if not already seeded)

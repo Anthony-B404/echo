@@ -248,7 +248,6 @@
       "manageTeams": "Manage teams",
       "organizationSwitched": "Organization switched successfully",
       "organizationSwitchError": "Error switching organization",
-      "subscriptionExpired": "The subscription for this organization has not been renewed",
       "createOrganizationModal": {
         "title": "Create organization",
         "description": "Enter your new organization information.",
@@ -268,21 +267,6 @@
           "invalidEmail": "Invalid email"
         }
       }
-    },
-    "trialBanner": {
-      "title": "Free Trial",
-      "description": "You have {days} days remaining in your trial.",
-      "subscribe": "Subscribe Now"
-    },
-    "accessBlockedModal": {
-      "title": "Access Blocked",
-      "description": "Your subscription has ended. Please subscribe to continue using the application.",
-      "descriptionMember": "The organization owner's subscription has ended. Create your own organization to continue.",
-      "switchToAccessible": "Switch to an organization you have access to:",
-      "subscribe": "Subscribe Now",
-      "createOrganization": "Create my organization",
-      "logout": "Log out",
-      "error": "Failed to create checkout session"
     },
     "contactSupport": {
       "title": "Contact Support",
@@ -305,7 +289,6 @@
     },
     "user": {
       "profile": "Profile",
-      "billing": "Billing",
       "settings": "Settings",
       "theme": "Theme",
       "primary": "Primary",
@@ -647,8 +630,7 @@
           "organization": "Organization",
           "members": "Members",
           "notifications": "Notifications",
-          "security": "Security",
-          "billing": "Billing"
+          "security": "Security"
         },
         "general": {
           "title": "Profile",
@@ -732,75 +714,8 @@
         "security": {
           "title": "Account",
           "description": "No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
-        },
-        "billing": {
-          "title": "Billing",
-          "description": "Manage your subscription and billing information.",
-          "noSubscription": {
-            "title": "No active subscription",
-            "description": "Subscribe to unlock all features."
-          },
-          "subscribe": "Subscribe Now",
-          "status": "Subscription Status",
-          "renewsAt": "Renews at",
-          "endsAt": "Access until",
-          "statuses": {
-            "active": "Active",
-            "cancelled": "Cancelled",
-            "expired": "Expired",
-            "paused": "Paused",
-            "past_due": "Past Due",
-            "unpaid": "Unpaid",
-            "on_trial": "Trial"
-          },
-          "paymentMethod": {
-            "title": "Payment Method",
-            "update": "Update payment method"
-          },
-          "cancel": {
-            "button": "Cancel subscription",
-            "modal": {
-              "title": "Cancel subscription",
-              "description": "Are you sure you want to cancel your subscription?",
-              "warning": "Your subscription will remain active until {date}. After this date, you will lose access to premium features.",
-              "confirm": "Yes, cancel subscription"
-            },
-            "success": "Subscription cancelled successfully",
-            "error": "Failed to cancel subscription"
-          },
-          "cancelled": {
-            "alert": {
-              "title": "Subscription cancelled",
-              "description": "Your subscription has been cancelled. You will have access until {date}."
-            }
-          },
-          "reactivate": {
-            "button": "Reactivate subscription",
-            "success": "Subscription reactivated successfully",
-            "error": "Failed to reactivate subscription"
-          },
-          "success": {
-            "subscribed": "Successfully subscribed! Thank you for your support."
-          },
-          "error": {
-            "fetchFailed": "Failed to load subscription status",
-            "checkoutFailed": "Failed to create checkout session"
-          },
-          "trial": {
-            "title": "Free Trial Active",
-            "description": "You have {days} days remaining in your free trial.",
-            "expiredTitle": "Trial Expired",
-            "expiredDescription": "Your free trial has ended. Subscribe to continue using the application."
-          }
         }
       }
-    },
-    "trialExpired": {
-      "title": "Your Free Trial Has Ended",
-      "description": "Subscribe now to continue using all features.",
-      "subscribe": "Subscribe",
-      "logout": "Log out",
-      "error": "Failed to create checkout session"
     },
     "shared": {
       "seoTitle": "Shared Analysis",

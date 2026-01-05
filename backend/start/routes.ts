@@ -16,8 +16,6 @@ const OrganizationsController = () => import('#controllers/organizations_control
 const InvitationsController = () => import('#controllers/invitations_controller')
 const SocialAuthController = () => import('#controllers/social_auth_controller')
 const MembersController = () => import('#controllers/members_controller')
-const BillingController = () => import('#controllers/billing_controller')
-const WebhooksController = () => import('#controllers/webhooks_controller')
 const ContactController = () => import('#controllers/contact_controller')
 const AudioController = () => import('#controllers/audio_controller')
 const AudiosController = () => import('#controllers/audios_controller')
@@ -56,69 +54,38 @@ router.get('/verify-email-change/:token', [UsersController, 'verifyEmailChange']
 router.get('/auth/google/redirect', [SocialAuthController, 'googleRedirect'])
 router.get('/auth/google/callback', [SocialAuthController, 'googleCallback'])
 
-// Webhook routes (public - signature verified in controller)
-router.post('/webhooks/lemonsqueezy', [WebhooksController, 'handleLemonSqueezy'])
-
 // Public routes for shared audios (no auth required)
 router.get('/shared/:identifier', [SharedAudioController, 'show'])
 router.get('/shared/:identifier/export', [SharedAudioController, 'export'])
 router.get('/shared/:identifier/audio', [SharedAudioController, 'audio'])
 
-// Protected routes WITHOUT trial guard (always accessible when authenticated)
+// Protected routes (all authenticated users)
 router
   .group(() => {
-    // Auth routes (must work even when trial expired)
+    // Auth routes
     router.post('/logout', [AuthController, 'logout'])
     router.get('/check-token', [AuthController, 'checkToken'])
 
-    // User routes (must work even when trial expired for UI display)
+    // User routes
     router.get('/me', [UsersController, 'me'])
+    router.put('/profile', [UsersController, 'updateProfile'])
 
-    // OAuth completion route (onboarding - trial not yet set)
+    // OAuth completion route (onboarding)
     router.post('/oauth/complete-registration', [SocialAuthController, 'completeOAuthRegistration'])
 
-    // Organization GET (needed for auth callback flow and UI display when trial expired)
+    // Organization routes
     router.get('/organization', [OrganizationsController, 'getOrganizationWithUsers'])
     router.get('/organizations', [OrganizationsController, 'listUserOrganizations'])
-
-    // Organization creation (must work when trial expired for members to create their own org)
     router.post('/organizations', [OrganizationsController, 'createOrganization'])
-
-    // Organization switch (must work when current org is blocked to switch to accessible org)
     router.post('/organizations/:id/switch', [OrganizationsController, 'switchOrganization'])
-
-    // List accessible organizations (for blocked modal to show switch options)
-    router.get('/organizations/accessible', [
-      OrganizationsController,
-      'listAccessibleOrganizations',
-    ])
-
-    // Billing routes (must work even when trial expired for subscription)
-    router.get('/billing/status', [BillingController, 'getSubscriptionStatus'])
-    router.post('/billing/checkout', [BillingController, 'createCheckoutSession'])
-    router.post('/billing/cancel', [BillingController, 'cancelSubscription'])
-    router.post('/billing/reactivate', [BillingController, 'reactivateSubscription'])
-
-    // Contact support route
-    router.post('/contact', [ContactController, 'send'])
-  })
-  .use(middleware.auth({ guards: ['api'] }))
-
-// Protected routes WITH trial guard (blocked when trial expired)
-router
-  .group(() => {
-    // User routes
-    router.put('/profile', [UsersController, 'updateProfile'])
+    router.put('/organization/update', [OrganizationsController, 'updateOrganization'])
+    router.delete('/organizations/:id', [OrganizationsController, 'deleteOrganization'])
+    router.get('/members', [OrganizationsController, 'getMembers'])
 
     // Member management routes
     router.put('/update-member/:id', [MembersController, 'updateMember'])
     router.put('/update-member-role/:id', [MembersController, 'updateMemberRole'])
     router.delete('/delete-member/:id', [MembersController, 'deleteMember'])
-
-    // Organization routes (PUT/DELETE actions blocked when trial expired)
-    router.put('/organization/update', [OrganizationsController, 'updateOrganization'])
-    router.delete('/organizations/:id', [OrganizationsController, 'deleteOrganization'])
-    router.get('/members', [OrganizationsController, 'getMembers'])
 
     // Invitation routes
     router.post('/invite-member', [InvitationsController, 'createInvitation'])
@@ -166,6 +133,8 @@ router
     // Credits routes
     router.get('/credits', [CreditsController, 'balance'])
     router.get('/credits/history', [CreditsController, 'history'])
+
+    // Contact support route
+    router.post('/contact', [ContactController, 'send'])
   })
   .use(middleware.auth({ guards: ['api'] }))
-  .use(middleware.trialGuard())

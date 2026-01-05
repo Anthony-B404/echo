@@ -5,8 +5,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const toast = useToast();
-const trialStore = useTrialStore();
-const { canAccessOrganization, canAccessBilling } = useSettingsPermissions();
+const { canAccessOrganization } = useSettingsPermissions();
 const creditsStore = useCreditsStore();
 const { credits } = storeToRefs(creditsStore);
 const { fetchBalance } = creditsStore;
@@ -57,7 +56,7 @@ const settingsItems = computed(() => {
     {
       label: t("pages.dashboard.settings.navigation.general"),
       to: localePath("/dashboard/settings"),
-      icon: "i-lucide-sliders", 
+      icon: "i-lucide-sliders",
       onSelect: () => {
         open.value = false;
       },
@@ -102,25 +101,10 @@ const settingsItems = computed(() => {
     },
   });
 
-  if (canAccessBilling.value) {
-    items.push({
-      label: t("pages.dashboard.settings.navigation.billing"),
-      to: localePath("/dashboard/settings/billing"),
-      icon: "i-lucide-credit-card",
-      onSelect: () => {
-        open.value = false;
-      },
-    });
-  }
-
   return [items];
 });
 
 onMounted(async () => {
-  if (!trialStore.loaded) {
-    await trialStore.fetchTrialStatus();
-  }
-
   const cookie = useCookie("cookie-consent");
   if (cookie.value === "accepted") {
     return;
@@ -154,12 +138,12 @@ onMounted(async () => {
     <!-- Background Blobs -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <!-- Top Left Blob -->
-      <div 
+      <div
         class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-20 blur-3xl bg-gradient-to-br from-indigo-400 to-blue-500 animate-pulse"
         style="animation-duration: 8s;"
       ></div>
       <!-- Bottom Right Blob -->
-      <div 
+      <div
         class="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full opacity-15 blur-3xl bg-gradient-to-tl from-indigo-500 to-purple-500 animate-pulse"
         style="animation-duration: 12s;"
       ></div>
@@ -221,7 +205,6 @@ onMounted(async () => {
     </main>
 
     <!-- Global Components -->
-    <BillingAccessBlockedModal v-if="trialStore.loaded && !trialStore.hasAccess" />
     <ContactSupportModal v-model:open="contactModalOpen" />
 
     <!-- Mobile Slideover -->
@@ -229,7 +212,7 @@ onMounted(async () => {
       <template #body>
         <div class="flex flex-col gap-4 h-full">
            <TeamsMenu />
-           
+
            <div class="space-y-4">
              <div class="font-semibold text-sm text-gray-500 px-2">{{ t("layouts.default.navigation.workshop") }}</div>
              <UNavigationMenu :items="mainLinks[0]" orientation="vertical" />
@@ -240,9 +223,9 @@ onMounted(async () => {
            <div class="space-y-4">
              <div class="font-semibold text-sm text-gray-500 px-2">{{ t("layouts.default.navigation.settings") }}</div>
               <!-- Reusing settingsItems logic for mobile nav -->
-              <UNavigationMenu 
-                :items="settingsItems[0] as any" 
-                orientation="vertical" 
+              <UNavigationMenu
+                :items="settingsItems[0] as any"
+                orientation="vertical"
               />
            </div>
 

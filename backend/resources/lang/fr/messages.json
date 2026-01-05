@@ -69,20 +69,6 @@
     "deleted": "Membre retiré de l'organisation avec succès",
     "not_found": "Membre introuvable dans cette organisation"
   },
-  "billing": {
-    "checkout_failed": "Impossible de créer la session de paiement",
-    "already_subscribed": "Vous avez déjà un abonnement actif",
-    "subscription_created": "Abonnement créé avec succès",
-    "subscription_cancelled": "Abonnement résilié avec succès",
-    "subscription_reactivated": "Abonnement réactivé avec succès",
-    "subscription_not_found": "Abonnement introuvable",
-    "cancel_failed": "Impossible de résilier l'abonnement",
-    "reactivate_failed": "Impossible de réactiver l'abonnement",
-    "no_active_subscription": "Aucun abonnement actif",
-    "cannot_reactivate": "Impossible de réactiver - l'abonnement a déjà expiré",
-    "subscription_ended": "Votre abonnement est terminé. Veuillez vous abonner pour continuer à utiliser l'application.",
-    "subscription_ended_member": "L'abonnement du propriétaire de l'organisation est terminé. Créez votre propre organisation pour continuer."
-  },
   "contact": {
     "sent": "Message envoyé avec succès"
   },

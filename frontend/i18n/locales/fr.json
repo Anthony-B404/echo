@@ -250,7 +250,6 @@
       "manageTeams": "Gérer les équipes",
       "organizationSwitched": "Organisation changée avec succès",
       "organizationSwitchError": "Erreur lors du changement d'organisation",
-      "subscriptionExpired": "L'abonnement de cette organisation n'a pas été renouvelé",
       "createOrganizationModal": {
         "title": "Créer une organisation",
         "description": "Renseignez les informations de votre nouvelle organisation.",
@@ -270,21 +269,6 @@
           "invalidEmail": "Email invalide"
         }
       }
-    },
-    "trialBanner": {
-      "title": "Essai gratuit",
-      "description": "Il vous reste {days} jours d'essai.",
-      "subscribe": "S'abonner"
-    },
-    "accessBlockedModal": {
-      "title": "Accès bloqué",
-      "description": "Votre abonnement est terminé. Veuillez vous abonner pour continuer à utiliser l'application.",
-      "descriptionMember": "L'abonnement du propriétaire de l'organisation est terminé. Créez votre propre organisation pour continuer.",
-      "switchToAccessible": "Basculez vers une organisation à laquelle vous avez accès :",
-      "subscribe": "S'abonner maintenant",
-      "createOrganization": "Créer mon organisation",
-      "logout": "Se déconnecter",
-      "error": "Erreur lors de la création du paiement"
     },
     "contactSupport": {
       "title": "Contacter le support",
@@ -307,7 +291,6 @@
     },
     "user": {
       "profile": "Profil",
-      "billing": "Facturation",
       "settings": "Paramètres",
       "theme": "Thème",
       "primary": "Primaire",
@@ -649,8 +632,7 @@
           "organization": "Organisation",
           "members": "Membres",
           "notifications": "Notifications",
-          "security": "Sécurité",
-          "billing": "Facturation"
+          "security": "Sécurité"
         },
         "general": {
           "title": "Profil",
@@ -734,75 +716,8 @@
         "security": {
           "title": "Compte",
           "description": "Vous ne souhaitez plus utiliser notre service ? Vous pouvez supprimer votre compte ici. Cette action est irréversible. Toutes les informations liées à ce compte seront supprimées définitivement."
-        },
-        "billing": {
-          "title": "Facturation",
-          "description": "Gérez votre abonnement et vos informations de facturation.",
-          "noSubscription": {
-            "title": "Aucun abonnement actif",
-            "description": "Abonnez-vous pour débloquer toutes les fonctionnalités."
-          },
-          "subscribe": "S'abonner",
-          "status": "Statut de l'abonnement",
-          "renewsAt": "Renouvellement le",
-          "endsAt": "Accès jusqu'au",
-          "statuses": {
-            "active": "Actif",
-            "cancelled": "Annulé",
-            "expired": "Expiré",
-            "paused": "En pause",
-            "past_due": "En retard",
-            "unpaid": "Impayé",
-            "on_trial": "Essai"
-          },
-          "paymentMethod": {
-            "title": "Moyen de paiement",
-            "update": "Modifier le moyen de paiement"
-          },
-          "cancel": {
-            "button": "Résilier l'abonnement",
-            "modal": {
-              "title": "Résilier l'abonnement",
-              "description": "Êtes-vous sûr de vouloir résilier votre abonnement ?",
-              "warning": "Votre abonnement restera actif jusqu'au {date}. Après cette date, vous perdrez l'accès aux fonctionnalités premium.",
-              "confirm": "Oui, résilier l'abonnement"
-            },
-            "success": "Abonnement résilié avec succès",
-            "error": "Impossible de résilier l'abonnement"
-          },
-          "cancelled": {
-            "alert": {
-              "title": "Abonnement résilié",
-              "description": "Votre abonnement a été résilié. Vous aurez accès jusqu'au {date}."
-            }
-          },
-          "reactivate": {
-            "button": "Réactiver l'abonnement",
-            "success": "Abonnement réactivé avec succès",
-            "error": "Impossible de réactiver l'abonnement"
-          },
-          "success": {
-            "subscribed": "Abonnement réussi ! Merci pour votre soutien."
-          },
-          "error": {
-            "fetchFailed": "Impossible de charger le statut de l'abonnement",
-            "checkoutFailed": "Impossible de créer la session de paiement"
-          },
-          "trial": {
-            "title": "Essai gratuit actif",
-            "description": "Il vous reste {days} jours d'essai gratuit.",
-            "expiredTitle": "Essai gratuit terminé",
-            "expiredDescription": "Votre essai gratuit est terminé. Abonnez-vous pour continuer à utiliser l'application."
-          }
         }
       }
-    },
-    "trialExpired": {
-      "title": "Votre essai gratuit est terminé",
-      "description": "Abonnez-vous maintenant pour continuer à utiliser toutes les fonctionnalités.",
-      "subscribe": "S'abonner",
-      "logout": "Se déconnecter",
-      "error": "Impossible de créer la session de paiement"
     },
     "shared": {
       "seoTitle": "Analyse partagée",

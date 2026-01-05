@@ -69,20 +69,6 @@
     "deleted": "Member removed from organization successfully",
     "not_found": "Member not found in this organization"
   },
-  "billing": {
-    "checkout_failed": "Failed to create checkout session",
-    "already_subscribed": "You already have an active subscription",
-    "subscription_created": "Subscription created successfully",
-    "subscription_cancelled": "Subscription cancelled successfully",
-    "subscription_reactivated": "Subscription reactivated successfully",
-    "subscription_not_found": "Subscription not found",
-    "cancel_failed": "Failed to cancel subscription",
-    "reactivate_failed": "Failed to reactivate subscription",
-    "no_active_subscription": "No active subscription",
-    "cannot_reactivate": "Cannot reactivate - subscription has already expired",
-    "subscription_ended": "Your subscription has ended. Please subscribe to continue using the application.",
-    "subscription_ended_member": "The organization owner's subscription has ended. Create your own organization to continue."
-  },
   "contact": {
     "sent": "Message sent successfully"
   },
