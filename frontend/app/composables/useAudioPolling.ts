@@ -1,4 +1,5 @@
-import type { JobStatus, AudioStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { JobStatus } from '~/types/audio'
 
 export interface UseAudioPollingOptions {
   /** Initial polling interval in ms (default: 2000) */
@@ -17,6 +18,17 @@ export interface UseAudioPollingOptions {
   onError?: (error: Error) => void
 }
 
+/**
+ * Internal state for each active poll
+ */
+interface ActivePoll {
+  jobId: string
+  audioId: number
+  attempts: number
+  interval: number
+  timeoutId: ReturnType<typeof setTimeout> | null
+}
+
 export function useAudioPolling(options: UseAudioPollingOptions = {}) {
   const {
     initialInterval = 2000,
@@ -31,13 +43,11 @@ export function useAudioPolling(options: UseAudioPollingOptions = {}) {
   const { authenticatedFetch } = useAuth()
   const audioStore = useAudioStore()
 
-  const polling = ref(false)
-  const currentJobId = ref<string | null>(null)
-  const currentAudioId = ref<number | null>(null)
-  const attempts = ref(0)
-  const currentInterval = ref(initialInterval)
+  // Map of active polls - supports multiple concurrent jobs
+  const activePolls = ref<Map<string, ActivePoll>>(new Map())
 
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  // Computed: true if any job is being polled
+  const polling = computed(() => activePolls.value.size > 0)
 
   /**
    * Fetch job status from API
@@ -53,41 +63,39 @@ export function useAudioPolling(options: UseAudioPollingOptions = {}) {
   }
 
   /**
-   * Single poll iteration
+   * Single poll iteration for a specific job
    */
-  async function poll() {
-    if (!polling.value || !currentJobId.value || !currentAudioId.value) return
+  async function pollJob(jobId: string) {
+    const poll = activePolls.value.get(jobId)
+    if (!poll) return
 
-    attempts.value += 1
+    poll.attempts += 1
 
     // Check max attempts
-    if (attempts.value > maxAttempts) {
-      stopPolling()
+    if (poll.attempts > maxAttempts) {
+      stopPollingForJob(jobId)
       onError?.(new Error('Maximum polling attempts reached. Please refresh to check status.'))
       return
     }
 
-    const status = await fetchStatus(currentJobId.value)
+    const status = await fetchStatus(jobId)
 
     if (!status) {
       // Retry with backoff on network error
-      scheduleNextPoll()
+      scheduleNextPoll(jobId)
       return
     }
 
     // Update store with job status
-    audioStore.updateJobStatus(currentJobId.value, status)
+    audioStore.updateJobStatus(jobId, status)
     onStatusChange?.(status)
 
     // Handle completion
-    if (status.status === 'completed') {
-      // Save values before stopPolling nulls them
-      const jobId = currentJobId.value!
-      const audioId = currentAudioId.value!
-
-      stopPolling()
+    if (status.status === AudioStatus.Completed) {
+      const audioId = poll.audioId
+      stopPollingForJob(jobId)
       audioStore.removeJob(jobId, audioId)
-      audioStore.updateAudioStatus(audioId, 'completed' as AudioStatus)
+      audioStore.updateAudioStatus(audioId, AudioStatus.Completed)
       // Refresh the audio to get transcription
       await audioStore.fetchAudio(audioId)
       onComplete?.(status)
@@ -95,83 +103,98 @@ export function useAudioPolling(options: UseAudioPollingOptions = {}) {
     }
 
     // Handle failure
-    if (status.status === 'failed') {
-      // Save values before stopPolling nulls them
-      const jobId = currentJobId.value!
-      const audioId = currentAudioId.value!
-
-      stopPolling()
+    if (status.status === AudioStatus.Failed) {
+      const audioId = poll.audioId
+      stopPollingForJob(jobId)
       audioStore.removeJob(jobId, audioId)
-      audioStore.updateAudioStatus(audioId, 'failed' as AudioStatus, status.error)
+      audioStore.updateAudioStatus(audioId, AudioStatus.Failed, status.error)
       onError?.(new Error(status.error || 'Processing failed'))
       return
     }
 
     // Continue polling with backoff
-    scheduleNextPoll()
+    scheduleNextPoll(jobId)
   }
 
   /**
-   * Schedule next poll with exponential backoff
+   * Schedule next poll with exponential backoff for a specific job
    */
-  function scheduleNextPoll() {
-    // Apply exponential backoff
-    currentInterval.value = Math.min(currentInterval.value * backoffFactor, maxInterval)
+  function scheduleNextPoll(jobId: string) {
+    const poll = activePolls.value.get(jobId)
+    if (!poll) return
 
-    timeoutId = setTimeout(() => {
-      poll()
-    }, currentInterval.value)
+    // Apply exponential backoff
+    poll.interval = Math.min(poll.interval * backoffFactor, maxInterval)
+
+    poll.timeoutId = setTimeout(() => {
+      pollJob(jobId)
+    }, poll.interval)
   }
 
   /**
-   * Start polling for a job
+   * Start polling for a job (supports multiple concurrent jobs)
    */
   function startPolling(jobId: string, audioId: number) {
-    // Stop any existing polling
-    stopPolling()
+    // Don't restart if already polling this job
+    if (activePolls.value.has(jobId)) return
 
-    polling.value = true
-    currentJobId.value = jobId
-    currentAudioId.value = audioId
-    attempts.value = 0
-    currentInterval.value = initialInterval
+    // Create new poll entry
+    const poll: ActivePoll = {
+      jobId,
+      audioId,
+      attempts: 0,
+      interval: initialInterval,
+      timeoutId: null,
+    }
+
+    activePolls.value.set(jobId, poll)
 
     // Track in store
     audioStore.trackJob(jobId, audioId)
 
     // Start polling immediately
-    poll()
+    pollJob(jobId)
   }
 
   /**
-   * Stop polling
+   * Stop polling for a specific job
    */
-  function stopPolling() {
-    polling.value = false
+  function stopPollingForJob(jobId: string) {
+    const poll = activePolls.value.get(jobId)
+    if (!poll) return
 
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-      timeoutId = null
+    if (poll.timeoutId) {
+      clearTimeout(poll.timeoutId)
     }
 
-    currentJobId.value = null
-    currentAudioId.value = null
+    activePolls.value.delete(jobId)
+  }
+
+  /**
+   * Stop all active polling
+   */
+  function stopAllPolling() {
+    activePolls.value.forEach((poll) => {
+      if (poll.timeoutId) {
+        clearTimeout(poll.timeoutId)
+      }
+    })
+    activePolls.value.clear()
   }
 
   // Cleanup on unmount
   onUnmounted(() => {
-    stopPolling()
+    stopAllPolling()
   })
 
   return {
     // State
     polling: readonly(polling),
-    currentJobId: readonly(currentJobId),
-    currentAudioId: readonly(currentAudioId),
-    attempts: readonly(attempts),
+    activePolls: readonly(activePolls),
 
     // Methods
     startPolling,
-    stopPolling,
+    stopPollingForJob,
+    stopAllPolling,
   }
 }

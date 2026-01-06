@@ -146,10 +146,6 @@ export default class AudioChunkingService {
       chunkIndex++
     }
 
-    console.log(
-      `[AudioChunking] Split ${metadata.duration.toFixed(1)}s audio into ${chunks.length} chunks`
-    )
-
     return {
       metadata,
       chunks,
@@ -217,6 +213,5 @@ export default class AudioChunkingService {
       }
     }
 
-    console.log(`[AudioChunking] Cleaned up ${chunks.length} chunk files`)
   }
 }

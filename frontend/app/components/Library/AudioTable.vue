@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Audio, AudioStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { Audio } from '~/types/audio'
 import { formatDistanceToNow } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 
@@ -254,10 +255,10 @@ function handleTitleKeydown(event: KeyboardEvent, audio: Audio) {
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
             <UIcon
-              :name="row.original.status === 'processing' ? 'i-lucide-loader-2' : 'i-lucide-music'"
+              :name="row.original.status === AudioStatus.Processing ? 'i-lucide-loader-2' : 'i-lucide-music'"
               :class="[
                 'h-5 w-5 text-primary-600 dark:text-primary-400',
-                row.original.status === 'processing' ? 'animate-spin' : ''
+                row.original.status === AudioStatus.Processing ? 'animate-spin' : ''
               ]"
             />
           </div>
@@ -336,7 +337,7 @@ function handleTitleKeydown(event: KeyboardEvent, audio: Audio) {
             :name="statusConfig[row.original.status as AudioStatus]?.icon || 'i-lucide-circle'"
             :class="[
               'h-3 w-3 mr-1',
-              row.original.status === 'processing' ? 'animate-spin' : ''
+              row.original.status === AudioStatus.Processing ? 'animate-spin' : ''
             ]"
           />
           {{ t(`components.workshop.status.${row.original.status}`) }}

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { AudioStatus } from '~/types/audio'
+
 definePageMeta({
   middleware: ['auth', 'pending-deletion'],
 })
@@ -17,7 +19,7 @@ const currentJobStatus = computed(() =>
   currentJobId.value ? audioStore.getJobStatus(currentJobId.value) : null
 )
 
-const { startPolling, stopPolling, polling } = useAudioPolling({
+const { startPolling, stopAllPolling, polling } = useAudioPolling({
   onComplete: () => {
     currentJobId.value = null
     toast.add({
@@ -40,8 +42,12 @@ const { startPolling, stopPolling, polling } = useAudioPolling({
 const audioId = computed(() => Number(route.params.id))
 const audio = computed(() => audioStore.currentAudio)
 const isProcessing = computed(
-  () => audio.value && (audio.value.status === 'pending' || audio.value.status === 'processing')
+  () => audio.value && (audio.value.status === AudioStatus.Pending || audio.value.status === AudioStatus.Processing)
 )
+
+// Computed helpers for template
+const isCompleted = computed(() => audio.value?.status === AudioStatus.Completed)
+const isFailed = computed(() => audio.value?.status === AudioStatus.Failed)
 
 const activeTab = ref<'transcription' | 'analysis'>('transcription')
 const deleteModalOpen = ref(false)
@@ -82,7 +88,7 @@ onMounted(async () => {
 watch(
   () => audio.value?.status,
   async (status) => {
-    if (status === 'completed' && audio.value && !audioFileUrl.value) {
+    if (status === AudioStatus.Completed && audio.value && !audioFileUrl.value) {
       await loadAudioFile()
     }
   },
@@ -276,7 +282,7 @@ function formatFileSize(bytes: number): string {
 
 // Cleanup
 onUnmounted(() => {
-  stopPolling()
+  stopAllPolling()
   audioStore.clearCurrentAudio()
   // Revoke blob URL to prevent memory leak
   if (audioFileUrl.value) {
@@ -394,14 +400,14 @@ const tabItems = computed(() => [
             <div class="flex items-start gap-4 mb-4">
               <div
                 class="shrink-0 w-16 h-16 rounded-lg flex items-center justify-center"
-                :class="audio.status === 'completed' ? 'bg-primary/10' : 'bg-elevated'"
+                :class="isCompleted ? 'bg-primary/10' : 'bg-elevated'"
               >
                 <UIcon
                   :name="isProcessing ? 'i-lucide-loader-2' : 'i-lucide-music'"
                   class="w-8 h-8"
                   :class="[
                     isProcessing ? 'animate-spin text-primary' : '',
-                    audio.status === 'completed' ? 'text-primary' : 'text-muted',
+                    isCompleted ? 'text-primary' : 'text-muted',
                   ]"
                 />
               </div>
@@ -438,7 +444,7 @@ const tabItems = computed(() => [
               class="mt-4"
               :status="{
                 jobId: currentJobId || '',
-                status: currentJobStatus?.status || 'processing',
+                status: currentJobStatus?.status || AudioStatus.Processing,
                 progress: currentJobStatus?.progress || 0,
                 error: currentJobStatus?.error,
               }"
@@ -446,7 +452,7 @@ const tabItems = computed(() => [
           </UPageCard>
 
           <!-- Transcription/Analysis tabs -->
-          <UPageCard v-if="audio.status === 'completed' && audio.transcription" variant="subtle">
+          <UPageCard v-if="isCompleted && audio.transcription" variant="subtle">
             <div class="flex items-center justify-between mb-4">
               <UTabs v-model="activeTab" :items="tabItems" />
 
@@ -522,7 +528,7 @@ const tabItems = computed(() => [
 
           <!-- Error state -->
           <UAlert
-            v-if="audio.status === 'failed'"
+            v-if="isFailed"
             color="error"
             variant="subtle"
             :title="t('pages.dashboard.workshop.detail.processingFailed')"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { AudioStatus } from "~/types/audio";
+
 definePageMeta({
   layout: false,
 });
@@ -188,7 +190,7 @@ useSeoMeta({
 
           <!-- Audio player -->
           <WorkshopAudioPlayer
-            v-if="audio.status === 'completed'"
+            v-if="audio.status === AudioStatus.Completed"
             ref="audioPlayerRef"
             :src="audioUrl"
             :duration="audio.duration"

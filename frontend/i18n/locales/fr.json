@@ -417,8 +417,14 @@
         "failed": "Échoué"
       },
       "processing": {
+        "uploading": "Envoi du fichier...",
         "pending": "En attente de traitement...",
-        "analyzing": "Analyse en cours... {progress}%",
+        "starting": "Démarrage...",
+        "converting": "Conversion audio...",
+        "analyzing_metadata": "Analyse des métadonnées...",
+        "transcribing": "Transcription en cours... {progress}%",
+        "analyzing": "Analyse du contenu...",
+        "finalizing": "Finalisation...",
         "completed": "Traitement terminé",
         "failed": "Traitement échoué",
         "errorTitle": "Erreur de traitement"
@@ -496,6 +502,7 @@
     "dashboard": {
       "workshop": {
         "title": "Atelier Audio",
+        "subtitle": "Gérez vos fichiers audio et générez des analyses.",
         "newAudio": "Nouveau fichier audio",
         "tabs": {
           "upload": "Importer",

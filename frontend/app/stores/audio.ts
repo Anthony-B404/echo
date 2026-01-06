@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Audio, AudioPagination, AudioStatus, JobStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { Audio, AudioPagination, JobStatus } from '~/types/audio'
 
 interface AudioState {
   audios: Audio[]
@@ -49,10 +50,10 @@ export const useAudioStore = defineStore('audio', {
       return (audioId: number) => state.processingAudioIds.has(audioId)
     },
 
-    pendingAudios: (state) => state.audios.filter((a) => a.status === 'pending'),
-    processingAudios: (state) => state.audios.filter((a) => a.status === 'processing'),
-    completedAudios: (state) => state.audios.filter((a) => a.status === 'completed'),
-    failedAudios: (state) => state.audios.filter((a) => a.status === 'failed'),
+    pendingAudios: (state) => state.audios.filter((a) => a.status === AudioStatus.Pending),
+    processingAudios: (state) => state.audios.filter((a) => a.status === AudioStatus.Processing),
+    completedAudios: (state) => state.audios.filter((a) => a.status === AudioStatus.Completed),
+    failedAudios: (state) => state.audios.filter((a) => a.status === AudioStatus.Failed),
 
     hasMore: (state) => state.pagination.currentPage < state.pagination.lastPage,
   },
@@ -226,7 +227,7 @@ export const useAudioStore = defineStore('audio', {
     trackJob(jobId: string, audioId: number) {
       this.activeJobs.set(jobId, {
         jobId,
-        status: 'pending',
+        status: AudioStatus.Pending,
         progress: 0,
       })
       this.processingAudioIds.add(audioId)

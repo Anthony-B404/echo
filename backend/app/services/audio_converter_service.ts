@@ -135,10 +135,6 @@ export default class AudioConverterService {
     const convertedSize = await this.getFileSize(outputPath)
     const compressionRatio = originalSize > 0 ? convertedSize / originalSize : 1
 
-    console.log(
-      `[AudioConverter] Converted ${originalName}: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(convertedSize / 1024 / 1024).toFixed(2)}MB (${(compressionRatio * 100).toFixed(1)}%)`
-    )
-
     return {
       path: outputPath,
       originalSize,

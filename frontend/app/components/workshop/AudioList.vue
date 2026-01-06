@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { Audio, AudioStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { Audio } from '~/types/audio'
 
 const props = defineProps<{
   audios: Audio[]
   loading?: boolean
   selectedId?: number | null
-  processingAudioId?: number | null
-  processingProgress?: number
 }>()
 
 const emit = defineEmits<{
@@ -29,10 +28,23 @@ const hasMore = computed(() => audioStore.hasMore)
 
 const statusOptions = computed(() => [
   { label: t('components.workshop.filters.all'), value: 'all' },
-  { label: t('components.workshop.filters.completed'), value: 'completed' },
-  { label: t('components.workshop.filters.processing'), value: 'processing' },
-  { label: t('components.workshop.filters.failed'), value: 'failed' },
+  { label: t('components.workshop.filters.completed'), value: AudioStatus.Completed },
+  { label: t('components.workshop.filters.processing'), value: AudioStatus.Processing },
+  { label: t('components.workshop.filters.failed'), value: AudioStatus.Failed },
 ])
+
+/**
+ * Get progress for a specific audio from the store
+ * Returns undefined if the audio is not currently being processed
+ */
+function getProgressForAudio(audio: Audio): number | undefined {
+  // Only show progress for pending or processing audios with a job
+  if (!audio.currentJobId) return undefined
+  if (audio.status !== AudioStatus.Pending && audio.status !== AudioStatus.Processing) return undefined
+
+  const jobStatus = audioStore.getJobStatus(audio.currentJobId)
+  return jobStatus?.progress
+}
 </script>
 
 <template>
@@ -74,7 +86,7 @@ const statusOptions = computed(() => [
         :key="audio.id"
         :audio="audio"
         :selected="selectedId === audio.id"
-        :progress="audio.id === processingAudioId ? processingProgress : undefined"
+        :progress="getProgressForAudio(audio)"
         @click="emit('select', audio)"
         @delete="emit('delete', audio)"
       />

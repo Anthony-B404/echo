@@ -2,6 +2,7 @@ import { Worker, Job } from 'bullmq'
 import queueConfig from '#config/queue'
 import MistralService, { type TranscriptionResult } from '#services/mistral_service'
 import AudioChunkingService, { type ChunkingResult } from '#services/audio_chunking_service'
+import AudioConverterService from '#services/audio_converter_service'
 import storageService from '#services/storage_service'
 import Audio, { AudioStatus } from '#models/audio'
 import User from '#models/user'
@@ -24,11 +25,11 @@ interface MergeContext {
 
 /**
  * Calculate progress percentage for chunk processing
- * Transcription phase: 10% to 70% (60% range distributed across chunks)
+ * Transcription phase: 17% to 72% (55% range distributed across chunks)
  */
 function calculateChunkProgress(currentChunk: number, totalChunks: number): number {
-  const TRANSCRIPTION_START = 10
-  const TRANSCRIPTION_END = 70
+  const TRANSCRIPTION_START = 17
+  const TRANSCRIPTION_END = 72
   const TRANSCRIPTION_RANGE = TRANSCRIPTION_END - TRANSCRIPTION_START
 
   const perChunkRange = TRANSCRIPTION_RANGE / totalChunks
@@ -102,18 +103,18 @@ function mergeChunkTranscription(
  * Process transcription jobs with chunking support for long audio files.
  *
  * Progress stages:
- * - 0-5%: Downloading file from storage
- * - 5-10%: Getting metadata and chunking if needed
- * - 10-70%: Transcribing audio chunks with Mistral
- * - 70-90%: Analyzing with AI
- * - 90-100%: Cleanup and completion
+ * - 0-2%: Downloading file from storage
+ * - 2-12%: Converting audio to Opus format
+ * - 12-17%: Getting metadata and chunking if needed
+ * - 17-72%: Transcribing audio chunks with Mistral
+ * - 72-92%: Analyzing with AI
+ * - 92-100%: Cleanup and completion
  */
 async function processTranscriptionJob(
   job: Job<TranscriptionJobData, TranscriptionJobResult>
 ): Promise<TranscriptionJobResult> {
   const { audioId, audioFilePath, audioFileName, prompt } = job.data
 
-  console.log(`[Job ${job.id}] Starting transcription for: ${audioFileName} (audioId: ${audioId})`)
 
   // Load audio record and set status to processing
   const audio = await Audio.find(audioId)
@@ -122,55 +123,96 @@ async function processTranscriptionJob(
     await audio.save()
   }
 
-  // Stage 1: Download file from storage (0-5%)
-  await job.updateProgress(2)
-
-  const fileBuffer = await storageService.getFileBuffer(audioFilePath)
-
-  // Write to temp file for processing
+  // Initialize tracking variables
   const tempDir = tmpdir()
-  const tempPath = join(tempDir, `${randomUUID()}-${audioFileName}`)
-  await writeFile(tempPath, fileBuffer)
-
-  await job.updateProgress(5)
-  console.log(`[Job ${job.id}] File downloaded to temp path`)
-
-  // Initialize chunking service and result tracking
+  let tempOriginalPath: string | null = null
+  let tempPath: string | null = null
+  const converter = new AudioConverterService()
   const chunkingService = new AudioChunkingService()
   let chunkingResult: ChunkingResult | null = null
 
   try {
-    // Stage 2: Get metadata and chunk if needed (5-10%)
-    await job.updateProgress(7)
-    console.log(`[Job ${job.id}] Analyzing audio metadata...`)
+    // Stage 1: Download file from storage (0-2%)
+    await job.updateProgress(1)
 
-    chunkingResult = await chunkingService.splitIntoChunks(tempPath, tempDir)
+    const fileBuffer = await storageService.getFileBuffer(audioFilePath)
 
-    // Update audio duration in database
+    // Write to temp file for processing
+    tempOriginalPath = join(tempDir, `${randomUUID()}-original-${audioFileName}`)
+    await writeFile(tempOriginalPath, fileBuffer)
+
+    await job.updateProgress(2)
+
+    // Stage 2: Convert to Opus format (2-12%)
+    // Use simulated progress during ffmpeg conversion
+    await job.updateProgress(3)
+
+    // Start simulated progress during conversion (3% to 7%)
+    let conversionProgress = 3
+    const conversionInterval = setInterval(async () => {
+      if (conversionProgress < 7) {
+        conversionProgress++
+        await job.updateProgress(conversionProgress).catch(() => {})
+      }
+    }, 500)
+
+    let conversionResult
+    try {
+      conversionResult = await converter.convertToOpus(tempOriginalPath, 'voice')
+    } finally {
+      clearInterval(conversionInterval)
+    }
+
+    await job.updateProgress(8)
+
+    // Store converted file in persistent storage
+    await job.updateProgress(9)
+    const convertedFile = await storageService.storeAudioFromPath(
+      conversionResult.path,
+      job.data.organizationId,
+      {
+        originalName: audioFileName.replace(/\.[^/.]+$/, '.opus'),
+        mimeType: 'audio/opus',
+      }
+    )
+
+    // Update Audio record with converted file info
+    await job.updateProgress(10)
     if (audio) {
-      audio.duration = Math.round(chunkingResult.metadata.duration)
+      audio.filePath = convertedFile.path
+      audio.fileSize = convertedFile.size
+      audio.mimeType = 'audio/opus'
+      audio.duration = Math.round(conversionResult.duration)
       await audio.save()
     }
 
-    await job.updateProgress(10)
+    // Delete original file from storage
+    await storageService.deleteFile(audioFilePath).catch(() => {})
 
-    if (chunkingResult.needsChunking) {
-      console.log(
-        `[Job ${job.id}] Audio requires chunking: ${chunkingResult.metadata.duration.toFixed(1)}s → ${chunkingResult.chunks.length} chunks`
-      )
-    } else {
-      console.log(
-        `[Job ${job.id}] Audio under threshold: ${chunkingResult.metadata.duration.toFixed(1)}s, no chunking needed`
-      )
-    }
+    // Cleanup temp files from conversion
+    await job.updateProgress(11)
+    await unlink(tempOriginalPath).catch(() => {})
+    tempOriginalPath = null // Mark as cleaned
+    await converter.cleanup(conversionResult.path)
+
+    // Write converted file to temp for subsequent processing
+    tempPath = join(tempDir, `${randomUUID()}-converted.opus`)
+    const convertedBuffer = await storageService.getFileBuffer(convertedFile.path)
+    await writeFile(tempPath, convertedBuffer)
+
+    await job.updateProgress(12)
+
+    // Stage 3: Get metadata and chunk if needed (12-17%)
+    await job.updateProgress(14)
+
+    chunkingResult = await chunkingService.splitIntoChunks(tempPath, tempDir)
+
+    await job.updateProgress(17)
+
 
     // Credit check: Calculate credits needed (1 credit = 1 minute, rounded up)
     const durationMinutes = Math.ceil(chunkingResult.metadata.duration / 60)
     const creditsNeeded = Math.max(1, durationMinutes) // Minimum 1 credit
-
-    console.log(
-      `[Job ${job.id}] Credits needed: ${creditsNeeded} (${chunkingResult.metadata.duration.toFixed(1)}s)`
-    )
 
     // Load user and check credits
     const user = await User.find(job.data.userId)
@@ -198,9 +240,8 @@ async function processTranscriptionJob(
       `Analyse audio: ${fileNameWithoutExt} (${Math.round(chunkingResult.metadata.duration)}s)`,
       audioId
     )
-    console.log(`[Job ${job.id}] Deducted ${creditsNeeded} credits. New balance: ${user.credits}`)
 
-    // Stage 3: Transcribe audio chunks (10-70%)
+    // Stage 4: Transcribe audio chunks (17-72%)
     const mistralService = new MistralService()
     let transcriptionResult: TranscriptionResult
 
@@ -215,16 +256,9 @@ async function processTranscriptionJob(
 
       for (let i = 0; i < chunkingResult.chunks.length; i++) {
         const chunk = chunkingResult.chunks[i]
-        console.log(
-          `[Job ${job.id}] Transcribing chunk ${i + 1}/${chunkingResult.chunks.length} (${chunk.duration.toFixed(1)}s)...`
-        )
 
         const chunkFileName = `chunk_${i}_${audioFileName}`
         const chunkTranscription = await mistralService.transcribe(chunk.path, chunkFileName)
-
-        console.log(
-          `[Job ${job.id}] Chunk ${i + 1} transcribed: ${chunkTranscription.text.length} chars, ${chunkTranscription.segments.length} segments`
-        )
 
         // Merge with timestamp adjustment using chunk's position in original audio
         mergeContext = mergeChunkTranscription(mergeContext, chunkTranscription, i, chunk.startTime)
@@ -239,33 +273,51 @@ async function processTranscriptionJob(
         segments: mergeContext.segments,
         language: mergeContext.language,
       }
-
-      console.log(
-        `[Job ${job.id}] All chunks merged: ${transcriptionResult.text.length} chars, ${transcriptionResult.segments.length} total segments`
-      )
     } else {
       // Single file transcription (no chunking)
-      console.log(`[Job ${job.id}] Starting transcription...`)
-      transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
-      await job.updateProgress(70)
-    }
+      // Use simulated progress during Mistral API call (17% to 70%)
+      await job.updateProgress(20)
 
-    console.log(
-      `[Job ${job.id}] Transcription complete (${transcriptionResult.text.length} chars, ${transcriptionResult.segments.length} segments)`
-    )
+      let transcriptionProgress = 20
+      const transcriptionInterval = setInterval(async () => {
+        if (transcriptionProgress < 68) {
+          transcriptionProgress += 3
+          await job.updateProgress(transcriptionProgress).catch(() => {})
+        }
+      }, 1000)
+
+      try {
+        transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
+      } finally {
+        clearInterval(transcriptionInterval)
+      }
+      await job.updateProgress(72)
+    }
 
     if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
       throw new Error('Transcription returned empty result')
     }
 
-    // Stage 4: Analyze with AI (70-90%)
-    await job.updateProgress(75)
-    console.log(`[Job ${job.id}] Starting analysis...`)
+    // Stage 5: Analyze with AI (72-92%)
+    // Use simulated progress during Mistral API call
+    await job.updateProgress(74)
 
-    const analysis = await mistralService.analyze(transcriptionResult.text, prompt)
+    let analysisProgress = 74
+    const analysisInterval = setInterval(async () => {
+      if (analysisProgress < 90) {
+        analysisProgress += 2
+        await job.updateProgress(analysisProgress).catch(() => {})
+      }
+    }, 500)
 
-    await job.updateProgress(90)
-    console.log(`[Job ${job.id}] Analysis complete (${analysis.length} chars)`)
+    let analysis
+    try {
+      analysis = await mistralService.analyze(transcriptionResult.text, prompt)
+    } finally {
+      clearInterval(analysisInterval)
+    }
+
+    await job.updateProgress(92)
 
     // Save transcription AND analysis to database
     if (audio) {
@@ -276,13 +328,12 @@ async function processTranscriptionJob(
         language: transcriptionResult.language || 'fr',
         analysis: analysis,
       })
-      console.log(`[Job ${job.id}] Transcription and analysis saved to database`)
     }
 
-    // Stage 5: Cleanup and finalize (90-100%)
-    await job.updateProgress(95)
+    // Stage 6: Cleanup and finalize (92-100%)
+    await job.updateProgress(96)
 
-    // Cleanup original temp file
+    // Cleanup converted temp file
     try {
       await unlink(tempPath)
     } catch {
@@ -302,7 +353,6 @@ async function processTranscriptionJob(
     }
 
     await job.updateProgress(100)
-    console.log(`[Job ${job.id}] Job completed successfully`)
 
     return {
       transcription: transcriptionResult.text,
@@ -317,11 +367,12 @@ async function processTranscriptionJob(
       await audio.save()
     }
 
-    // Cleanup temp file on error
-    try {
-      await unlink(tempPath)
-    } catch {
-      // Ignore cleanup errors
+    // Cleanup temp files on error
+    if (tempOriginalPath) {
+      await unlink(tempOriginalPath).catch(() => {})
+    }
+    if (tempPath) {
+      await unlink(tempPath).catch(() => {})
     }
 
     // Cleanup chunk files on error
@@ -329,7 +380,6 @@ async function processTranscriptionJob(
       await chunkingService.cleanupChunks(chunkingResult.chunks)
     }
 
-    console.error(`[Job ${job.id}] Job failed:`, error)
     throw error
   }
 }
@@ -347,21 +397,13 @@ export function createTranscriptionWorker(): Worker<TranscriptionJobData, Transc
     }
   )
 
-  worker.on('completed', (job) => {
-    console.log(`[Worker] Job ${job.id} completed successfully`)
-  })
+  worker.on('completed', () => {})
 
-  worker.on('failed', (job, error) => {
-    console.error(`[Worker] Job ${job?.id} failed:`, error.message)
-  })
+  worker.on('failed', () => {})
 
-  worker.on('progress', (job, progress) => {
-    console.log(`[Worker] Job ${job.id} progress: ${progress}%`)
-  })
+  worker.on('progress', () => {})
 
-  worker.on('error', (error) => {
-    console.error('[Worker] Error:', error)
-  })
+  worker.on('error', () => {})
 
   return worker
 }

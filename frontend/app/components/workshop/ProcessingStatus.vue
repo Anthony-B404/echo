@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AudioStatus } from '~/types/audio'
 import type { JobStatus } from '~/types/audio'
 
 const props = defineProps<{
@@ -9,13 +10,23 @@ const { t } = useI18n()
 
 const progressLabel = computed(() => {
   switch (props.status.status) {
-    case 'pending':
+    case 'uploading':
+      return t('components.workshop.processing.uploading')
+    case AudioStatus.Pending:
       return t('components.workshop.processing.pending')
-    case 'processing':
-      return t('components.workshop.processing.analyzing', { progress: props.status.progress })
-    case 'completed':
+    case AudioStatus.Processing: {
+      const progress = props.status.progress
+      // Dynamic labels based on progress stage
+      if (progress < 2) return t('components.workshop.processing.starting')
+      if (progress < 12) return t('components.workshop.processing.converting')
+      if (progress < 17) return t('components.workshop.processing.analyzing_metadata')
+      if (progress < 72) return t('components.workshop.processing.transcribing', { progress })
+      if (progress < 92) return t('components.workshop.processing.analyzing')
+      return t('components.workshop.processing.finalizing')
+    }
+    case AudioStatus.Completed:
       return t('components.workshop.processing.completed')
-    case 'failed':
+    case AudioStatus.Failed:
       return t('components.workshop.processing.failed')
     default:
       return ''
@@ -24,31 +35,42 @@ const progressLabel = computed(() => {
 
 const progressColor = computed(() => {
   switch (props.status.status) {
-    case 'pending':
-      return 'neutral'
-    case 'processing':
+    case 'uploading':
       return 'primary'
-    case 'completed':
+    case AudioStatus.Pending:
+      return 'neutral'
+    case AudioStatus.Processing:
+      return 'primary'
+    case AudioStatus.Completed:
       return 'success'
-    case 'failed':
+    case AudioStatus.Failed:
       return 'error'
     default:
       return 'neutral'
   }
 })
 
+// Use indeterminate for uploading state (no real progress tracking)
+const isIndeterminate = computed(() => props.status.status === 'uploading')
+
 const progressValue = computed(() => {
-  if (props.status.status === 'completed') return 100
-  if (props.status.status === 'failed') return 100
+  if (props.status.status === 'uploading') return undefined // Indeterminate
+  if (props.status.status === AudioStatus.Completed) return 100
+  if (props.status.status === AudioStatus.Failed) return 100
   return props.status.progress
 })
+
+// Computed helpers for template
+const isProcessing = computed(() => props.status.status === AudioStatus.Processing)
+const isUploading = computed(() => props.status.status === 'uploading')
+const isFailed = computed(() => props.status.status === AudioStatus.Failed)
 </script>
 
 <template>
   <div class="space-y-3">
     <div class="flex items-center justify-between text-sm">
       <span class="text-muted">{{ progressLabel }}</span>
-      <span v-if="status.status === 'processing'" class="text-highlighted font-medium">
+      <span v-if="isProcessing" class="text-highlighted font-medium">
         {{ status.progress }}%
       </span>
     </div>
@@ -56,11 +78,11 @@ const progressValue = computed(() => {
     <UProgress
       :model-value="progressValue"
       :color="progressColor"
-      :animation="status.status === 'processing' ? 'carousel' : undefined"
+      :animation="isUploading || isProcessing ? 'carousel' : undefined"
     />
 
     <UAlert
-      v-if="status.status === 'failed' && status.error"
+      v-if="isFailed && status.error"
       color="error"
       variant="subtle"
       :title="t('components.workshop.processing.errorTitle')"

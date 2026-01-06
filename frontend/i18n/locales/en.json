@@ -415,8 +415,14 @@
         "failed": "Failed"
       },
       "processing": {
+        "uploading": "Uploading file...",
         "pending": "Waiting for processing...",
-        "analyzing": "Analyzing... {progress}%",
+        "starting": "Starting...",
+        "converting": "Converting audio...",
+        "analyzing_metadata": "Analyzing metadata...",
+        "transcribing": "Transcribing... {progress}%",
+        "analyzing": "Analyzing content...",
+        "finalizing": "Finalizing...",
         "completed": "Processing complete",
         "failed": "Processing failed",
         "errorTitle": "Processing error"
@@ -494,6 +500,7 @@
     "dashboard": {
       "workshop": {
         "title": "Audio Workshop",
+        "subtitle": "Manage your audio files and generate analyses.",
         "newAudio": "New audio file",
         "tabs": {
           "upload": "Upload",

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { formatDistanceToNow } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
-import type { Audio, AudioStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { Audio } from '~/types/audio'
 
 const props = defineProps<{
   audio: Audio
@@ -22,28 +23,28 @@ const dateLocale = computed(() => (locale.value === 'fr' ? fr : enUS))
 const isProcessing = computed(
   () =>
     audioStore.isAudioProcessing(props.audio.id) ||
-    props.audio.status === 'pending' ||
-    props.audio.status === 'processing'
+    props.audio.status === AudioStatus.Pending ||
+    props.audio.status === AudioStatus.Processing
 )
 
 const statusConfig = computed(() => {
   const configs: Record<AudioStatus, { color: string; icon: string; label: string }> = {
-    pending: {
+    [AudioStatus.Pending]: {
       color: 'neutral',
       icon: 'i-lucide-clock',
       label: t('components.workshop.status.pending'),
     },
-    processing: {
+    [AudioStatus.Processing]: {
       color: 'primary',
       icon: 'i-lucide-loader-2',
       label: t('components.workshop.status.processing'),
     },
-    completed: {
+    [AudioStatus.Completed]: {
       color: 'success',
       icon: 'i-lucide-check-circle',
       label: t('components.workshop.status.completed'),
     },
-    failed: {
+    [AudioStatus.Failed]: {
       color: 'error',
       icon: 'i-lucide-x-circle',
       label: t('components.workshop.status.failed'),
@@ -51,6 +52,11 @@ const statusConfig = computed(() => {
   }
   return configs[props.audio.status]
 })
+
+// Expose enum for template usage
+const isCompleted = computed(() => props.audio.status === AudioStatus.Completed)
+const isFailed = computed(() => props.audio.status === AudioStatus.Failed)
+const isProcessingStatus = computed(() => props.audio.status === AudioStatus.Processing)
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -80,14 +86,14 @@ function formatDuration(seconds: number | null): string {
       <!-- Icon -->
       <div
         class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center"
-        :class="audio.status === 'completed' ? 'bg-primary/10' : 'bg-elevated'"
+        :class="isCompleted ? 'bg-primary/10' : 'bg-elevated'"
       >
         <UIcon
           :name="isProcessing ? 'i-lucide-loader-2' : 'i-lucide-music'"
           class="w-6 h-6"
           :class="[
             isProcessing ? 'animate-spin text-primary' : '',
-            audio.status === 'completed' ? 'text-primary' : 'text-muted',
+            isCompleted ? 'text-primary' : 'text-muted',
           ]"
         />
       </div>
@@ -102,7 +108,7 @@ function formatDuration(seconds: number | null): string {
             <UIcon
               :name="statusConfig.icon"
               class="w-3 h-3 mr-1"
-              :class="audio.status === 'processing' ? 'animate-spin' : ''"
+              :class="isProcessingStatus ? 'animate-spin' : ''"
             />
             {{ statusConfig.label }}
           </UBadge>
@@ -129,7 +135,7 @@ function formatDuration(seconds: number | null): string {
 
         <!-- Error message -->
         <p
-          v-if="audio.status === 'failed' && audio.errorMessage"
+          v-if="isFailed && audio.errorMessage"
           class="mt-2 text-sm text-error truncate"
         >
           {{ audio.errorMessage }}

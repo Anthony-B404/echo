@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Audio, AudioStatus } from '~/types/audio'
+import { AudioStatus } from '~/types/audio'
+import type { Audio } from '~/types/audio'
 
 definePageMeta({
   middleware: ['auth', 'pending-deletion'],
@@ -34,9 +35,9 @@ watch(searchQuery, () => {
 // Status filter options
 const statusOptions = computed(() => [
   { label: t('components.workshop.filters.all'), value: null },
-  { label: t('components.workshop.filters.completed'), value: 'completed' as AudioStatus },
-  { label: t('components.workshop.filters.processing'), value: 'processing' as AudioStatus },
-  { label: t('components.workshop.filters.failed'), value: 'failed' as AudioStatus },
+  { label: t('components.workshop.filters.completed'), value: AudioStatus.Completed },
+  { label: t('components.workshop.filters.processing'), value: AudioStatus.Processing },
+  { label: t('components.workshop.filters.failed'), value: AudioStatus.Failed },
 ])
 
 // Sort options

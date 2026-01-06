@@ -89,7 +89,7 @@ export interface ProcessJobResponse {
  */
 export interface JobStatus {
   jobId: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
+  status: 'uploading' | 'pending' | 'processing' | 'completed' | 'failed'
   progress: number
   result?: {
     transcription: string

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AudioStatus } from "~/types/audio";
 import type { Audio } from "~/types/audio";
 
 definePageMeta({
@@ -12,30 +13,22 @@ const localePath = useLocalePath();
 const audioStore = useAudioStore();
 const creditsStore = useCreditsStore();
 
-// Track current job for real-time progress display
-const currentJobId = ref<string | null>(null);
-const currentJobStatus = computed(() =>
-  currentJobId.value ? audioStore.getJobStatus(currentJobId.value) : null
-);
-
 const {
   uploading,
-  progress,
   upload,
   reset: resetUpload,
   formatFileSize,
 } = useAudioUpload({
   onSuccess: async (response) => {
-    // Track the job ID for real-time progress display
-    currentJobId.value = response.jobId;
-
     // Fetch the newly created audio and add it to the list immediately
     await audioStore.fetchAudio(response.audioId);
     if (audioStore.currentAudio) {
       audioStore.addAudio(audioStore.currentAudio);
     }
 
+    // Start polling for this job (multiple jobs can be polled simultaneously)
     startPolling(response.jobId, response.audioId);
+
     toast.add({
       title: t("pages.dashboard.workshop.uploadSuccess"),
       description: t("pages.dashboard.workshop.processingStarted"),
@@ -51,9 +44,8 @@ const {
   },
 });
 
-const { startPolling, stopPolling, polling, currentAudioId } = useAudioPolling({
+const { startPolling, stopAllPolling } = useAudioPolling({
   onComplete: () => {
-    currentJobId.value = null;
     toast.add({
       title: t("pages.dashboard.workshop.processingComplete"),
       color: "success",
@@ -63,7 +55,6 @@ const { startPolling, stopPolling, polling, currentAudioId } = useAudioPolling({
     creditsStore.refresh();
   },
   onError: (error) => {
-    currentJobId.value = null;
     toast.add({
       title: t("pages.dashboard.workshop.processingError"),
       description: error.message,
@@ -87,14 +78,15 @@ const hasMoreAudios = computed(() => audioStore.pagination.total > 5);
 onMounted(async () => {
   await audioStore.fetchAudios();
 
-  // Resume polling for any processing audio with currentJobId (after page refresh)
-  const processingAudio = audioStore.audios.find(
-    (a) => (a.status === "pending" || a.status === "processing") && a.currentJobId
+  // Resume polling for ALL processing audios with currentJobId (after page refresh)
+  const processingAudios = audioStore.audios.filter(
+    (a) => (a.status === AudioStatus.Pending || a.status === AudioStatus.Processing) && a.currentJobId
   );
-  if (processingAudio && processingAudio.currentJobId) {
-    currentJobId.value = processingAudio.currentJobId;
-    startPolling(processingAudio.currentJobId, processingAudio.id);
-  }
+  processingAudios.forEach((audio) => {
+    if (audio.currentJobId) {
+      startPolling(audio.currentJobId, audio.id);
+    }
+  });
 });
 
 // Handle file selection
@@ -126,7 +118,7 @@ async function handleUpload() {
   const response = await upload(selectedFile.value, prompt.value);
 
   if (response) {
-    // Reset form on success
+    // Reset form on success - immediately ready for next upload
     selectedFile.value = null;
     prompt.value = "";
     resetUpload();
@@ -167,7 +159,7 @@ async function handleDeleteConfirm() {
 
 // Cleanup
 onUnmounted(() => {
-  stopPolling();
+  stopAllPolling();
 });
 
 // Tab items for upload/record
@@ -192,7 +184,7 @@ const tabItems = computed(() => [
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('pages.dashboard.workshop.title') }}</h1>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Gérez vos fichiers audio et générez des analyses.</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">{{ t('pages.dashboard.workshop.subtitle') }}</p>
       </div>
     </div>
 
@@ -229,7 +221,7 @@ const tabItems = computed(() => [
               class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 flex items-center gap-4 rounded-xl p-4 shadow-sm"
             >
               <div
-                class="bg-primary-100 dark:bg-primary-900/30 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+                class="bg-primary-100 dark:bg-primary-900/30 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
               >
                 <UIcon name="i-lucide-music" class="text-primary-600 dark:text-primary-400 h-6 w-6" />
               </div>
@@ -262,23 +254,12 @@ const tabItems = computed(() => [
             />
           </div>
 
-          <!-- Prompt input -->
+          <!-- Prompt input and submit button -->
           <div v-if="selectedFile" class="mt-6 space-y-4">
-            <AudioPromptInput 
-              v-model="prompt" 
+            <AudioPromptInput
+              v-model="prompt"
               :disabled="uploading"
-              class="bg-white dark:bg-slate-900" 
-            />
-
-            <!-- Processing status with real-time progress -->
-            <WorkshopProcessingStatus
-              v-if="uploading || polling"
-              :status="{
-                jobId: currentJobId || '',
-                status: uploading ? 'pending' : (currentJobStatus?.status || 'processing'),
-                progress: uploading ? progress.percentage : (currentJobStatus?.progress || 0),
-                error: currentJobStatus?.error,
-              }"
+              class="bg-white dark:bg-slate-900"
             />
 
             <!-- Submit button -->
@@ -297,13 +278,11 @@ const tabItems = computed(() => [
         </UCard>
       </div>
 
-      <!-- Right: Audio list -->
+      <!-- Right: Audio list (progress shown per card) -->
       <div class="space-y-4">
         <WorkshopAudioList
           :audios="recentAudios"
           :loading="audioStore.loading"
-          :processing-audio-id="currentAudioId"
-          :processing-progress="currentJobStatus?.progress"
           @select="handleSelectAudio"
           @delete="handleDeleteRequest"
         />
