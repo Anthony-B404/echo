@@ -200,7 +200,7 @@ jobs:
   deploy:
     needs: [build-backend, build-frontend, security-scan]
     runs-on: ubuntu-latest
-    environment: production
+    environment: env
 
     steps:
       - name: Checkout repository
