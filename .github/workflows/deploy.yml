@@ -304,11 +304,34 @@ jobs:
             echo "=== Container Status ==="
             docker compose -f docker-compose.prod.yml ps
 
-            # Debug: Show backend logs if it's not running
-            echo "=== Backend Logs (last 50 lines) ==="
-            docker compose -f docker-compose.prod.yml logs --tail=50 backend
+            # Debug: Show backend logs
+            echo "=== Backend Logs (last 30 lines) ==="
+            docker compose -f docker-compose.prod.yml logs --tail=30 backend
 
-            # Verify deployment (backend is internal, check via docker)
-            docker compose -f docker-compose.prod.yml exec -T backend wget -q --spider http://localhost:3333/health || exit 1
+            # Debug: Show nginx logs (in case of restart issues)
+            echo "=== Nginx Logs (last 30 lines) ==="
+            docker compose -f docker-compose.prod.yml logs --tail=30 nginx
+
+            # Debug: Show worker logs (in case of restart issues)
+            echo "=== Worker Logs (last 30 lines) ==="
+            docker compose -f docker-compose.prod.yml logs --tail=30 worker
+
+            # Verify deployment with retry (backend is internal, check via docker)
+            echo "=== Health Check ==="
+            for i in 1 2 3 4 5; do
+              echo "Health check attempt $i..."
+              if docker compose -f docker-compose.prod.yml exec -T backend wget -q --spider http://localhost:3333/health; then
+                echo "Health check passed!"
+                break
+              fi
+              if [ $i -eq 5 ]; then
+                echo "Health check failed after 5 attempts"
+                echo "=== Final Container Status ==="
+                docker compose -f docker-compose.prod.yml ps
+                exit 1
+              fi
+              echo "Retrying in 10 seconds..."
+              sleep 10
+            done
 
             echo "Deployment completed successfully!"
