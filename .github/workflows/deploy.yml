@@ -233,7 +233,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "docker-compose.prod.yml,docker/nginx/,docker/scheduler/"
+          source: "docker-compose.prod.yml,docker/scheduler/"
           target: "/opt/dh-echo"
 
       - name: Set lowercase repository name and short SHA
@@ -307,10 +307,6 @@ jobs:
             # Debug: Show backend logs
             echo "=== Backend Logs (last 30 lines) ==="
             docker compose -f docker-compose.prod.yml logs --tail=30 backend
-
-            # Debug: Show nginx logs (in case of restart issues)
-            echo "=== Nginx Logs (last 30 lines) ==="
-            docker compose -f docker-compose.prod.yml logs --tail=30 nginx
 
             # Debug: Show worker logs (in case of restart issues)
             echo "=== Worker Logs (last 30 lines) ==="
