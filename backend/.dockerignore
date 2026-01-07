@@ -1,0 +1,58 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+build
+.output
+dist
+
+# Development
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test
+coverage
+.nyc_output
+
+# Docker
+Dockerfile
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs
+README.md
+CLAUDE.md
+*.md
+
+# Storage (use volume instead)
+storage/*
+!storage/.gitkeep
+
+# Temporary files
+tmp
+temp
+*.tmp

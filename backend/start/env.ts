@@ -76,4 +76,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   DRIVE_DISK: Env.schema.enum(['local'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring FFmpeg/FFprobe paths
+  | Used in Docker containers where static binaries don't work
+  |----------------------------------------------------------
+  */
+  FFMPEG_PATH: Env.schema.string.optional(),
+  FFPROBE_PATH: Env.schema.string.optional(),
 })

@@ -4,11 +4,36 @@ import { unlink, mkdir } from 'node:fs/promises'
 import { join, basename, extname } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
+import env from '#start/env'
 
 // Use createRequire to import CommonJS modules in ESM
 const require = createRequire(import.meta.url)
-const ffmpegPath = require('ffmpeg-static') as string
-const ffprobePath = require('ffprobe-static') as { path: string }
+
+/**
+ * Get ffmpeg path - prefer environment variable (for Docker), fallback to static package (for local dev)
+ */
+function getFfmpegPath(): string {
+  const envPath = env.get('FFMPEG_PATH')
+  if (envPath) {
+    return envPath
+  }
+  return require('ffmpeg-static') as string
+}
+
+/**
+ * Get ffprobe path - prefer environment variable (for Docker), fallback to static package (for local dev)
+ */
+function getFfprobePath(): string {
+  const envPath = env.get('FFPROBE_PATH')
+  if (envPath) {
+    return envPath
+  }
+  const ffprobeStatic = require('ffprobe-static') as { path: string }
+  return ffprobeStatic.path
+}
+
+const ffmpegPath = getFfmpegPath()
+const ffprobePath = getFfprobePath()
 
 const execFileAsync = promisify(execFile)
 
@@ -65,7 +90,7 @@ export default class AudioChunkingService {
   async getMetadata(filePath: string): Promise<AudioMetadata> {
     const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', filePath]
 
-    const { stdout } = await execFileAsync(ffprobePath.path, args)
+    const { stdout } = await execFileAsync(ffprobePath, args)
     const data = JSON.parse(stdout)
 
     const format = data.format || {}

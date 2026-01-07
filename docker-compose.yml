@@ -1,0 +1,130 @@
+name: dh-echo-dev
+
+services:
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dh-echo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-dh_echo_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # 5433 sur Mac -> 5432 dans container
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dh-echo-network
+
+  # ===========================================
+  # Redis (BullMQ)
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: dh-echo-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dh-echo-network
+
+  # ===========================================
+  # Backend API (Development - mounted source)
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+      target: deps
+    container_name: dh-echo-backend
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pnpm install && node ace serve --hmr"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Overrides for Docker networking
+      CI: "true"
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3333
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_DATABASE: ${DB_DATABASE:-dh_echo_db}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      FRONTEND_URL: http://localhost:3000
+      # FFmpeg paths for audio processing (Alpine Linux)
+      FFMPEG_PATH: /usr/bin/ffmpeg
+      FFPROBE_PATH: /usr/bin/ffprobe
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_storage:/app/storage
+    ports:
+      - "3333:3333"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dh-echo-network
+
+  # Worker is included in backend via preload (adonisrc.ts)
+  # No separate container needed for development
+
+  # ===========================================
+  # Frontend (Development - mounted source)
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+      target: deps
+    container_name: dh-echo-frontend
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "pnpm install && pnpm dev --host 0.0.0.0"
+    env_file:
+      - ./frontend/.env
+    environment:
+      CI: "true"
+      # Override API_URL to use Docker host (backend accessible via localhost from browser)
+      API_URL: http://localhost:3333
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - dh-echo-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_storage:
+
+networks:
+  dh-echo-network:
+    driver: bridge

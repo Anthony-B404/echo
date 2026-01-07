@@ -5,11 +5,36 @@ import { join, basename } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
 import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 
 // Use createRequire to import CommonJS modules in ESM
 const require = createRequire(import.meta.url)
-const ffmpegPath = require('ffmpeg-static') as string
-const ffprobePath = require('ffprobe-static') as { path: string }
+
+/**
+ * Get ffmpeg path - prefer environment variable (for Docker), fallback to static package (for local dev)
+ */
+function getFfmpegPath(): string {
+  const envPath = env.get('FFMPEG_PATH')
+  if (envPath) {
+    return envPath
+  }
+  return require('ffmpeg-static') as string
+}
+
+/**
+ * Get ffprobe path - prefer environment variable (for Docker), fallback to static package (for local dev)
+ */
+function getFfprobePath(): string {
+  const envPath = env.get('FFPROBE_PATH')
+  if (envPath) {
+    return envPath
+  }
+  const ffprobeStatic = require('ffprobe-static') as { path: string }
+  return ffprobeStatic.path
+}
+
+const ffmpegPath = getFfmpegPath()
+const ffprobePath = getFfprobePath()
 
 const execFileAsync = promisify(execFile)
 
@@ -76,7 +101,7 @@ export default class AudioConverterService {
   async getDuration(filePath: string): Promise<number> {
     const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', filePath]
 
-    const { stdout } = await execFileAsync(ffprobePath.path, args)
+    const { stdout } = await execFileAsync(ffprobePath, args)
     const data = JSON.parse(stdout)
 
     return parseFloat(data.format?.duration) || 0

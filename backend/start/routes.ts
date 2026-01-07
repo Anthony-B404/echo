@@ -32,6 +32,14 @@ router.get('/', async () => {
   }
 })
 
+// Health check endpoint for Docker and load balancers
+router.get('/health', async ({ response }) => {
+  return response.ok({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+  })
+})
+
 // Public routes - Registration flow
 router.post('/register/request-magic-link', [AuthController, 'registerWithMagicLink'])
 router.post('/register/complete', [AuthController, 'completeRegistration'])

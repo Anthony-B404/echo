@@ -1,0 +1,2 @@
+# GDPR Scheduler - Runs daily at 2:00 AM
+0 2 * * * node ace gdpr:scheduler
