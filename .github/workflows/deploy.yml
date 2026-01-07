@@ -300,6 +300,14 @@ jobs:
             # Wait for services to start
             sleep 30
 
+            # Debug: Show container status
+            echo "=== Container Status ==="
+            docker compose -f docker-compose.prod.yml ps
+
+            # Debug: Show backend logs if it's not running
+            echo "=== Backend Logs (last 50 lines) ==="
+            docker compose -f docker-compose.prod.yml logs --tail=50 backend
+
             # Verify deployment (backend is internal, check via docker)
             docker compose -f docker-compose.prod.yml exec -T backend wget -q --spider http://localhost:3333/health || exit 1
 
