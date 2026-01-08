@@ -53,10 +53,32 @@ export function useAudioPolling(options: UseAudioPollingOptions = {}) {
    * Fetch job status from API
    */
   async function fetchStatus(jobId: string): Promise<JobStatus | null> {
+    const poll = activePolls.value.get(jobId)
+    if (!poll) return null
+
     try {
       const status = await authenticatedFetch<JobStatus>(`/audio/status/${jobId}`)
       return status
     } catch (err: any) {
+      // Handle 404 - job may have completed and currentJobId was cleared
+      if (err?.response?.status === 404 || err?.statusCode === 404 || err?.data?.status === 404) {
+        // Fetch the audio directly to check its current status
+        try {
+          await audioStore.fetchAudio(poll.audioId)
+          const audio = audioStore.currentAudio
+          if (audio && (audio.status === AudioStatus.Completed || audio.status === AudioStatus.Failed)) {
+            // Job finished, return synthetic status to trigger completion handlers
+            return {
+              jobId,
+              status: audio.status,
+              progress: 100,
+              error: audio.status === AudioStatus.Failed ? (audio.errorMessage ?? undefined) : undefined,
+            } as JobStatus
+          }
+        } catch {
+          // If audio fetch also fails, treat as real error
+        }
+      }
       console.error('Polling error:', err)
       return null
     }
