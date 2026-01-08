@@ -45,7 +45,7 @@ export default class AuthController {
           await mail.send((message) => {
             message
               .to(existingUser.email)
-              .from('onboarding@resend.dev')
+              .from('contact@dh-echo.cloud')
               .subject(i18n.t('emails.registration_magic_link.subject'))
               .htmlView('emails/registration_magic_link', {
                 token: existingUser.magicLinkToken,
@@ -74,7 +74,7 @@ export default class AuthController {
         await mail.send((message) => {
           message
             .to(existingUser.email)
-            .from('onboarding@resend.dev')
+            .from('contact@dh-echo.cloud')
             .subject(i18n.t('emails.registration_magic_link.subject'))
             .htmlView('emails/registration_magic_link', {
               token: existingUser.magicLinkToken,
@@ -119,7 +119,7 @@ export default class AuthController {
       await mail.send((message) => {
         message
           .to(user.email)
-          .from('onboarding@resend.dev')
+          .from('contact@dh-echo.cloud')
           .subject(i18n.t('emails.registration_magic_link.subject'))
           .htmlView('emails/registration_magic_link', {
             token: magicLinkToken,
@@ -347,7 +347,7 @@ export default class AuthController {
       await mail.send((message) => {
         message
           .to(user.email)
-          .from('onboarding@resend.dev')
+          .from('contact@dh-echo.cloud')
           .subject(i18n.t('emails.login_magic_link.subject'))
           .htmlView('emails/login_magic_link', {
             token: user.magicLinkToken,

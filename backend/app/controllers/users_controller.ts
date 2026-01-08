@@ -91,7 +91,7 @@ export default class UsersController {
         await mail.send((message) => {
           message
             .to(newEmail)
-            .from('onboarding@resend.dev')
+            .from('contact@dh-echo.cloud')
             .subject(i18n.t('emails.email_change.subject'))
             .htmlView('emails/verify_email_change', {
               token: user.emailChangeToken,

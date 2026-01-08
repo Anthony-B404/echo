@@ -76,7 +76,7 @@ class ShareService {
     await mail.send((message) => {
       message
         .to(email)
-        .from('onboarding@resend.dev')
+        .from('contact@dh-echo.cloud')
         .subject(i18n.t('emails.audio_share.subject', { senderName }))
         .htmlView('emails/audio_share', {
           senderName,

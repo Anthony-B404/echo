@@ -100,19 +100,13 @@ class GdprService {
 
     // Get transcription count
     const transcriptionCount = await Transcription.query()
-      .whereIn(
-        'audioId',
-        Audio.query().select('id').where('userId', user.id)
-      )
+      .whereIn('audioId', Audio.query().select('id').where('userId', user.id))
       .count('* as count')
       .first()
 
     // Get document count
     const documentCount = await Document.query()
-      .whereIn(
-        'audioId',
-        Audio.query().select('id').where('userId', user.id)
-      )
+      .whereIn('audioId', Audio.query().select('id').where('userId', user.id))
       .count('* as count')
       .first()
 
@@ -485,12 +479,14 @@ class GdprService {
     frontendUrl: string
   ): Promise<void> {
     const cancelUrl = `${frontendUrl}/dashboard/settings/privacy?cancel=${request.token}`
-    const scheduledDate = request.scheduledFor.setLocale(i18n.locale).toLocaleString(DateTime.DATE_FULL)
+    const scheduledDate = request.scheduledFor
+      .setLocale(i18n.locale)
+      .toLocaleString(DateTime.DATE_FULL)
 
     await mail.send((message) => {
       message
         .to(user.email)
-        .from('onboarding@resend.dev')
+        .from('contact@dh-echo.cloud')
         .subject(i18n.t('emails.gdpr_deletion_requested.subject'))
         .htmlView('emails/gdpr_deletion_requested', {
           user,
@@ -512,7 +508,7 @@ class GdprService {
     await mail.send((message) => {
       message
         .to(email)
-        .from('onboarding@resend.dev')
+        .from('contact@dh-echo.cloud')
         .subject(i18n.t('emails.gdpr_deletion_completed.subject'))
         .htmlView('emails/gdpr_deletion_completed', {
           summary,
@@ -532,14 +528,18 @@ class GdprService {
     frontendUrl: string
   ): Promise<void> {
     const cancelUrl = `${frontendUrl}/dashboard/settings/privacy?cancel=${request.token}`
-    const scheduledDate = request.scheduledFor.setLocale(i18n.locale).toLocaleString(DateTime.DATE_FULL)
+    const scheduledDate = request.scheduledFor
+      .setLocale(i18n.locale)
+      .toLocaleString(DateTime.DATE_FULL)
 
     await mail.send((message) => {
       message
         .to(user.email)
-        .from('onboarding@resend.dev')
+        .from('contact@dh-echo.cloud')
         .subject(
-          i18n.t('emails.gdpr_deletion_reminder.subject', { daysRemaining: daysRemaining.toString() })
+          i18n.t('emails.gdpr_deletion_reminder.subject', {
+            daysRemaining: daysRemaining.toString(),
+          })
         )
         .htmlView('emails/gdpr_deletion_reminder', {
           user,
