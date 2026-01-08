@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import env from '@adonisjs/core/services/env'
+import env from '#start/env'
 import InvitationPolicy from '#policies/invitation_policy'
 import Invitation from '#models/invitation'
 import Organization from '#models/organization'

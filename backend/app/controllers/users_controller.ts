@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import env from '@adonisjs/core/services/env'
+import env from '#start/env'
 import User from '#models/user'
 import { updateProfileValidator } from '#validators/user'
 import { cuid } from '@adonisjs/core/helpers'
