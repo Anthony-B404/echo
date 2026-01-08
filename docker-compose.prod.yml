@@ -85,7 +85,13 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3333/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3333/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       start_period: 40s
@@ -114,7 +120,8 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY:-anthonybette/dh-echo}/backend:${TAG:-latest}
     container_name: dh-echo-worker
     restart: always
-    command: ["node", "--import=./bin/server.js", "-e", "import('./start/worker.js')"]
+    command:
+      ["node", "--import=./bin/server.js", "-e", "import('./start/worker.js')"]
     environment:
       NODE_ENV: production
       PORT: 3333
@@ -209,7 +216,15 @@ services:
     expose:
       - "80"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:80/",
+        ]
       interval: 30s
       timeout: 10s
       start_period: 10s
@@ -243,4 +258,4 @@ networks:
     driver: bridge
   traefik-public:
     external: true
-    name: n8n-compose_default
+    name: traefik-public
