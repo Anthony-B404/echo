@@ -260,6 +260,8 @@ jobs:
             # Application
             APP_KEY=${{ secrets.APP_KEY }}
             LOG_LEVEL=info
+            API_URL=${{ secrets.API_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
 
             # Database
             DB_USER=${{ secrets.DB_USER }}
