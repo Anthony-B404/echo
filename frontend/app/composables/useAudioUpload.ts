@@ -80,8 +80,8 @@ export function useAudioUpload(options: UseAudioUploadOptions = {}) {
       return null
     }
 
-    if (prompt.trim().length > 1000) {
-      error.value = 'Prompt must be less than 1000 characters'
+    if (prompt.trim().length > 5000) {
+      error.value = 'Prompt must be less than 5000 characters'
       options.onError?.(new Error(error.value))
       return null
     }

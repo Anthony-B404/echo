@@ -5,7 +5,7 @@ import vine from '@vinejs/vine'
  */
 export const audioProcessValidator = vine.compile(
   vine.object({
-    prompt: vine.string().minLength(5).maxLength(1000),
+    prompt: vine.string().minLength(5).maxLength(5000),
   })
 )
 
