@@ -4,12 +4,15 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import Organization from './organization.js'
 import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import CreditTransaction, { CreditTransactionType } from './credit_transaction.js'
+import Reseller from './reseller.js'
 
 export enum UserRole {
   Owner = 1,
   Administrator = 2,
   Member = 3,
 }
+
+export type UserRoleType = 'super_admin' | 'reseller_admin' | 'organization_user'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -77,10 +80,19 @@ export default class User extends BaseModel {
   @column()
   declare credits: number
 
+  @column()
+  declare isSuperAdmin: boolean
+
+  @column()
+  declare resellerId: number | null
+
   declare isCurrentUser?: boolean
 
   @hasMany(() => CreditTransaction)
   declare creditTransactions: HasMany<typeof CreditTransaction>
+
+  @belongsTo(() => Reseller)
+  declare reseller: BelongsTo<typeof Reseller>
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
 
@@ -161,5 +173,28 @@ export default class User extends BaseModel {
     })
 
     return transaction
+  }
+
+  /**
+   * Get the role type of the user in the system hierarchy
+   * - super_admin: System administrator (DH-Echo)
+   * - reseller_admin: Reseller administrator
+   * - organization_user: Regular organization member
+   */
+  get roleType(): UserRoleType {
+    if (this.isSuperAdmin) {
+      return 'super_admin'
+    }
+    if (this.resellerId) {
+      return 'reseller_admin'
+    }
+    return 'organization_user'
+  }
+
+  /**
+   * Check if user is a reseller admin
+   */
+  isResellerAdmin(): boolean {
+    return this.resellerId !== null && !this.isSuperAdmin
   }
 }

@@ -85,4 +85,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   FFMPEG_PATH: Env.schema.string.optional(),
   FFPROBE_PATH: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Super Admin
+  | Used by the super_admin_seeder to create/promote a user
+  |----------------------------------------------------------
+  */
+  SUPER_ADMIN_EMAIL: Env.schema.string.optional(),
+  SUPER_ADMIN_NAME: Env.schema.string.optional(),
 })
