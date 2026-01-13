@@ -406,17 +406,17 @@ if (user.isSuperAdmin) {
 - [x] **4.6** Policy `ResellerOrganizationPolicy`
 - [x] **4.7** Routes `/api/reseller/*`
 
-### Phase 5 : Frontend Super Admin
+### Phase 5 : Frontend Super Admin ✅
 **Priorité**: Haute
 **Estimation**: 2-3 jours
 
-- [ ] **5.1** Layout `/admin` avec navigation
-- [ ] **5.2** Page liste resellers
-- [ ] **5.3** Page création reseller
-- [ ] **5.4** Page détail/édition reseller
-- [ ] **5.5** Page gestion crédits reseller
-- [ ] **5.6** Composables `useAdmin`, `useResellers`
-- [ ] **5.7** Middleware frontend `admin.ts`
+- [x] **5.1** Layout `/admin` avec navigation
+- [x] **5.2** Page liste resellers
+- [x] **5.3** Page création reseller
+- [x] **5.4** Page détail/édition reseller
+- [x] **5.5** Page gestion crédits reseller
+- [x] **5.6** Composables `useAdmin`, `useResellers`
+- [x] **5.7** Middleware frontend `admin.ts`
 
 ### Phase 6 : Frontend Reseller
 **Priorité**: Haute
