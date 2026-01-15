@@ -71,9 +71,12 @@ export const useAuthStore = defineStore("auth", {
 
         this.setUser(response);
 
-        // Charger l'organisation après avoir récupéré l'utilisateur
-        const organizationStore = useOrganizationStore();
-        await organizationStore.fetchOrganization();
+        // Charger l'organisation seulement si l'utilisateur n'est PAS un reseller admin
+        // Les reseller admins n'ont pas de currentOrganizationId, donc l'appel échouerait avec 400
+        if (!response.resellerId) {
+          const organizationStore = useOrganizationStore();
+          await organizationStore.fetchOrganization();
+        }
       } catch (error) {
         console.error("Failed to fetch user:", error);
         // Token might be invalid, clear auth state

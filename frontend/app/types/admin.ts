@@ -171,11 +171,20 @@ export interface TransactionsFilters {
 }
 
 /**
+ * VineJS validation error structure
+ */
+export interface ValidationError {
+  field: string
+  rule: string
+  message: string
+}
+
+/**
  * API Error response shape
  */
 export interface ApiErrorResponse {
   message?: string
-  errors?: Record<string, string[]>
+  errors?: ValidationError[]
   code?: string
 }
 

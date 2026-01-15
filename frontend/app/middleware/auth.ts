@@ -3,6 +3,7 @@
  * Protects routes that require authentication
  * Redirects to login if user is not authenticated
  * Redirects superadmin to /admin if they try to access /dashboard
+ * Redirects reseller admin to /reseller if they try to access /dashboard
  */
 export default defineNuxtRouteMiddleware(async (to) => {
   const { isAuthenticated, user } = useAuth();
@@ -21,5 +22,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // SuperAdmin cannot access dashboard pages - redirect to admin
   if (user.value?.isSuperAdmin && to.path.includes("/dashboard")) {
     return navigateTo(localePath("/admin"));
+  }
+
+  // Reseller admin cannot access dashboard pages - redirect to reseller
+  if (user.value?.resellerId && to.path.includes("/dashboard")) {
+    return navigateTo(localePath("/reseller"));
   }
 });
