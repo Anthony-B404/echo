@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CreateResellerPayload } from '~/types/admin'
+import { getErrorMessage } from '~/utils/errors'
 
 definePageMeta({
   layout: 'admin',
@@ -40,13 +41,9 @@ async function handleSubmit(data: CreateResellerPayload) {
       navigateTo(localePath(`/admin/resellers/${result.reseller.id}`))
     }
   } catch (e: unknown) {
-    const errorMessage =
-      e && typeof e === 'object' && 'data' in e
-        ? (e as { data?: { message?: string } }).data?.message
-        : undefined
     toast.add({
       title: t('admin.resellers.create.error'),
-      description: errorMessage || t('admin.resellers.create.errorDescription'),
+      description: getErrorMessage(e, t('admin.resellers.create.errorDescription')),
       color: 'error',
     })
   }
