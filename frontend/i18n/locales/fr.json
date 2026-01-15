@@ -245,7 +245,9 @@
       "back": "Retour",
       "view": "Voir",
       "edit": "Modifier",
-      "deactivate": "Désactiver"
+      "deactivate": "Désactiver",
+      "actions": "Actions",
+      "logout": "Se déconnecter"
     },
     "error": "Erreur",
     "credits": "crédits",
@@ -1013,6 +1015,305 @@
         "title": "Cookies tiers",
         "content": "Nous n'utilisons pas de cookies de tracking publicitaire ni de cookies de réseaux sociaux. Aucun cookie tiers n'est déposé à des fins de ciblage publicitaire."
       }
+    }
+  },
+  "reseller": {
+    "title": "Espace Revendeur",
+    "navigation": {
+      "dashboard": "Tableau de bord",
+      "organizations": "Organisations",
+      "credits": "Crédits",
+      "profile": "Profil",
+      "backToApp": "Retour à l'application"
+    },
+    "dashboard": {
+      "title": "Tableau de bord Revendeur",
+      "subtitle": "Vue d'ensemble de vos organisations et crédits",
+      "stats": {
+        "creditPool": "Pool de crédits",
+        "creditsAvailable": "crédits disponibles",
+        "creditsInOrgs": "Crédits dans les orgs",
+        "organizations": "Organisations",
+        "distributedCredits": "Crédits distribués",
+        "consumedCredits": "Crédits consommés"
+      },
+      "recentOrganizations": "Organisations récentes",
+      "recentTransactions": "Transactions récentes",
+      "noOrganizations": "Aucune organisation",
+      "noOrganizationsDescription": "Créez votre première organisation pour commencer",
+      "noTransactions": "Aucune transaction"
+    },
+    "organizations": {
+      "list": {
+        "title": "Organisations",
+        "subtitle": "Gérez vos organisations clientes",
+        "noOrganizations": "Aucune organisation",
+        "noOrganizationsDescription": "Créez votre première organisation pour commencer"
+      },
+      "create": {
+        "title": "Créer une organisation",
+        "subtitle": "Ajoutez une nouvelle organisation cliente",
+        "button": "Nouvelle organisation",
+        "submit": "Créer l'organisation",
+        "success": "Organisation créée",
+        "successDescription": "L'organisation a été créée avec succès",
+        "error": "Erreur",
+        "errorDescription": "Impossible de créer l'organisation"
+      },
+      "detail": {
+        "title": "Détails de l'organisation",
+        "info": "Informations",
+        "manageCredits": "Gérer les crédits",
+        "creditBalance": "Solde de crédits",
+        "manageUsers": "Gérer les utilisateurs",
+        "usersCount": "{count} utilisateur | {count} utilisateurs",
+        "members": "Membres",
+        "noMembers": "Aucun membre",
+        "quickActions": "Actions rapides",
+        "updateSuccess": "Organisation mise à jour",
+        "updateError": "Erreur lors de la mise à jour"
+      },
+      "table": {
+        "name": "Nom",
+        "email": "Email",
+        "credits": "Crédits",
+        "users": "Utilisateurs",
+        "createdAt": "Créé le"
+      },
+      "actions": {
+        "view": "Voir",
+        "credits": "Crédits",
+        "users": "Utilisateurs",
+        "distributeCredits": "Distribuer des crédits",
+        "manageUsers": "Gérer les utilisateurs",
+        "addUser": "Ajouter un utilisateur"
+      },
+      "filters": {
+        "searchPlaceholder": "Rechercher une organisation...",
+        "sortBy": "Trier par",
+        "sortName": "Nom",
+        "sortCredits": "Crédits",
+        "sortDate": "Date"
+      },
+      "form": {
+        "organizationInfo": "Informations de l'organisation",
+        "ownerInfo": "Informations du propriétaire",
+        "ownerDescription": "Ces informations seront utilisées pour créer le compte du propriétaire de l'organisation.",
+        "initialCredits": "Crédits initiaux",
+        "creditsDescription": "Attribuez des crédits initiaux à l'organisation depuis votre pool.",
+        "availableCredits": "{count} crédits disponibles",
+        "initialCreditsHint": "Crédits à attribuer à l'organisation (max: {max})"
+      },
+      "fields": {
+        "name": "Nom de l'organisation",
+        "email": "Email de l'organisation",
+        "ownerEmail": "Email du propriétaire",
+        "ownerFirstName": "Prénom du propriétaire",
+        "ownerLastName": "Nom du propriétaire",
+        "initialCredits": "Crédits initiaux",
+        "createdAt": "Créé le"
+      },
+      "placeholders": {
+        "name": "Mon entreprise",
+        "email": "contact{'@'}entreprise.com",
+        "ownerEmail": "proprietaire{'@'}entreprise.com",
+        "ownerFirstName": "Jean",
+        "ownerLastName": "Dupont",
+        "initialCredits": "0"
+      },
+      "hints": {
+        "name": "Le nom sera visible par les utilisateurs de l'organisation",
+        "email": "Email principal pour les communications",
+        "ownerEmail": "Un email d'invitation sera envoyé à cette adresse"
+      },
+      "credits": {
+        "max": "Max"
+      },
+      "validation": {
+        "nameMin": "Le nom doit contenir au moins 2 caractères",
+        "emailInvalid": "Email invalide",
+        "ownerEmailInvalid": "Email du propriétaire invalide",
+        "ownerFirstNameMin": "Le prénom doit contenir au moins 2 caractères",
+        "ownerLastNameMin": "Le nom doit contenir au moins 2 caractères",
+        "initialCreditsMax": "Vous n'avez pas assez de crédits disponibles",
+        "initialCreditsMin": "Les crédits doivent être positifs ou nuls"
+      },
+      "steps": {
+        "organization": "Organisation",
+        "organizationDesc": "Informations de base",
+        "owner": "Propriétaire",
+        "ownerDesc": "Compte propriétaire",
+        "members": "Membres",
+        "membersDesc": "Invitations (optionnel)"
+      },
+      "members": {
+        "title": "Inviter des membres",
+        "description": "Vous pouvez inviter des membres maintenant ou le faire plus tard.",
+        "addMember": "Ajouter un membre",
+        "removeMember": "Supprimer",
+        "noMembers": "Aucun membre à inviter",
+        "skipInfo": "Cette étape est optionnelle",
+        "roleAdmin": "Administrateur",
+        "roleMember": "Membre",
+        "memberNumber": "Membre #{number}",
+        "fields": {
+          "email": "Email",
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "role": "Rôle"
+        },
+        "placeholders": {
+          "email": "utilisateur{'@'}entreprise.com",
+          "firstName": "Jean",
+          "lastName": "Dupont"
+        }
+      },
+      "stepper": {
+        "next": "Suivant",
+        "previous": "Précédent",
+        "create": "Créer l'organisation",
+        "creating": "Création en cours..."
+      }
+    },
+    "credits": {
+      "title": "Mes crédits",
+      "subtitle": "Gérez votre pool de crédits",
+      "availableCredits": "{count} crédits disponibles",
+      "currentBalance": "Solde actuel",
+      "availableToDistribute": "Disponibles à distribuer",
+      "purchaseInfo": "Contactez votre administrateur pour acheter des crédits supplémentaires.",
+      "transactionHistory": "Historique des transactions",
+      "distribute": "Distribuer les crédits",
+      "noTransactions": "Aucune transaction",
+      "noTransactionsDescription": "Votre historique de transactions apparaîtra ici",
+      "filters": {
+        "all": "Tous les types",
+        "type": "Type"
+      },
+      "fields": {
+        "amount": "Montant",
+        "description": "Description (optionnel)"
+      },
+      "placeholders": {
+        "amount": "Nombre de crédits",
+        "description": "Raison du transfert..."
+      },
+      "validation": {
+        "amountRequired": "Le montant est requis",
+        "amountInvalid": "Le montant doit être un nombre valide",
+        "amountPositive": "Le montant doit être positif",
+        "amountMax": "Vous n'avez pas assez de crédits"
+      },
+      "distribution": {
+        "title": "Distribuer des crédits",
+        "subtitle": "Transférer des crédits vers cette organisation",
+        "formTitle": "Distribuer des crédits",
+        "myPool": "Mon pool de crédits",
+        "orgBalance": "Solde de l'organisation",
+        "currentPool": "Mon pool actuel",
+        "organizationBalance": "Solde de l'organisation",
+        "amount": "Montant",
+        "amountPlaceholder": "Nombre de crédits",
+        "amountHint": "Maximum disponible : {max} crédits",
+        "description": "Description (optionnel)",
+        "descriptionPlaceholder": "Raison du transfert...",
+        "submit": "Distribuer les crédits",
+        "success": "Crédits distribués avec succès",
+        "error": "Erreur lors de la distribution",
+        "history": "Historique des distributions",
+        "noHistory": "Aucune distribution effectuée",
+        "validation": {
+          "amountPositive": "Le montant doit être positif",
+          "amountMax": "Vous n'avez pas assez de crédits"
+        }
+      }
+    },
+    "users": {
+      "management": {
+        "title": "Gestion des utilisateurs",
+        "noUsers": "Aucun utilisateur",
+        "noUsersDescription": "Ajoutez votre premier utilisateur pour commencer"
+      },
+      "pendingInvitation": "Invitation en attente",
+      "table": {
+        "name": "Nom",
+        "email": "Email",
+        "role": "Rôle",
+        "createdAt": "Inscrit le"
+      },
+      "roles": {
+        "owner": "Propriétaire",
+        "administrator": "Administrateur",
+        "member": "Membre"
+      },
+      "actions": {
+        "cannotDeleteOwner": "Impossible de supprimer le propriétaire"
+      },
+      "add": {
+        "title": "Ajouter un utilisateur",
+        "description": "Invitez un nouvel utilisateur à rejoindre cette organisation",
+        "button": "Inviter un utilisateur",
+        "submit": "Ajouter l'utilisateur",
+        "success": "Utilisateur ajouté avec succès",
+        "error": "Erreur lors de l'ajout de l'utilisateur"
+      },
+      "delete": {
+        "title": "Retirer l'utilisateur",
+        "message": "Êtes-vous sûr de vouloir retirer {name} de l'organisation ?",
+        "warning": "Cette action retirera l'utilisateur de l'organisation. Il pourra être réinvité ultérieurement.",
+        "confirm": "Retirer",
+        "success": "Utilisateur retiré avec succès",
+        "error": "Erreur lors du retrait de l'utilisateur"
+      },
+      "form": {
+        "roleHint": "Les administrateurs peuvent gérer les membres et les paramètres"
+      },
+      "fields": {
+        "email": "Email",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "role": "Rôle"
+      },
+      "placeholders": {
+        "email": "utilisateur{'@'}entreprise.com",
+        "firstName": "Jean",
+        "lastName": "Dupont",
+        "role": "Sélectionner un rôle"
+      },
+      "validation": {
+        "emailInvalid": "Email invalide",
+        "firstNameMin": "Le prénom doit contenir au moins 2 caractères",
+        "lastNameMin": "Le nom doit contenir au moins 2 caractères",
+        "roleInvalid": "Veuillez sélectionner un rôle valide"
+      }
+    },
+    "profile": {
+      "title": "Mon profil",
+      "subtitle": "Informations de votre compte revendeur",
+      "info": "Informations",
+      "status": "Statut",
+      "statusActive": "Actif",
+      "statusInactive": "Inactif",
+      "creditBalance": "Solde de crédits",
+      "editInfo": "Pour modifier vos informations, contactez votre administrateur.",
+      "fields": {
+        "name": "Nom",
+        "company": "Société",
+        "email": "Email",
+        "phone": "Téléphone",
+        "siret": "SIRET",
+        "address": "Adresse",
+        "createdAt": "Membre depuis"
+      }
+    },
+    "transactions": {
+      "types": {
+        "purchase": "Achat",
+        "distribution": "Distribution",
+        "adjustment": "Ajustement"
+      },
+      "to": "vers",
+      "noDescription": "Aucune description"
     }
   },
   "admin": {

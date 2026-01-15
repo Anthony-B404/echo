@@ -243,7 +243,9 @@
       "back": "Back",
       "view": "View",
       "edit": "Edit",
-      "deactivate": "Deactivate"
+      "deactivate": "Deactivate",
+      "actions": "Actions",
+      "logout": "Log out"
     },
     "error": "Error",
     "credits": "credits",
@@ -1011,6 +1013,305 @@
         "title": "Third-Party Cookies",
         "content": "We do not use advertising tracking cookies or social network cookies. No third-party cookies are placed for advertising targeting purposes."
       }
+    }
+  },
+  "reseller": {
+    "title": "Reseller Portal",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "organizations": "Organizations",
+      "credits": "Credits",
+      "profile": "Profile",
+      "backToApp": "Back to app"
+    },
+    "dashboard": {
+      "title": "Reseller Dashboard",
+      "subtitle": "Overview of your organizations and credits",
+      "stats": {
+        "creditPool": "Credit Pool",
+        "creditsAvailable": "credits available",
+        "creditsInOrgs": "Credits in Organizations",
+        "organizations": "Organizations",
+        "distributedCredits": "Distributed Credits",
+        "consumedCredits": "Consumed Credits"
+      },
+      "recentOrganizations": "Recent Organizations",
+      "recentTransactions": "Recent Transactions",
+      "noOrganizations": "No organizations",
+      "noOrganizationsDescription": "Create your first organization to get started",
+      "noTransactions": "No transactions"
+    },
+    "organizations": {
+      "list": {
+        "title": "Organizations",
+        "subtitle": "Manage your client organizations",
+        "noOrganizations": "No organizations",
+        "noOrganizationsDescription": "Create your first organization to get started"
+      },
+      "create": {
+        "title": "Create Organization",
+        "subtitle": "Add a new client organization",
+        "button": "New organization",
+        "submit": "Create organization",
+        "success": "Organization created",
+        "successDescription": "The organization has been created successfully",
+        "error": "Error",
+        "errorDescription": "Failed to create organization"
+      },
+      "detail": {
+        "title": "Organization Details",
+        "info": "Information",
+        "manageCredits": "Manage Credits",
+        "creditBalance": "Credit Balance",
+        "manageUsers": "Manage Users",
+        "usersCount": "{count} user | {count} users",
+        "members": "Members",
+        "noMembers": "No members",
+        "quickActions": "Quick Actions",
+        "updateSuccess": "Organization updated",
+        "updateError": "Error updating organization"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "credits": "Credits",
+        "users": "Users",
+        "createdAt": "Created"
+      },
+      "actions": {
+        "view": "View",
+        "credits": "Credits",
+        "users": "Users",
+        "distributeCredits": "Distribute Credits",
+        "manageUsers": "Manage Users",
+        "addUser": "Add User"
+      },
+      "filters": {
+        "searchPlaceholder": "Search organizations...",
+        "sortBy": "Sort by",
+        "sortName": "Name",
+        "sortCredits": "Credits",
+        "sortDate": "Date"
+      },
+      "form": {
+        "organizationInfo": "Organization Information",
+        "ownerInfo": "Owner Information",
+        "ownerDescription": "This information will be used to create the organization owner's account.",
+        "initialCredits": "Initial Credits",
+        "creditsDescription": "Allocate initial credits to the organization from your pool.",
+        "availableCredits": "{count} credits available",
+        "initialCreditsHint": "Credits to assign to the organization (max: {max})"
+      },
+      "fields": {
+        "name": "Organization name",
+        "email": "Organization email",
+        "ownerEmail": "Owner email",
+        "ownerFirstName": "Owner first name",
+        "ownerLastName": "Owner last name",
+        "initialCredits": "Initial credits",
+        "createdAt": "Created on"
+      },
+      "placeholders": {
+        "name": "My company",
+        "email": "contact{'@'}company.com",
+        "ownerEmail": "owner{'@'}company.com",
+        "ownerFirstName": "John",
+        "ownerLastName": "Doe",
+        "initialCredits": "0"
+      },
+      "hints": {
+        "name": "The name will be visible to organization users",
+        "email": "Main email for communications",
+        "ownerEmail": "An invitation email will be sent to this address"
+      },
+      "credits": {
+        "max": "Max"
+      },
+      "validation": {
+        "nameMin": "Name must be at least 2 characters",
+        "emailInvalid": "Invalid email",
+        "ownerEmailInvalid": "Invalid owner email",
+        "ownerFirstNameMin": "First name must be at least 2 characters",
+        "ownerLastNameMin": "Last name must be at least 2 characters",
+        "initialCreditsMax": "You don't have enough credits available",
+        "initialCreditsMin": "Credits must be positive or zero"
+      },
+      "steps": {
+        "organization": "Organization",
+        "organizationDesc": "Basic information",
+        "owner": "Owner",
+        "ownerDesc": "Owner account",
+        "members": "Members",
+        "membersDesc": "Invitations (optional)"
+      },
+      "members": {
+        "title": "Invite Members",
+        "description": "You can invite members now or do it later.",
+        "addMember": "Add member",
+        "removeMember": "Remove",
+        "noMembers": "No members to invite",
+        "skipInfo": "This step is optional",
+        "roleAdmin": "Administrator",
+        "roleMember": "Member",
+        "memberNumber": "Member #{number}",
+        "fields": {
+          "email": "Email",
+          "firstName": "First name",
+          "lastName": "Last name",
+          "role": "Role"
+        },
+        "placeholders": {
+          "email": "user{'@'}company.com",
+          "firstName": "John",
+          "lastName": "Doe"
+        }
+      },
+      "stepper": {
+        "next": "Next",
+        "previous": "Previous",
+        "create": "Create organization",
+        "creating": "Creating..."
+      }
+    },
+    "credits": {
+      "title": "My Credits",
+      "subtitle": "Manage your credit pool",
+      "availableCredits": "{count} credits available",
+      "currentBalance": "Current Balance",
+      "availableToDistribute": "Available to distribute",
+      "purchaseInfo": "Contact your administrator to purchase additional credits.",
+      "transactionHistory": "Transaction History",
+      "distribute": "Distribute Credits",
+      "noTransactions": "No transactions",
+      "noTransactionsDescription": "Your transaction history will appear here",
+      "filters": {
+        "all": "All types",
+        "type": "Type"
+      },
+      "fields": {
+        "amount": "Amount",
+        "description": "Description (optional)"
+      },
+      "placeholders": {
+        "amount": "Number of credits",
+        "description": "Reason for transfer..."
+      },
+      "validation": {
+        "amountRequired": "Amount is required",
+        "amountInvalid": "Amount must be a valid number",
+        "amountPositive": "Amount must be positive",
+        "amountMax": "You don't have enough credits"
+      },
+      "distribution": {
+        "title": "Distribute Credits",
+        "subtitle": "Transfer credits to this organization",
+        "formTitle": "Distribute Credits",
+        "myPool": "My Credit Pool",
+        "orgBalance": "Organization Balance",
+        "currentPool": "My current pool",
+        "organizationBalance": "Organization balance",
+        "amount": "Amount",
+        "amountPlaceholder": "Number of credits",
+        "amountHint": "Maximum available: {max} credits",
+        "description": "Description (optional)",
+        "descriptionPlaceholder": "Reason for transfer...",
+        "submit": "Distribute credits",
+        "success": "Credits distributed successfully",
+        "error": "Error distributing credits",
+        "history": "Distribution History",
+        "noHistory": "No distributions made",
+        "validation": {
+          "amountPositive": "Amount must be positive",
+          "amountMax": "You don't have enough credits"
+        }
+      }
+    },
+    "users": {
+      "management": {
+        "title": "User Management",
+        "noUsers": "No users",
+        "noUsersDescription": "Add your first user to get started"
+      },
+      "pendingInvitation": "Pending invitation",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "createdAt": "Joined"
+      },
+      "roles": {
+        "owner": "Owner",
+        "administrator": "Administrator",
+        "member": "Member"
+      },
+      "actions": {
+        "cannotDeleteOwner": "Cannot delete owner"
+      },
+      "add": {
+        "title": "Add User",
+        "description": "Invite a new user to join this organization",
+        "button": "Invite user",
+        "submit": "Add user",
+        "success": "User added successfully",
+        "error": "Error adding user"
+      },
+      "delete": {
+        "title": "Remove User",
+        "message": "Are you sure you want to remove {name} from the organization?",
+        "warning": "This action will remove the user from the organization. They can be re-invited later.",
+        "confirm": "Remove",
+        "success": "User removed successfully",
+        "error": "Error removing user"
+      },
+      "form": {
+        "roleHint": "Administrators can manage members and settings"
+      },
+      "fields": {
+        "email": "Email",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "role": "Role"
+      },
+      "placeholders": {
+        "email": "user{'@'}company.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "Select a role"
+      },
+      "validation": {
+        "emailInvalid": "Invalid email",
+        "firstNameMin": "First name must be at least 2 characters",
+        "lastNameMin": "Last name must be at least 2 characters",
+        "roleInvalid": "Please select a valid role"
+      }
+    },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Your reseller account information",
+      "info": "Information",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "creditBalance": "Credit Balance",
+      "editInfo": "To update your information, contact your administrator.",
+      "fields": {
+        "name": "Name",
+        "company": "Company",
+        "email": "Email",
+        "phone": "Phone",
+        "siret": "SIRET",
+        "address": "Address",
+        "createdAt": "Member since"
+      }
+    },
+    "transactions": {
+      "types": {
+        "purchase": "Purchase",
+        "distribution": "Distribution",
+        "adjustment": "Adjustment"
+      },
+      "to": "to",
+      "noDescription": "No description"
     }
   },
   "admin": {

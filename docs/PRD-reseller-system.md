@@ -39,11 +39,11 @@ Super Admin (DH-Echo)
 - Authentification unifiée avec redirection par rôle
 
 ### 1.3 Critères de Succès
-- [ ] Super Admin peut créer des Resellers
-- [ ] Super Admin peut ajouter des crédits aux Resellers
-- [ ] Reseller peut créer des Organizations et Users
-- [ ] Reseller peut distribuer ses crédits aux Organizations
-- [ ] Crédits consommés au niveau Organization
+- [x] Super Admin peut créer des Resellers
+- [x] Super Admin peut ajouter des crédits aux Resellers
+- [x] Reseller peut créer des Organizations et Users
+- [x] Reseller peut distribuer ses crédits aux Organizations
+- [x] Crédits consommés au niveau Organization
 - [ ] Inscription publique désactivée
 
 ---
@@ -418,27 +418,27 @@ if (user.isSuperAdmin) {
 - [x] **5.6** Composables `useAdmin`, `useResellers`
 - [x] **5.7** Middleware frontend `admin.ts`
 
-### Phase 6 : Frontend Reseller
+### Phase 6 : Frontend Reseller ✅
 **Priorité**: Haute
 **Estimation**: 3-4 jours
 
-- [ ] **6.1** Layout `/reseller` avec navigation
-- [ ] **6.2** Dashboard reseller (overview)
-- [ ] **6.3** Page liste organizations
-- [ ] **6.4** Page création organization
-- [ ] **6.5** Page détail organization
-- [ ] **6.6** Page distribution crédits
-- [ ] **6.7** Page gestion users organization
-- [ ] **6.8** Page profil reseller
-- [ ] **6.9** Composables `useReseller`, `useResellerOrganizations`
-- [ ] **6.10** Middleware frontend `reseller.ts`
+- [x] **6.1** Layout `/reseller` avec navigation
+- [x] **6.2** Dashboard reseller (overview)
+- [x] **6.3** Page liste organizations
+- [x] **6.4** Page création organization (avec stepper multi-étapes)
+- [x] **6.5** Page détail organization
+- [x] **6.6** Page distribution crédits
+- [x] **6.7** Page gestion users organization
+- [x] **6.8** Page profil reseller
+- [x] **6.9** Composables `useResellerProfile`, `useResellerOrganizations`, `useFormatters`
+- [x] **6.10** Middleware frontend `reseller.ts`
 
 ### Phase 7 : Auth & Cleanup
 **Priorité**: Haute
 **Estimation**: 1 jour
 
-- [ ] **7.1** Modifier `/api/me` pour retourner le type de rôle
-- [ ] **7.2** Modifier login frontend pour redirection par rôle
+- [x] **7.1** Modifier `/api/me` pour retourner le type de rôle (`isSuperAdmin`, `resellerId`)
+- [x] **7.2** Modifier login frontend pour redirection par rôle (middleware `auth.ts`)
 - [ ] **7.3** Supprimer route `/api/signup`
 - [ ] **7.4** Supprimer page `/signup`
 - [ ] **7.5** Redirect `/signup` → `/login`
@@ -522,16 +522,16 @@ Opérations critiques à wrapper dans des transactions DB :
 
 ### MVP Complet quand :
 
-- [ ] Super Admin peut créer un Reseller avec son admin
-- [ ] Super Admin peut ajouter des crédits à un Reseller
-- [ ] Reseller peut se connecter et voir son dashboard
-- [ ] Reseller peut créer une Organization avec Owner
-- [ ] Reseller peut distribuer ses crédits à ses Organizations
-- [ ] Reseller peut créer des Users dans ses Organizations
-- [ ] Client final peut se connecter et utiliser le service
-- [ ] Crédits sont consommés au niveau Organization
+- [x] Super Admin peut créer un Reseller avec son admin
+- [x] Super Admin peut ajouter des crédits à un Reseller
+- [x] Reseller peut se connecter et voir son dashboard
+- [x] Reseller peut créer une Organization avec Owner
+- [x] Reseller peut distribuer ses crédits à ses Organizations
+- [x] Reseller peut créer des Users dans ses Organizations
+- [x] Client final peut se connecter et utiliser le service
+- [x] Crédits sont consommés au niveau Organization
 - [ ] Inscription publique est désactivée
-- [ ] Login redirige vers le bon dashboard selon le rôle
+- [x] Login redirige vers le bon dashboard selon le rôle
 
 ---
 
