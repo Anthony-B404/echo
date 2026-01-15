@@ -11,22 +11,8 @@ import type {
   AddCreditsResponse,
   ResellersFilters,
   TransactionsFilters,
-  FetchError,
 } from '~/types/admin'
-
-/**
- * Helper to extract error message from fetch error
- */
-function getErrorMessage(e: unknown, fallback: string): string {
-  if (e && typeof e === 'object' && 'data' in e) {
-    const fetchError = e as FetchError
-    return fetchError.data?.message || fallback
-  }
-  if (e instanceof Error) {
-    return e.message
-  }
-  return fallback
-}
+import { getErrorMessage } from '~/utils/errors'
 
 /**
  * Resellers composable
