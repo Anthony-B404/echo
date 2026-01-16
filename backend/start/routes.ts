@@ -63,6 +63,9 @@ router.get('/bimi-logo.svg', async ({ response }) => {
 router.get('/check-invitation/:identifier', [InvitationsController, 'checkInvitation'])
 router.post('/accept-invitation', [InvitationsController, 'acceptInvitation'])
 
+// Complete registration (after magic link verification)
+router.post('/complete-registration', [AuthController, 'completeRegistration'])
+
 // Email verification route
 router.get('/verify-email-change/:token', [UsersController, 'verifyEmailChange'])
 

@@ -86,6 +86,32 @@
       "noToken": "Lien invalide. Veuillez demander un nouveau lien de vérification.",
       "invalidToken": "Ce lien est invalide ou a expiré"
     },
+    "setup": {
+      "title": "Finalisez votre compte",
+      "subtitle": "Complétez vos informations pour accéder à votre espace",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Entrez votre prénom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Entrez votre nom",
+      "organizationName": "Nom de l'organisation",
+      "organizationNamePlaceholder": "Nom de votre organisation",
+      "logo": "Logo (optionnel)",
+      "logoHint": "JPG, PNG ou GIF. 1Mo max.",
+      "submit": "Activer mon compte",
+      "verifying": "Vérification du lien",
+      "pleaseWait": "Veuillez patienter...",
+      "tokenInvalid": "Ce lien n'est pas valide",
+      "tokenInvalidDescription": "Le lien que vous avez utilisé est invalide. Veuillez contacter votre administrateur.",
+      "tokenExpired": "Ce lien a expiré",
+      "tokenExpiredDescription": "Le lien d'activation a expiré. Veuillez contacter votre administrateur pour obtenir un nouveau lien.",
+      "alreadyCompleted": "Compte déjà activé",
+      "alreadyCompletedDescription": "Votre compte est déjà activé. Vous pouvez vous connecter.",
+      "success": "Compte activé !",
+      "successDescription": "Bienvenue ! Votre compte a été activé avec succès.",
+      "error": "Erreur",
+      "errorDescription": "Une erreur est survenue lors de l'activation de votre compte.",
+      "noToken": "Lien manquant"
+    },
     "acceptInvitation": {
       "title": "Accepter l'invitation",
       "description": "Vous avez été invité à rejoindre {organization}",
@@ -173,6 +199,10 @@
     "acceptInvitation": {
       "title": "Accepter l'invitation",
       "description": "Rejoignez une organisation en acceptant votre invitation"
+    },
+    "setup": {
+      "title": "Finalisez votre compte",
+      "description": "Complétez votre inscription pour accéder à DH-Echo"
     },
     "dashboard": {
       "title": "DH-Echo",
@@ -262,7 +292,8 @@
       "reply": "Répondre",
       "attachFile": "Joindre un fichier",
       "viewDetails": "Voir les détails",
-      "viewPayments": "Voir les paiements"
+      "viewPayments": "Voir les paiements",
+      "backToHome": "Retour à l'accueil"
     },
     "status": {
       "paid": "Payé",

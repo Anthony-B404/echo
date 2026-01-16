@@ -194,10 +194,20 @@ export default class AuthController {
 
     // Otherwise, this is a registration flow - return user data for complete registration
     // Include existing user info for pre-filling forms (especially for disabled users re-registering)
+    // Load organization name for pre-filling (if user was created by reseller)
+    let organizationName: string | null = null
+    if (user.currentOrganizationId) {
+      const organization = await Organization.find(user.currentOrganizationId)
+      if (organization && organization.name !== 'Temporary Organization') {
+        organizationName = organization.name
+      }
+    }
+
     return response.ok({
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      organizationName,
       token: token,
       isDisabled: user.disabled,
     })

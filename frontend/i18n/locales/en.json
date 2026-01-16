@@ -99,6 +99,32 @@
       "noToken": "Invalid link. Please request a new verification link.",
       "invalidToken": "This link is invalid or has expired"
     },
+    "setup": {
+      "title": "Complete your account",
+      "subtitle": "Fill in your information to access your workspace",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Enter your last name",
+      "organizationName": "Organization name",
+      "organizationNamePlaceholder": "Your organization name",
+      "logo": "Logo (optional)",
+      "logoHint": "JPG, PNG or GIF. 1MB max.",
+      "submit": "Activate my account",
+      "verifying": "Verifying link",
+      "pleaseWait": "Please wait...",
+      "tokenInvalid": "This link is invalid",
+      "tokenInvalidDescription": "The link you used is invalid. Please contact your administrator.",
+      "tokenExpired": "This link has expired",
+      "tokenExpiredDescription": "The activation link has expired. Please contact your administrator to get a new link.",
+      "alreadyCompleted": "Account already activated",
+      "alreadyCompletedDescription": "Your account is already activated. You can log in.",
+      "success": "Account activated!",
+      "successDescription": "Welcome! Your account has been activated successfully.",
+      "error": "Error",
+      "errorDescription": "An error occurred while activating your account.",
+      "noToken": "Missing link"
+    },
     "acceptInvitation": {
       "title": "Accept invitation",
       "description": "You have been invited to join {organization}",
@@ -171,6 +197,10 @@
     "acceptInvitation": {
       "title": "Accept invitation",
       "description": "Join an organization by accepting your invitation"
+    },
+    "setup": {
+      "title": "Complete your account",
+      "description": "Complete your registration to access DH-Echo"
     },
     "dashboard": {
       "title": "DH-Echo",
@@ -260,7 +290,8 @@
       "reply": "Reply",
       "attachFile": "Attach file",
       "viewDetails": "View details",
-      "viewPayments": "View payments"
+      "viewPayments": "View payments",
+      "backToHome": "Back to home"
     },
     "status": {
       "paid": "Paid",
