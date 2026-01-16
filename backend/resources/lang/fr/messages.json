@@ -135,7 +135,8 @@
     "batch_deleted": "{count} audio(s) supprimé(s) avec succès",
     "access_denied": "Vous n'avez pas accès à cet audio",
     "created": "Audio créé avec succès",
-    "file_not_found": "Fichier audio introuvable dans le stockage"
+    "file_not_found": "Fichier audio introuvable dans le stockage",
+    "insufficient_credits_details": "Crédits insuffisants. Requis : {creditsNeeded}, Disponible : {creditsAvailable}. Veuillez recharger votre compte pour continuer."
   },
   "export": {
     "no_transcription": "Aucune transcription disponible pour l'export",

@@ -768,7 +768,7 @@
           "refund": "Refund"
         },
         "insufficientCredits": "Insufficient Credits",
-        "insufficientCreditsMessage": "You don't have enough credits for this analysis. Required: {required}, available: {available}.",
+        "insufficientCreditsMessage": "Insufficient credits. Required: {required}, available: {available}. Please purchase more credits to continue.",
         "creditInfo": "1 credit = 1 minute of audio"
       },
       "settings": {

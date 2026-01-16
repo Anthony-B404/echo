@@ -135,7 +135,8 @@
     "batch_deleted": "{count} audio(s) deleted successfully",
     "access_denied": "You do not have access to this audio",
     "created": "Audio created successfully",
-    "file_not_found": "Audio file not found in storage"
+    "file_not_found": "Audio file not found in storage",
+    "insufficient_credits_details": "Insufficient credits. Required: {creditsNeeded}, Available: {creditsAvailable}. Please purchase more credits to continue."
   },
   "export": {
     "no_transcription": "No transcription available for export",

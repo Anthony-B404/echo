@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { AudioStatus } from "~/types/audio";
 import type { Audio } from "~/types/audio";
+import { getAudioDuration } from "~/utils/audio";
 
 definePageMeta({
   middleware: ["auth", "pending-deletion"],
@@ -120,6 +121,27 @@ async function handleUpload() {
       color: "error",
     });
     return;
+  }
+
+  // Check credits
+  try {
+    const duration = await getAudioDuration(selectedFile.value);
+    const creditsNeeded = Math.max(1, Math.ceil(duration / 60));
+
+    if (creditsStore.credits < creditsNeeded) {
+      toast.add({
+        title: t("pages.dashboard.credits.insufficientCredits"),
+        description: t("pages.dashboard.credits.insufficientCreditsMessage", { 
+          required: creditsNeeded, 
+          available: creditsStore.credits 
+        }),
+        color: "error",
+      });
+      return;
+    }
+  } catch (error) {
+    console.error("Failed to check audio duration:", error);
+    // Continue with upload if check fails (backend will handle it)
   }
 
   const response = await upload(selectedFile.value, prompt.value);

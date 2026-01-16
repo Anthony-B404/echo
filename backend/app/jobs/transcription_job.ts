@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { writeFile, unlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
+import i18nManager from '@adonisjs/i18n/services/main'
 
 /**
  * Context for merging transcription chunks
@@ -153,7 +154,7 @@ async function processTranscriptionJob(
     const conversionInterval = setInterval(async () => {
       if (conversionProgress < 7) {
         conversionProgress++
-        await job.updateProgress(conversionProgress).catch(() => {})
+        await job.updateProgress(conversionProgress).catch(() => { })
       }
     }, 500)
 
@@ -188,11 +189,11 @@ async function processTranscriptionJob(
     }
 
     // Delete original file from storage
-    await storageService.deleteFile(audioFilePath).catch(() => {})
+    await storageService.deleteFile(audioFilePath).catch(() => { })
 
     // Cleanup temp files from conversion
     await job.updateProgress(11)
-    await unlink(tempOriginalPath).catch(() => {})
+    await unlink(tempOriginalPath).catch(() => { })
     tempOriginalPath = null // Mark as cleaned
     await converter.cleanup(conversionResult.path)
 
@@ -230,17 +231,22 @@ async function processTranscriptionJob(
       throw new Error('Organization not found')
     }
 
+
     if (!organization.hasEnoughCredits(creditsNeeded)) {
       // Set audio status to failed with specific error
+      const i18n = i18nManager.locale('fr')
+      const errorMessage = i18n.t('messages.audio.insufficient_credits_details', {
+        creditsNeeded,
+        creditsAvailable: organization.credits
+      })
+
       if (audio) {
         audio.status = AudioStatus.Failed
-        audio.errorMessage = `Insufficient credits. Required: ${creditsNeeded}, Available: ${organization.credits}`
+        audio.errorMessage = errorMessage
         audio.currentJobId = null
         await audio.save()
       }
-      throw new Error(
-        `Insufficient credits. Required: ${creditsNeeded}, Available: ${organization.credits}`
-      )
+      throw new Error(errorMessage)
     }
 
     // Deduct credits from organization
@@ -293,7 +299,7 @@ async function processTranscriptionJob(
       const transcriptionInterval = setInterval(async () => {
         if (transcriptionProgress < 68) {
           transcriptionProgress += 3
-          await job.updateProgress(transcriptionProgress).catch(() => {})
+          await job.updateProgress(transcriptionProgress).catch(() => { })
         }
       }, 1000)
 
@@ -317,7 +323,7 @@ async function processTranscriptionJob(
     const analysisInterval = setInterval(async () => {
       if (analysisProgress < 90) {
         analysisProgress += 2
-        await job.updateProgress(analysisProgress).catch(() => {})
+        await job.updateProgress(analysisProgress).catch(() => { })
       }
     }, 500)
 
@@ -380,10 +386,10 @@ async function processTranscriptionJob(
 
     // Cleanup temp files on error
     if (tempOriginalPath) {
-      await unlink(tempOriginalPath).catch(() => {})
+      await unlink(tempOriginalPath).catch(() => { })
     }
     if (tempPath) {
-      await unlink(tempPath).catch(() => {})
+      await unlink(tempPath).catch(() => { })
     }
 
     // Cleanup chunk files on error
@@ -408,13 +414,13 @@ export function createTranscriptionWorker(): Worker<TranscriptionJobData, Transc
     }
   )
 
-  worker.on('completed', () => {})
+  worker.on('completed', () => { })
 
-  worker.on('failed', () => {})
+  worker.on('failed', () => { })
 
-  worker.on('progress', () => {})
+  worker.on('progress', () => { })
 
-  worker.on('error', () => {})
+  worker.on('error', () => { })
 
   return worker
 }
