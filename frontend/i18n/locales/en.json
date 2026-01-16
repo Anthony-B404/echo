@@ -125,6 +125,32 @@
       "errorDescription": "An error occurred while activating your account.",
       "noToken": "Missing link"
     },
+    "resellerSetup": {
+      "title": "Activate your reseller account",
+      "subtitle": "Welcome to DH-Echo! Complete your information to access your reseller workspace.",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Enter your last name",
+      "organizationName": "Organization name",
+      "organizationNamePlaceholder": "Your organization name",
+      "logo": "Logo (optional)",
+      "logoHint": "JPG, PNG or GIF. 1MB max.",
+      "submit": "Activate my account",
+      "verifying": "Verifying link",
+      "pleaseWait": "Please wait...",
+      "tokenInvalid": "This link is invalid",
+      "tokenInvalidDescription": "The link you used is invalid. Please contact the DH-Echo administrator.",
+      "tokenExpired": "This link has expired",
+      "tokenExpiredDescription": "The activation link has expired. Please contact the DH-Echo administrator to get a new link.",
+      "alreadyCompleted": "Account already activated",
+      "alreadyCompletedDescription": "Your account is already activated. You can log in.",
+      "success": "Reseller account activated!",
+      "successDescription": "Welcome! Your reseller workspace is ready.",
+      "error": "Error",
+      "errorDescription": "An error occurred while activating your account.",
+      "noToken": "Missing link"
+    },
     "acceptInvitation": {
       "title": "Accept invitation",
       "description": "You have been invited to join {organization}",
@@ -201,6 +227,10 @@
     "setup": {
       "title": "Complete your account",
       "description": "Complete your registration to access DH-Echo"
+    },
+    "resellerSetup": {
+      "title": "Activate your reseller account",
+      "description": "Complete your registration to access your DH-Echo reseller workspace"
     },
     "dashboard": {
       "title": "DH-Echo",

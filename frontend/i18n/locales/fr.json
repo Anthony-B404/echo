@@ -112,6 +112,32 @@
       "errorDescription": "Une erreur est survenue lors de l'activation de votre compte.",
       "noToken": "Lien manquant"
     },
+    "resellerSetup": {
+      "title": "Activez votre compte revendeur",
+      "subtitle": "Bienvenue chez DH-Echo ! Complétez vos informations pour accéder à votre espace revendeur.",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Entrez votre prénom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Entrez votre nom",
+      "organizationName": "Nom de l'organisation",
+      "organizationNamePlaceholder": "Nom de votre organisation",
+      "logo": "Logo (optionnel)",
+      "logoHint": "JPG, PNG ou GIF. 1Mo max.",
+      "submit": "Activer mon compte",
+      "verifying": "Vérification du lien",
+      "pleaseWait": "Veuillez patienter...",
+      "tokenInvalid": "Ce lien n'est pas valide",
+      "tokenInvalidDescription": "Le lien que vous avez utilisé est invalide. Veuillez contacter l'administrateur DH-Echo.",
+      "tokenExpired": "Ce lien a expiré",
+      "tokenExpiredDescription": "Le lien d'activation a expiré. Veuillez contacter l'administrateur DH-Echo pour obtenir un nouveau lien.",
+      "alreadyCompleted": "Compte déjà activé",
+      "alreadyCompletedDescription": "Votre compte est déjà activé. Vous pouvez vous connecter.",
+      "success": "Compte revendeur activé !",
+      "successDescription": "Bienvenue ! Votre espace revendeur est prêt.",
+      "error": "Erreur",
+      "errorDescription": "Une erreur est survenue lors de l'activation de votre compte.",
+      "noToken": "Lien manquant"
+    },
     "acceptInvitation": {
       "title": "Accepter l'invitation",
       "description": "Vous avez été invité à rejoindre {organization}",
@@ -203,6 +229,10 @@
     "setup": {
       "title": "Finalisez votre compte",
       "description": "Complétez votre inscription pour accéder à DH-Echo"
+    },
+    "resellerSetup": {
+      "title": "Activez votre compte revendeur",
+      "description": "Complétez votre inscription pour accéder à votre espace revendeur DH-Echo"
     },
     "dashboard": {
       "title": "DH-Echo",
