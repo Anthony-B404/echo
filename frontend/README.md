@@ -1,75 +1,73 @@
-# Nuxt 3 Minimal Starter
+# DH-Echo Frontend
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Application Nuxt 4 pour DH-Echo - Transformation audio en documents structurés.
 
-## Setup
+## Stack Technique
 
-Make sure to install the dependencies:
+- **Framework**: Nuxt 4.2.1 (SPA mode)
+- **UI**: Nuxt UI 4.1.0
+- **Styling**: Tailwind CSS v4
+- **State**: Pinia 3.0.4
+- **Validation**: Zod 4.1.12
+- **i18n**: @nuxtjs/i18n (français par défaut)
+
+## Installation
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+## Développement
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+pnpm dev
+# App disponible sur http://localhost:3000
 ```
 
-## Production
+## Configuration
 
-Build the application for production:
+Créer un fichier `.env` :
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+API_URL=http://localhost:3333
 ```
 
-Locally preview production build:
+## Structure du Projet
+
+```
+app/
+├── components/     # Composants Vue auto-importés
+├── composables/    # Fonctions de composition
+├── layouts/        # Layouts (default, auth, app)
+├── middleware/     # Middleware de routes (auth, admin, reseller)
+├── pages/          # Pages avec routing automatique
+│   ├── admin/      # Pages Super Admin
+│   ├── reseller/   # Pages Reseller Admin
+│   └── dashboard/  # Pages utilisateurs
+└── stores/         # Stores Pinia
+```
+
+## Rôles et Accès
+
+| Rôle | Pages | Middleware |
+|------|-------|------------|
+| Super Admin | `/admin/*` | `admin` |
+| Reseller Admin | `/reseller/*` | `reseller` |
+| Utilisateur | `/dashboard/*` | `auth` |
+
+## Scripts
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+pnpm dev          # Serveur de développement
+pnpm build        # Build production
+pnpm preview      # Preview du build
+pnpm typecheck    # Vérification TypeScript
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Points Importants
+
+- **Pas d'inscription publique** : Les utilisateurs sont créés par les revendeurs
+- **Crédits au niveau Organisation** : Les crédits sont gérés par organisation, pas par utilisateur
+- **Redirection par rôle** : Après login, redirection automatique selon le type d'utilisateur
+
+Pour plus de détails, voir [CLAUDE.md](./CLAUDE.md).

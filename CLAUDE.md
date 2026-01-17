@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DH-Echo is a B2B SaaS application that transforms audio recordings (meetings, dictations, calls) into structured written documents using AI. Built with Nuxt 4 frontend and AdonisJS v6 backend with multi-tenant architecture.
+DH-Echo is a B2B2B SaaS application that transforms audio recordings (meetings, dictations, calls) into structured written documents using AI. Built with Nuxt 4 frontend and AdonisJS v6 backend with multi-tenant architecture and a reseller distribution model.
 
 ### Core Features (MVP)
 - **Audio Workshop**: Upload (MP3, WAV) or record via microphone
@@ -13,9 +13,11 @@ DH-Echo is a B2B SaaS application that transforms audio recordings (meetings, di
 - **Dashboard & Export**: Audio library with PDF/Word export
 
 ### Business Context
-- **Target users**: Professionals (Lawyers, Doctors, Salespeople)
+- **Business Model**: B2B2B (DH-Echo → Resellers → Client Organizations → Users)
+- **Target users**: Professionals (Lawyers, Doctors, Salespeople) via reseller partners
 - **Value proposition**: "1-hour messy audio → 2-minute structured document"
 - **UX principles**: Minimalist, reassuring, "Drag, Drop, Done"
+- **Distribution**: No public signup - all users created by Reseller admins
 
 ## Technology Stack
 
@@ -75,21 +77,45 @@ node ace generate:key               # Generate APP_KEY
 
 ### Multi-Tenant Architecture
 
+**System Hierarchy (B2B2B Model)**:
+```
+Super Admin (DH-Echo staff)    → Access: /admin/*
+    ↓
+Reseller (Business partner)    → Access: /reseller/*
+    ↓
+Organization (Client company)  → Credits pool, users, audios
+    ↓
+User (End user)                → Access: /dashboard/*
+```
+
+**Credit Flow**: Super Admin → Reseller (pool) → Organization (pool) → Usage
+
 - **Tenant Isolation**: All data is scoped by `currentOrganizationId` (user's active organization)
 - **Critical Rule**: ALWAYS filter database queries by `currentOrganizationId` to prevent data leaks
+- **Reseller Scope**: Reseller admins can only access organizations belonging to their reseller
 - **User-Organization Relationship**: Users can belong to MULTIPLE organizations
 - **Organization Context**: Users have a "current organization" that determines which data they see
-- **Roles**: Owner (1), Administrator (2), and Member (3) - stored per-organization in `organization_user` pivot table
+- **Organization-Level Roles**: Owner (1), Administrator (2), and Member (3) - stored per-organization in `organization_user` pivot table
 - **Role Verification**: Use `user.isOwnerOf(orgId)` and `user.hasOrganization(orgId)` methods
 - **Organization Switching**: Users can switch between their organizations via `/api/organizations/:id/switch`
+- **Public Signup Disabled**: All users are created by Reseller admins, no public registration
 
 ### Authentication & Authorization Flow
 
-1. **Signup**: Creates organization + owner user in transaction (`/signup`)
-2. **Login**: Returns API token for Bearer auth (`/login`)
-3. **Protected Routes**: All `/api/*` routes require `Authorization: Bearer <token>` header
-4. **Middleware**: `auth_middleware.ts` validates tokens, `initialize_bouncer_middleware.ts` sets up policies
-5. **Policies**: Located in `backend/app/policies/` - always check tenant isolation in policies
+1. **User Creation**: Users are created by Reseller admins (no public signup)
+   - Reseller creates organization → creates users within organization
+   - Users receive magic link to complete setup
+2. **Login**: Returns API token for Bearer auth (`/login/request-magic-link`)
+3. **Role-Based Redirection**: After login, redirect based on `user.roleType`:
+   - `super_admin` → `/admin`
+   - `reseller_admin` → `/reseller`
+   - `organization_user` → `/dashboard`
+4. **Protected Routes**:
+   - `/api/*` - All authenticated users
+   - `/admin/*` - Super Admin only (`superAdmin` middleware)
+   - `/reseller/*` - Reseller Admin only (`reseller` middleware)
+5. **Middleware**: `auth_middleware.ts` validates tokens, `super_admin_middleware.ts` and `reseller_middleware.ts` check role access
+6. **Policies**: Located in `backend/app/policies/` - always check tenant isolation in policies
 
 ### Invitation System
 
@@ -100,15 +126,28 @@ node ace generate:key               # Generate APP_KEY
   - **Existing Users**: Adds organization to user's organizations (user can belong to multiple orgs)
 - **Email Notifications**: Automatically sent via Resend when invitation created
 
-### Credits System
+### Credits System (Updated)
 
-- **Credit-Based**: Users have credits for audio processing (1 credit = 1 minute of audio)
+**Credit Flow**: Super Admin → Reseller pool → Organization pool → Usage
+
+- **Organization-Level Credits**: Credits are now stored at the Organization level, not User level
 - **Credit Check**: Verification happens only at audio transcription time in `transcription_job.ts`
 - **No Access Control**: Users always have access to the application; credits are deducted on usage
-- **User Fields**: `credits` field stores current credit balance
-- **Methods**: `hasEnoughCredits(minutes)`, `deductCredits(amount)`, `addCredits(amount)`
+- **Three-Tier Structure**:
+  - `reseller.creditBalance` - Reseller's pool (topped up by Super Admin)
+  - `organization.credits` - Organization's pool (distributed by Reseller)
+  - `credit_transactions` - Audit trail of organization-level usage
+- **Organization Methods**: `hasEnoughCredits(amount)`, `deductCredits(amount, description, userId, audioId?)`, `addCredits(amount, type, description, userId)`
+- **Reseller Methods**: `hasEnoughCredits(amount)`, `distributeCredits(amount, orgId, description, userId)`, `addCredits(amount, description, userId)`
 
 ### Role-Based Access Control (RBAC)
+
+**System-Level Access** (based on `user.roleType`):
+| Role | Routes | Middleware |
+|------|--------|------------|
+| Super Admin | `/admin/*` | `superAdmin` middleware |
+| Reseller Admin | `/reseller/*` | `reseller` middleware |
+| Organization User | `/dashboard/*` | `auth` middleware |
 
 **Frontend Permissions** (`useSettingsPermissions` composable):
 ```typescript
@@ -121,7 +160,7 @@ canManageMembers       // Owner + Administrator
 - `changeRole()`: Owner can change any role (except to Owner); Admin can only change Members
 - `deleteMember()`: Same rules as `manageMember()`
 
-**Settings Page Access**:
+**Settings Page Access (Organization Users)**:
 | Page | Access |
 |------|--------|
 | `/dashboard/settings/organization` | Owner only |
@@ -129,6 +168,23 @@ canManageMembers       // Owner + Administrator
 | `/dashboard/settings/security` | All authenticated users |
 | `/dashboard/settings/notifications` | All authenticated users |
 | `/dashboard/credits` | All authenticated users |
+
+**Admin Page Access (Super Admin)**:
+| Page | Access |
+|------|--------|
+| `/admin` | Dashboard with global stats |
+| `/admin/resellers` | Manage resellers |
+| `/admin/resellers/:id` | Reseller details & credits |
+
+**Reseller Page Access (Reseller Admin)**:
+| Page | Access |
+|------|--------|
+| `/reseller` | Dashboard |
+| `/reseller/profile` | Reseller profile |
+| `/reseller/credits` | Credit balance & transactions |
+| `/reseller/organizations` | Manage client organizations |
+| `/reseller/organizations/:id/users` | Manage organization users |
+| `/reseller/organizations/:id/credits` | Distribute credits |
 
 ### Internationalization (i18n)
 
@@ -181,36 +237,60 @@ const data = await authenticatedFetch('/protected-endpoint')
 
 ### Backend Architecture (AdonisJS)
 
-- **Controllers**: Thin controllers in `app/controllers/` (UsersController, OrganizationsController, InvitationsController, CreditsController, AudioController)
+- **Controllers**: Thin controllers in `app/controllers/`:
+  - Core: `UsersController`, `OrganizationsController`, `InvitationsController`, `CreditsController`, `AudioController`
+  - Admin: `app/controllers/admin/` - `ResellersController`, `ResellerCreditsController`, `AdminStatsController`
+  - Reseller: `app/controllers/reseller/` - `ResellerProfileController`, `ResellerCreditsController`, `ResellerOrganizationsController`, `ResellerUsersController`
 - **Validators**: VineJS schemas in `app/validators/` - always validate user input
-- **Models**: Lucid models in `app/models/` (User, Organization, OrganizationUser, Invitation, CreditTransaction, Audio)
+- **Models**: Lucid models in `app/models/` (User, Organization, Reseller, ResellerTransaction, CreditTransaction, Audio)
 - **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy, MemberPolicy)
-- **Middleware**: Custom middleware in `app/middleware/` (auth, detect_user_locale, initialize_bouncer)
+- **Middleware**: Custom middleware in `app/middleware/`:
+  - `auth` - Token validation
+  - `superAdmin` - Super Admin access check
+  - `reseller` - Reseller Admin access check
+  - `pendingDeletion` - Block writes during GDPR deletion
+  - `detect_user_locale` - i18n detection
 - **Import Aliases**: Use `#controllers/*`, `#models/*`, `#validators/*`, etc. (defined in package.json)
 
 ## Database Schema
 
 ### Core Tables
 
-- **users**: Users with `currentOrganizationId` (active organization context), `credits` field for credit balance
-- **organizations**: Organization entities with `name`, `logo`, `email`
+- **resellers** (NEW): Reseller entities with `name`, `email`, `company`, `siret`, `creditBalance`, `isActive`
+- **reseller_transactions** (NEW): Reseller credit transactions (`resellerId`, `amount`, `type`, `targetOrganizationId`, `performedByUserId`)
+- **users**: Users with `currentOrganizationId`, `isSuperAdmin` (boolean), `resellerId` (FK for reseller admins)
+- **organizations**: Organization entities with `name`, `logo`, `email`, `resellerId` (FK), `credits` (moved from users)
 - **organization_user**: Pivot table linking users to organizations with `role` per organization (1=Owner, 2=Administrator, 3=Member)
 - **invitations**: Pending invitations with `identifier` (UUID), `organizationId`, `role`, `expiresAt`
-- **credit_transactions**: Credit usage history (`userId`, `amount`, `type`, `description`)
+- **credit_transactions**: Credit usage history (`userId`, `organizationId`, `amount`, `balanceAfter`, `type`, `audioId`)
 - **audios**: Audio files with transcription and analysis data
 - **access_tokens**: API authentication tokens managed by AdonisJS Auth
 
 ### Key Relationships
 
+- Reseller → Organizations (has many)
+- Reseller → ResellerTransactions (has many)
+- Reseller → Admin Users (has many via `user.resellerId`)
 - User ↔ Organization (many-to-many via `organization_user` pivot)
 - User → Current Organization (belongs to via `currentOrganizationId`)
-- User → CreditTransactions (has many)
+- User → Reseller (belongs to via `resellerId` for reseller admins)
+- Organization → Reseller (belongs to via `resellerId`)
+- Organization → CreditTransactions (has many)
 - Invitation → Organization (many-to-one)
 - Audio → Organization (belongs to, multi-tenant)
 - Access Token → User (tokenable polymorphic)
 
-### User Roles (per organization)
+### User Roles
 
+**System-Level Roles** (determined by `user.roleType` getter):
+```typescript
+export type UserRoleType = 'super_admin' | 'reseller_admin' | 'organization_user'
+// - isSuperAdmin = true → 'super_admin'
+// - resellerId != null → 'reseller_admin'
+// - otherwise → 'organization_user'
+```
+
+**Organization-Level Roles** (per organization in pivot table):
 ```typescript
 export enum UserRole {
   Owner = 1,         // Full control of organization
@@ -266,6 +346,36 @@ API_URL=http://localhost:3333
 
 ## Common Pitfalls
 
+### Public Signup Disabled
+
+- **IMPORTANT**: Public registration is disabled - all users are created by Reseller admins
+- Don't expect `/signup` endpoint to exist
+- Users receive magic link to complete account setup after being created by reseller
+
+### Credits at Organization Level (Not User Level)
+
+```typescript
+// ❌ Wrong - Old user-level credits
+if (!user.hasEnoughCredits(amount)) { ... }
+
+// ✅ Correct - Organization-level credits
+const org = await Organization.findOrFail(user.currentOrganizationId)
+if (!org.hasEnoughCredits(amount)) { ... }
+```
+
+### Reseller Scope Isolation
+
+- **Always** verify organization belongs to reseller before operations in `/reseller/*` routes
+- Use `ctx.reseller` (attached by middleware) to check scope
+
+```typescript
+// ✅ Correct - Verify organization belongs to reseller
+const org = await Organization.query()
+  .where('id', params.id)
+  .where('resellerId', ctx.reseller!.id)
+  .firstOrFail()
+```
+
 ### Multi-Tenant Issues
 
 - **NEVER** fetch data without filtering by `currentOrganizationId` (user's active organization)
@@ -306,9 +416,10 @@ API_URL=http://localhost:3333
 ### Credits System
 
 - **Credit Check**: Credits are verified only at audio processing time (`transcription_job.ts`)
-- **Credit Methods**: Use `user.hasEnoughCredits(minutes)` before processing, `user.deductCredits(amount)` after
-- **Insufficient Credits**: Returns error with `code: 'INSUFFICIENT_CREDITS'` when user doesn't have enough credits
-- **Frontend Handling**: Credits page at `/dashboard/credits` shows balance and transaction history
+- **Organization-Level**: Use `organization.hasEnoughCredits(amount)` before processing, `organization.deductCredits(...)` after
+- **Insufficient Credits**: Returns error with `code: 'INSUFFICIENT_CREDITS'` when organization doesn't have enough credits
+- **Frontend Handling**: Credits page at `/dashboard/credits` shows organization balance and transaction history
+- **Reseller Credit Distribution**: Resellers must have enough credits in their pool before distributing to organizations
 
 ## Feature: Audio Analysis with Mistral AI
 

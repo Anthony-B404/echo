@@ -70,6 +70,33 @@ node ace generate:key               # Generate APP_KEY
 
 ## Multi-Tenant Architecture
 
+### System Hierarchy
+
+The system implements a B2B2B model with four tiers:
+
+```
+Super Admin (DH-Echo staff)
+    │ Access: /admin/*
+    │ Can: Create resellers, add credits to resellers
+    ▼
+Reseller (Business partner)
+    │ Access: /reseller/*
+    │ Can: Create orgs, distribute credits, manage users
+    ▼
+Organization (Client company)
+    │ Contains: Credits pool, users, audios
+    ▼
+User (End user)
+    │ Access: /dashboard/*
+    │ Can: Use the service, consume credits
+```
+
+### Credit Flow
+
+```
+Super Admin adds credits → Reseller (pool) → Organization (pool) → Usage
+```
+
 ### Critical Rules
 
 1. **ALWAYS filter queries by `currentOrganizationId`** - Never fetch data without tenant isolation
@@ -78,10 +105,37 @@ node ace generate:key               # Generate APP_KEY
 4. **Policies**: Always use Bouncer policies to verify tenant access with `hasOrganization()` and `isOwnerOf()` methods
 5. **Transactions**: Use database transactions for multi-model operations
 6. **Organization Switching**: Users can switch between their organizations via API endpoint
+7. **Reseller Scope**: Reseller admins can only access organizations belonging to their reseller
+8. **Public Signup Disabled**: All users are created by Reseller admins, no public registration
 
 ### Database Schema
 
 #### Core Tables
+
+**resellers** (NEW)
+
+- `id` - Primary key
+- `name` - Reseller contact name
+- `email` - Reseller email
+- `phone` - Phone number (optional)
+- `company` - Company name
+- `siret` - French company registration number (optional)
+- `address` - Address (optional)
+- `creditBalance` - Credit pool available for distribution
+- `isActive` - Boolean flag to enable/disable reseller
+- `notes` - Admin notes (optional)
+- `createdAt`, `updatedAt` - Timestamps
+
+**reseller_transactions** (NEW)
+
+- `id` - Primary key
+- `resellerId` - Foreign key to resellers
+- `amount` - Credit amount (positive for purchases, negative for distributions)
+- `type` - Transaction type: `purchase`, `distribution`, `adjustment`
+- `targetOrganizationId` - Foreign key to organizations (for distributions)
+- `description` - Optional description
+- `performedByUserId` - Who performed the action (Super Admin or Reseller Admin)
+- `createdAt` - Transaction timestamp
 
 **users**
 
@@ -99,16 +153,20 @@ node ace generate:key               # Generate APP_KEY
 - `pendingEmail` - Email pending change (optional)
 - `emailChangeToken` - Token for email change confirmation (optional)
 - `emailChangeExpiresAt` - Expiration date for email change token
-- `credits` - Credit balance for audio processing
+- `isSuperAdmin` - Boolean flag for Super Admin access (NEW)
+- `resellerId` - Foreign key to resellers for Reseller Admins (NEW, optional)
 - `disabled` - Boolean flag if user is disabled
 
 **credit_transactions**
 
 - `id` - Primary key
-- `userId` - Foreign key to users
+- `userId` - Foreign key to users (who triggered the usage)
+- `organizationId` - Foreign key to organizations (NEW - credits are now at org level)
 - `amount` - Credit amount (positive for additions, negative for deductions)
+- `balanceAfter` - Balance after transaction
 - `type` - Transaction type: `usage`, `purchase`, `bonus`, `refund`
 - `description` - Optional description
+- `audioId` - Foreign key to audios (for usage transactions)
 - `createdAt` - Transaction timestamp
 
 **organizations**
@@ -117,6 +175,8 @@ node ace generate:key               # Generate APP_KEY
 - `name` - Organization name
 - `logo` - Logo URL (optional)
 - `email` - Organization email
+- `resellerId` - Foreign key to resellers (NEW - which reseller manages this org)
+- `credits` - Credit balance for audio processing (NEW - moved from users)
 
 **organization_user** (Pivot Table)
 
@@ -143,6 +203,22 @@ node ace generate:key               # Generate APP_KEY
 ### Relationships
 
 ```typescript
+// Reseller model
+@hasMany(() => Organization)
+declare organizations: HasMany<typeof Organization>
+
+@hasMany(() => ResellerTransaction)
+declare transactions: HasMany<typeof ResellerTransaction>
+
+@hasMany(() => User)  // Reseller admin users
+declare adminUsers: HasMany<typeof User>
+
+// Helper methods
+hasEnoughCredits(amount: number): boolean
+async distributeCredits(amount, organizationId, description, performedByUserId): Promise<ResellerTransaction>
+async addCredits(amount, description, performedByUserId): Promise<ResellerTransaction>
+async adjustCredits(amount, description, performedByUserId): Promise<ResellerTransaction>
+
 // User model
 @manyToMany(() => Organization, {
   pivotTable: 'organization_user',
@@ -155,15 +231,14 @@ declare organizations: ManyToMany<typeof Organization>
 })
 declare currentOrganization: BelongsTo<typeof Organization>
 
-@hasMany(() => CreditTransaction)
-declare creditTransactions: HasMany<typeof CreditTransaction>
+@belongsTo(() => Reseller)  // For reseller admin users
+declare reseller: BelongsTo<typeof Reseller>
 
 // Helper methods
 async isOwnerOf(organizationId: number): Promise<boolean>
 async hasOrganization(organizationId: number): Promise<boolean>
-hasEnoughCredits(minutes: number): boolean
-async deductCredits(amount: number, description?: string): Promise<void>
-async addCredits(amount: number, type: string, description?: string): Promise<void>
+get roleType(): 'super_admin' | 'reseller_admin' | 'organization_user'
+isResellerAdmin(): boolean
 
 // Organization model
 @manyToMany(() => User, {
@@ -174,9 +249,45 @@ declare users: ManyToMany<typeof User>
 
 @hasMany(() => Invitation)
 declare invitations: HasMany<typeof Invitation>
+
+@belongsTo(() => Reseller)  // Which reseller manages this org
+declare reseller: BelongsTo<typeof Reseller>
+
+// Helper methods
+async getOwner(): Promise<User | null>
+hasEnoughCredits(amount: number): boolean
+async deductCredits(amount, description, userId, audioId?): Promise<CreditTransaction>
+async addCredits(amount, type, description, userId): Promise<CreditTransaction>
 ```
 
 ### User Roles
+
+#### System-Level Roles (User Type)
+
+Determined by `user.roleType` getter:
+
+```typescript
+export type UserRoleType = 'super_admin' | 'reseller_admin' | 'organization_user'
+
+// Determined by:
+// - isSuperAdmin = true → 'super_admin'
+// - resellerId != null → 'reseller_admin'
+// - otherwise → 'organization_user'
+```
+
+- **Super Admin** (`isSuperAdmin = true`): DH-Echo staff with access to `/admin/*` routes
+  - Can manage all resellers
+  - Can add/remove credits to reseller pools
+  - Can view global statistics
+- **Reseller Admin** (`resellerId != null`): Reseller employee with access to `/reseller/*` routes
+  - Can create/manage organizations for their reseller
+  - Can distribute credits from reseller pool to organizations
+  - Can create/manage users within their organizations
+- **Organization User** (default): Regular user with access to `/dashboard/*` routes
+  - Can use the audio processing service
+  - Access based on organization membership
+
+#### Organization-Level Roles (Within an Organization)
 
 ```typescript
 export enum UserRole {
@@ -247,56 +358,98 @@ await user.save()
 
 ## Credits System
 
-### Overview
+### Overview (Updated)
 
-- **Credit-Based**: Users have credits for audio processing (1 credit = 1 minute of audio)
+- **Organization-Level Credits**: Credits are now stored at the Organization level, not User level
+- **Credit Flow**: Super Admin → Reseller pool → Organization pool → Usage
 - **No Access Control**: Users always have access; credits are verified only at processing time
 - **Credit Check**: Happens in `transcription_job.ts` before processing audio
 
-### User Credit Methods
+### Three-Tier Credit Structure
 
-```typescript
-// Check if user has enough credits for audio duration
-user.hasEnoughCredits(minutes: number): boolean
+```
+1. Reseller Pool (reseller.creditBalance)
+   - Topped up by Super Admin
+   - Distributed to organizations by Reseller Admin
 
-// Deduct credits after processing
-await user.deductCredits(amount: number, description?: string): Promise<void>
+2. Organization Pool (organization.credits)
+   - Receives credits from Reseller
+   - Consumed by audio processing
 
-// Add credits (purchase, bonus, refund)
-await user.addCredits(amount: number, type: string, description?: string): Promise<void>
+3. Credit Transactions (credit_transactions table)
+   - Tracks all organization-level credit movements
+   - Includes userId, organizationId, audioId for audit trail
 ```
 
-### CreditTransaction Model
+### Organization Credit Methods
 
 ```typescript
+// Check if organization has enough credits for audio duration
+organization.hasEnoughCredits(amount: number): boolean
+
+// Deduct credits after processing (called by transcription job)
+await organization.deductCredits(amount, description, userId, audioId?): Promise<CreditTransaction>
+
+// Add credits (from reseller distribution)
+await organization.addCredits(amount, type, description, userId): Promise<CreditTransaction>
+```
+
+### Reseller Credit Methods
+
+```typescript
+// Check if reseller has enough credits for distribution
+reseller.hasEnoughCredits(amount: number): boolean
+
+// Distribute credits to an organization
+await reseller.distributeCredits(amount, organizationId, description, performedByUserId): Promise<ResellerTransaction>
+
+// Add credits to pool (Super Admin action)
+await reseller.addCredits(amount, description, performedByUserId): Promise<ResellerTransaction>
+
+// Adjust credits (corrections, refunds)
+await reseller.adjustCredits(amount, description, performedByUserId): Promise<ResellerTransaction>
+```
+
+### CreditTransaction Types
+
+```typescript
+// Organization-level transactions
 export enum CreditTransactionType {
-  Usage = 'usage',
-  Purchase = 'purchase',
-  Bonus = 'bonus',
-  Refund = 'refund',
+  Usage = 'usage',        // Audio processing consumption
+  Purchase = 'purchase',  // From reseller distribution
+  Bonus = 'bonus',        // Promotional credits
+  Refund = 'refund',      // Refunds for failed processing
+}
+
+// Reseller-level transactions
+export enum ResellerTransactionType {
+  Purchase = 'purchase',       // Super Admin adds credits
+  Distribution = 'distribution', // Credits sent to organization
+  Adjustment = 'adjustment',   // Manual corrections
 }
 ```
 
 ### CreditsController Endpoints
 
 ```typescript
-// Get credit balance
-GET /api/credits/balance
+// Get organization credit balance
+GET /api/credits
 
-// Get transaction history
-GET /api/credits/transactions
+// Get organization transaction history
+GET /api/credits/history
 ```
 
 ### Credit Check in Transcription Job
 
 ```typescript
-// Before processing audio
-if (!user.hasEnoughCredits(audioDurationMinutes)) {
+// Before processing audio - now checks organization credits
+const organization = await Organization.findOrFail(user.currentOrganizationId)
+if (!organization.hasEnoughCredits(audioDurationMinutes)) {
   throw new Error('INSUFFICIENT_CREDITS')
 }
 
-// After successful processing
-await user.deductCredits(audioDurationMinutes, `Audio: ${audioTitle}`)
+// After successful processing - deducts from organization
+await organization.deductCredits(audioDurationMinutes, `Audio: ${audioTitle}`, user.id, audio.id)
 ```
 
 ## Authentication & Authorization
@@ -371,6 +524,101 @@ if (!(await auth.user!.hasOrganization(organizationId))) {
 // ✅ Correct - Check owner role
 if (!(await auth.user!.isOwnerOf(organizationId))) {
   return response.forbidden({ message: 'Owner access required' })
+}
+```
+
+## Admin & Reseller APIs
+
+### Super Admin Routes (`/admin/*`)
+
+Protected by `superAdmin` middleware (requires `user.isSuperAdmin = true`):
+
+```typescript
+// Global statistics
+GET /admin/stats
+
+// Reseller CRUD
+GET    /admin/resellers           // List all resellers
+POST   /admin/resellers           // Create reseller
+GET    /admin/resellers/:id       // Get reseller details
+PUT    /admin/resellers/:id       // Update reseller
+DELETE /admin/resellers/:id       // Delete reseller
+
+// Reseller credit management
+POST /admin/resellers/:id/credits        // Add credits to reseller pool
+POST /admin/resellers/:id/credits/remove // Remove credits from pool
+GET  /admin/resellers/:id/transactions   // Get reseller transaction history
+```
+
+### Reseller API Routes (`/reseller/*`)
+
+Protected by `reseller` middleware (requires `user.resellerId != null` and reseller must be active):
+
+```typescript
+// Profile
+GET /reseller/profile             // Get reseller profile & stats
+
+// Credits
+GET /reseller/credits             // Get credit balance & recent transactions
+
+// Organizations
+GET    /reseller/organizations           // List organizations for this reseller
+POST   /reseller/organizations           // Create new organization
+GET    /reseller/organizations/:id       // Get organization details
+PUT    /reseller/organizations/:id       // Update organization
+
+// Credit distribution
+POST /reseller/organizations/:id/credits // Distribute credits to organization
+
+// User management (within reseller's organizations)
+GET    /reseller/organizations/:id/users       // List users in organization
+POST   /reseller/organizations/:id/users       // Create user in organization
+DELETE /reseller/organizations/:id/users/:uid  // Remove user from organization
+```
+
+### Middleware Configuration
+
+```typescript
+// In start/kernel.ts
+export const middleware = router.named({
+  auth: () => import('#middleware/auth_middleware'),
+  superAdmin: () => import('#middleware/super_admin_middleware'),
+  reseller: () => import('#middleware/reseller_middleware'),
+  pendingDeletion: () => import('#middleware/pending_deletion_middleware'),
+})
+```
+
+### Reseller Middleware Details
+
+The `reseller` middleware:
+1. Verifies user is authenticated
+2. Checks `user.resellerId` is set
+3. Loads and verifies reseller is active (`isActive = true`)
+4. Attaches `ctx.reseller` for easy access in controllers
+
+```typescript
+// Access reseller in controllers
+const { reseller } = ctx
+await reseller.distributeCredits(amount, orgId, description, ctx.auth.user!.id)
+```
+
+### Login Flow and Redirection
+
+After login, redirect users based on their role type:
+
+```typescript
+// Frontend login handler
+const { roleType } = user
+
+switch (roleType) {
+  case 'super_admin':
+    navigateTo('/admin')
+    break
+  case 'reseller_admin':
+    navigateTo('/reseller')
+    break
+  default:
+    navigateTo('/dashboard')
 }
 ```
 
@@ -880,6 +1128,48 @@ return response.ok(users.toJSON())
 ```
 
 ## Common Pitfalls
+
+### Public Signup Disabled
+
+**Important**: Public registration is disabled. All users must be created by a Reseller Admin.
+
+```typescript
+// ❌ Wrong - Expecting /signup endpoint
+// Public signup doesn't exist
+
+// ✅ Correct - Users created via Reseller API
+POST /reseller/organizations/:id/users
+```
+
+### Credits at Organization Level (Not User Level)
+
+**Important**: Credits moved from User to Organization level.
+
+```typescript
+// ❌ Wrong - Old user-level credits
+if (!user.hasEnoughCredits(amount)) { ... }
+await user.deductCredits(amount)
+
+// ✅ Correct - Organization-level credits
+const org = await Organization.findOrFail(user.currentOrganizationId)
+if (!org.hasEnoughCredits(amount)) { ... }
+await org.deductCredits(amount, description, user.id, audio.id)
+```
+
+### Reseller Scope Isolation
+
+**Always** verify organization belongs to reseller before operations:
+
+```typescript
+// ❌ Wrong - No reseller scope check
+const org = await Organization.findOrFail(params.id)
+
+// ✅ Correct - Verify organization belongs to reseller
+const org = await Organization.query()
+  .where('id', params.id)
+  .where('resellerId', ctx.reseller!.id)
+  .firstOrFail()
+```
 
 ### Tenant Isolation
 

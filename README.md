@@ -4,9 +4,40 @@
 
 ## Concept
 
-DH-Echo est une application web B2B qui transforme des enregistrements audio (réunions, dictées, appels) en documents écrits parfaitement structurés. Ce n'est pas juste un transcripteur, c'est un rédacteur intelligent capable de s'adapter au métier de l'utilisateur (Avocat, Médecin, Commercial).
+DH-Echo est une application web B2B2B qui transforme des enregistrements audio (réunions, dictées, appels) en documents écrits parfaitement structurés. Ce n'est pas juste un transcripteur, c'est un rédacteur intelligent capable de s'adapter au métier de l'utilisateur (Avocat, Médecin, Commercial).
 
 **L'objectif** : L'utilisateur dépose un audio de 1 heure en désordre, et récupère en 2 minutes un document de synthèse clair et prêt à être envoyé.
+
+## Modèle de Distribution (B2B2B)
+
+DH-Echo utilise un modèle de distribution via revendeurs :
+
+```
+DH-Echo (Super Admin)
+    ↓ Gestion des revendeurs, attribution de crédits
+Revendeur (Reseller)
+    ↓ Création d'organisations, distribution de crédits, gestion des utilisateurs
+Organisation (Client)
+    ↓ Pool de crédits, utilisateurs
+Utilisateur
+    → Consommation des crédits via traitement audio
+```
+
+### Rôles Système
+
+| Rôle | Accès | Responsabilités |
+|------|-------|-----------------|
+| **Super Admin** | `/admin/*` | Gestion des revendeurs, attribution des crédits au pool revendeur |
+| **Reseller Admin** | `/reseller/*` | Création d'organisations, distribution des crédits, gestion des utilisateurs |
+| **Utilisateur** | `/dashboard/*` | Utilisation du service de transformation audio |
+
+### Flux des Crédits
+
+```
+Super Admin → Reseller Pool → Organization Pool → Consommation
+```
+
+**Note** : L'inscription publique est désactivée. Tous les utilisateurs sont créés par les administrateurs revendeurs.
 
 ## Fonctionnalités
 
@@ -215,6 +246,25 @@ createdb dh_echo_db
 node ace migration:run
 ```
 
+### Créer un Super Admin (Premier Accès)
+
+L'inscription publique étant désactivée, vous devez créer un Super Admin manuellement :
+
+```bash
+cd backend
+
+# Option 1: Via la console AdonisJS (si disponible)
+node ace user:create-super-admin
+
+# Option 2: Via SQL directement
+# INSERT INTO users (email, is_super_admin, ...) VALUES ('admin@example.com', true, ...);
+```
+
+Une fois le Super Admin créé, vous pouvez :
+1. Vous connecter à `/admin`
+2. Créer des revendeurs
+3. Les revendeurs peuvent ensuite créer des organisations et des utilisateurs
+
 ### Lancer l'Application
 
 **Terminal 1 - Backend:**
@@ -265,11 +315,38 @@ pnpm typecheck       # TypeScript type checking
 
 ## Architecture Multi-Tenant
 
-DH-Echo utilise une architecture multi-tenant où :
+DH-Echo utilise une architecture multi-tenant hiérarchique :
 
-- Chaque utilisateur peut appartenir à **plusieurs organisations**
-- Les données sont isolées par organisation (`currentOrganizationId`)
-- **Rôles** : Owner (propriétaire), Administrator, Member
+### Hiérarchie des Données
+
+```
+Reseller (revendeur)
+    └── Organizations (clients)
+            └── Users (utilisateurs)
+                    └── Audios (données)
+```
+
+### Isolation des Données
+
+- **Niveau Reseller** : Les revendeurs ne peuvent accéder qu'aux organisations qu'ils ont créées
+- **Niveau Organisation** : Les données sont isolées par `currentOrganizationId`
+- **Utilisateurs** : Chaque utilisateur peut appartenir à **plusieurs organisations**
+
+### Rôles au Niveau Organisation
+
+| Rôle | Permissions |
+|------|-------------|
+| **Owner** | Contrôle total de l'organisation |
+| **Administrator** | Gestion des membres, certains paramètres |
+| **Member** | Accès basique aux ressources |
+
+### Crédits
+
+Les crédits sont gérés au niveau **Organisation** (et non au niveau utilisateur) :
+
+1. Le Super Admin ajoute des crédits au pool du Reseller
+2. Le Reseller distribue des crédits aux Organisations
+3. Les utilisateurs consomment les crédits de leur organisation lors du traitement audio
 
 ---
 

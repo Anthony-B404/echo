@@ -25,13 +25,41 @@ frontend/
 │   │   ├── useApi.ts
 │   │   ├── useAuth.ts
 │   │   ├── useRoles.ts
-│   │   └── useSettingsPermissions.ts
+│   │   ├── useSettingsPermissions.ts
+│   │   ├── useResellerProfile.ts      # Reseller profile data
+│   │   ├── useResellerOrganizations.ts # Reseller org management
+│   │   └── useResellers.ts            # Admin reseller management
 │   ├── layouts/           # Layout components
 │   │   ├── default.vue
 │   │   ├── auth.vue
 │   │   └── app.vue
+│   ├── middleware/        # Route middleware
+│   │   ├── auth.ts         # Authenticated users only
+│   │   ├── admin.ts        # Super Admin only
+│   │   ├── reseller.ts     # Reseller Admin only
+│   │   └── pending-deletion.ts
 │   ├── pages/             # File-based routing
-│   │   └── dashboard/
+│   │   ├── admin/         # Super Admin pages (NEW)
+│   │   │   ├── index.vue           # Admin dashboard
+│   │   │   └── resellers/          # Reseller management
+│   │   │       ├── index.vue       # List resellers
+│   │   │       ├── create.vue      # Create reseller
+│   │   │       └── [id]/           # Reseller details
+│   │   │           ├── index.vue   # Reseller info
+│   │   │           └── credits.vue # Credit management
+│   │   ├── reseller/      # Reseller Admin pages (NEW)
+│   │   │   ├── index.vue           # Reseller dashboard
+│   │   │   ├── profile.vue         # Reseller profile
+│   │   │   ├── credits.vue         # Credit balance
+│   │   │   ├── setup/[token].vue   # Initial setup page
+│   │   │   └── organizations/      # Client org management
+│   │   │       ├── index.vue       # List organizations
+│   │   │       ├── create.vue      # Create organization
+│   │   │       └── [id]/           # Organization details
+│   │   │           ├── index.vue   # Org info
+│   │   │           ├── users.vue   # User management
+│   │   │           └── credits.vue # Credit distribution
+│   │   └── dashboard/     # Regular user pages
 │   │       └── settings/  # Settings pages with RBAC
 │   │           ├── organization.vue # Owner only
 │   │           ├── members.vue    # Owner + Admin
@@ -116,6 +144,25 @@ await authenticatedFetch('/profile', {
 
 ## Role-Based Access Control (RBAC)
 
+### System-Level Access (Middleware)
+
+Three route middleware control access based on user role type:
+
+| Middleware | Route Pattern | User Type |
+|------------|---------------|-----------|
+| `admin` | `/admin/*` | Super Admin (`user.isSuperAdmin`) |
+| `reseller` | `/reseller/*` | Reseller Admin (`user.resellerId != null`) |
+| `auth` | `/dashboard/*` | All authenticated users |
+
+**Login Redirection** (based on `user.roleType`):
+```typescript
+switch (roleType) {
+  case 'super_admin': navigateTo('/admin'); break
+  case 'reseller_admin': navigateTo('/reseller'); break
+  default: navigateTo('/dashboard')
+}
+```
+
 ### useSettingsPermissions Composable
 
 Controls access to settings pages based on user role in current organization:
@@ -143,8 +190,43 @@ const {
 } = useRoles()
 ```
 
-### Settings Page Access Matrix
+### Reseller Composables (NEW)
 
+```typescript
+// Reseller profile data
+const { profile, isLoading, refresh } = useResellerProfile()
+
+// Reseller organization management
+const { organizations, createOrganization, distributeCredits } = useResellerOrganizations()
+
+// Admin reseller management (Super Admin only)
+const { resellers, createReseller, addCredits } = useResellers()
+```
+
+### Page Access Matrix
+
+**Super Admin Pages** (`/admin/*`):
+| Page | Route | Access |
+|------|-------|--------|
+| Dashboard | `/admin` | Super Admin only |
+| Resellers List | `/admin/resellers` | Super Admin only |
+| Create Reseller | `/admin/resellers/create` | Super Admin only |
+| Reseller Details | `/admin/resellers/[id]` | Super Admin only |
+| Reseller Credits | `/admin/resellers/[id]/credits` | Super Admin only |
+
+**Reseller Admin Pages** (`/reseller/*`):
+| Page | Route | Access |
+|------|-------|--------|
+| Dashboard | `/reseller` | Reseller Admin only |
+| Profile | `/reseller/profile` | Reseller Admin only |
+| Credits | `/reseller/credits` | Reseller Admin only |
+| Organizations | `/reseller/organizations` | Reseller Admin only |
+| Create Org | `/reseller/organizations/create` | Reseller Admin only |
+| Org Details | `/reseller/organizations/[id]` | Reseller Admin only |
+| Org Users | `/reseller/organizations/[id]/users` | Reseller Admin only |
+| Org Credits | `/reseller/organizations/[id]/credits` | Reseller Admin only |
+
+**Organization User Pages** (`/dashboard/*`):
 | Page | Route | Access |
 |------|-------|--------|
 | Organization | `/dashboard/settings/organization` | Owner only |
@@ -156,26 +238,37 @@ const {
 **Usage in pages**:
 ```vue
 <script setup lang="ts">
+// For organization-level access
 const { canAccessOrganization, isOwner } = useSettingsPermissions()
-
-// Redirect if no access
 if (!canAccessOrganization.value) {
   navigateTo('/dashboard')
 }
+
+// For system-level access (handled by middleware)
+definePageMeta({
+  middleware: ['admin'] // or 'reseller' or 'auth'
+})
 </script>
 ```
 
-## Credits System
+## Credits System (Updated)
+
+**Important**: Credits are now stored at the **Organization** level, not the User level.
+
+### Credit Flow
+```
+Super Admin → Reseller Pool → Organization Pool → Usage
+```
 
 ### Credits Store (`app/stores/credits.ts`)
 
-Manages user credits state:
+Manages organization credits state:
 
 ```typescript
 const creditsStore = useCreditsStore()
 
 // State
-creditsStore.credits          // Current credit balance
+creditsStore.credits          // Current organization credit balance
 creditsStore.transactions     // Transaction history
 
 // Actions
@@ -186,7 +279,7 @@ await creditsStore.fetchTransactions()
 ### Credits Page
 
 Located at `/dashboard/credits`, shows:
-- Current credit balance
+- Current **organization** credit balance
 - Transaction history (usage, purchases, bonuses, refunds)
 
 ### Handling Insufficient Credits
@@ -197,9 +290,25 @@ When API returns error with `code: 'INSUFFICIENT_CREDITS'`:
 // In audio processing
 if (error.data?.code === 'INSUFFICIENT_CREDITS') {
   // Show error message with credits needed vs available
-  // Redirect to credits page
+  // Contact organization admin or reseller for more credits
 }
 ```
+
+### Reseller Credit Management
+
+**Reseller credits page** (`/reseller/credits`):
+- Shows reseller pool balance
+- Lists recent transactions (purchases, distributions)
+
+**Credit distribution** (`/reseller/organizations/[id]/credits`):
+- Distribute credits from reseller pool to organization
+- View organization credit history
+
+### Admin Credit Management
+
+**Reseller credit management** (`/admin/resellers/[id]/credits`):
+- Add credits to reseller pool
+- View reseller transaction history
 
 ## Nuxt UI Components
 
