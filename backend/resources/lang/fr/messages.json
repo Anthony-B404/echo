@@ -30,7 +30,11 @@
     "initial_credits_from_reseller": "Crédits initiaux du revendeur",
     "user_created": "Utilisateur créé et invitation envoyée",
     "user_added_existing": "Utilisateur existant ajouté à l'organisation",
-    "cannot_remove_owner": "Impossible de retirer le propriétaire de l'organisation"
+    "cannot_remove_owner": "Impossible de retirer le propriétaire de l'organisation",
+    "user_not_in_organization": "L'utilisateur n'est pas membre de cette organisation",
+    "user_already_verified": "Cet utilisateur a déjà finalisé son inscription",
+    "invitation_rate_limit": "Veuillez patienter avant d'envoyer une nouvelle invitation",
+    "invitation_resent": "Invitation renvoyée avec succès"
   },
   "subscription": {
     "updated": "Configuration d'abonnement mise à jour avec succès",

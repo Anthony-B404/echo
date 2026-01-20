@@ -226,11 +226,11 @@ ALTER TABLE users
 
 ### 4.6 Critères d'acceptation
 
-- [ ] Le reseller peut renvoyer une invitation à un utilisateur non vérifié
-- [ ] Le rate limit de 5 minutes est respecté
-- [ ] L'utilisateur reçoit un nouvel email avec un lien valide
-- [ ] Le statut "En attente" est visible sur la liste des utilisateurs
-- [ ] La date du dernier envoi est affichée
+- [x] Le reseller peut renvoyer une invitation à un utilisateur non vérifié
+- [x] Le rate limit de 5 minutes est respecté
+- [x] L'utilisateur reçoit un nouvel email avec un lien valide
+- [x] Le statut "En attente" est visible sur la liste des utilisateurs
+- [x] La date du dernier envoi est affichée
 
 ---
 

@@ -235,6 +235,7 @@ router
     // User management
     router.get('/organizations/:id/users', [ResellerUsersController, 'index'])
     router.post('/organizations/:id/users', [ResellerUsersController, 'store'])
+    router.post('/organizations/:id/users/:userId/resend-invitation', [ResellerUsersController, 'resendInvitation'])
     router.delete('/organizations/:id/users/:userId', [ResellerUsersController, 'destroy'])
 
     // Subscription management

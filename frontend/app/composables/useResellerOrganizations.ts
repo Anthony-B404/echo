@@ -232,6 +232,30 @@ export function useResellerOrganizations() {
     }
   }
 
+  /**
+   * Resend invitation to a pending user
+   */
+  async function resendInvitation(
+    organizationId: number,
+    userId: number
+  ): Promise<{ message: string; lastInvitationSentAt: string } | null> {
+    loading.value = true
+    error.value = null
+    try {
+      return await authenticatedFetch<{ message: string; lastInvitationSentAt: string }>(
+        `/reseller/organizations/${organizationId}/users/${userId}/resend-invitation`,
+        {
+          method: 'POST',
+        }
+      )
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e, 'Failed to resend invitation')
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   // ==========================================================================
   // ORGANIZATION STATUS MANAGEMENT
   // ==========================================================================
@@ -331,5 +355,6 @@ export function useResellerOrganizations() {
     fetchUsers,
     addUser,
     removeUser,
+    resendInvitation,
   }
 }

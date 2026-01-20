@@ -68,6 +68,7 @@ export interface OrganizationUser {
   role: 1 | 2 | 3 // Owner = 1, Administrator = 2, Member = 3
   createdAt: string
   onboardingCompleted: boolean
+  lastInvitationSentAt: string | null
 }
 
 // =============================================================================

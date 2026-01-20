@@ -67,6 +67,9 @@ export default class User extends BaseModel {
   @column.dateTime()
   declare magicLinkExpiresAt: DateTime | null
 
+  @column.dateTime()
+  declare lastInvitationSentAt: DateTime | null
+
   @column()
   declare pendingEmail: string | null
 
@@ -133,5 +136,31 @@ export default class User extends BaseModel {
    */
   isResellerAdmin(): boolean {
     return this.resellerId !== null && !this.isSuperAdmin
+  }
+
+  /**
+   * Check if invitation can be resent (5 minute cooldown)
+   */
+  canResendInvitation(): boolean {
+    if (!this.lastInvitationSentAt) {
+      return true
+    }
+    const cooldownMinutes = 5
+    const cooldownEnd = this.lastInvitationSentAt.plus({ minutes: cooldownMinutes })
+    return DateTime.now() >= cooldownEnd
+  }
+
+  /**
+   * Get remaining seconds until invitation can be resent
+   * Returns 0 if resend is allowed
+   */
+  getResendCooldownSeconds(): number {
+    if (!this.lastInvitationSentAt) {
+      return 0
+    }
+    const cooldownMinutes = 5
+    const cooldownEnd = this.lastInvitationSentAt.plus({ minutes: cooldownMinutes })
+    const diff = cooldownEnd.diff(DateTime.now(), 'seconds').seconds
+    return Math.max(0, Math.ceil(diff))
   }
 }

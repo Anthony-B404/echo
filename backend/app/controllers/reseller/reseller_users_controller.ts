@@ -38,7 +38,7 @@ export default class ResellerUsersController {
 
       await organization.load('users', (query) => {
         query
-          .select(['id', 'email', 'first_name', 'last_name', 'full_name', 'created_at', 'onboarding_completed'])
+          .select(['id', 'email', 'first_name', 'last_name', 'full_name', 'created_at', 'onboarding_completed', 'last_invitation_sent_at'])
           .orderBy('created_at', 'desc')
       })
 
@@ -52,6 +52,7 @@ export default class ResellerUsersController {
         role: user.$extras.pivot_role,
         createdAt: user.createdAt,
         onboardingCompleted: user.onboardingCompleted,
+        lastInvitationSentAt: user.lastInvitationSentAt?.toISO() ?? null,
       }))
 
       // Manual pagination for ManyToMany relation
@@ -311,6 +312,106 @@ export default class ResellerUsersController {
 
     return response.ok({
       message: i18n.t('messages.member.deleted'),
+    })
+  }
+
+  /**
+   * Resend invitation to a pending user
+   * POST /api/reseller/organizations/:id/users/:userId/resend-invitation
+   *
+   * Rules:
+   * - User must have onboardingCompleted === false
+   * - Rate limit: 5 minutes between resends
+   */
+  async resendInvitation({ params, response, reseller, i18n }: HttpContext) {
+    const organization = await Organization.find(params.id)
+
+    if (!organization) {
+      return response.notFound({
+        message: i18n.t('messages.organization.not_found'),
+      })
+    }
+
+    // Policy check: organization must belong to reseller
+    if (organization.resellerId !== reseller!.id) {
+      return response.forbidden({
+        message: i18n.t('messages.reseller_api.organization_access_denied'),
+      })
+    }
+
+    const user = await User.find(params.userId)
+
+    if (!user) {
+      return response.notFound({
+        message: i18n.t('messages.user.not_found'),
+      })
+    }
+
+    // Check user is in this organization
+    const isMember = await user.hasOrganization(organization.id)
+    if (!isMember) {
+      return response.notFound({
+        message: i18n.t('messages.reseller_api.user_not_in_organization'),
+      })
+    }
+
+    // Check user has not completed onboarding (is pending)
+    if (user.onboardingCompleted) {
+      return response.badRequest({
+        code: 'USER_ALREADY_VERIFIED',
+        message: i18n.t('messages.reseller_api.user_already_verified'),
+      })
+    }
+
+    // Check rate limit (5 minutes)
+    if (!user.canResendInvitation()) {
+      const remainingSeconds = user.getResendCooldownSeconds()
+      return response.tooManyRequests({
+        code: 'INVITATION_RATE_LIMIT',
+        message: i18n.t('messages.reseller_api.invitation_rate_limit'),
+        remainingSeconds,
+      })
+    }
+
+    // Generate new magic link token (7 days expiry)
+    const magicLinkToken = randomUUID()
+    user.magicLinkToken = magicLinkToken
+    user.magicLinkExpiresAt = DateTime.now().plus({ days: 7 })
+    user.lastInvitationSentAt = DateTime.now()
+    await user.save()
+
+    // Get user's role in this organization
+    await user.load('organizations')
+    const orgMembership = user.organizations.find((o) => o.id === organization.id)
+    const userRole = orgMembership?.$extras.pivot_role
+
+    // Send invitation email
+    const frontendUrl = env.get('FRONTEND_URL', 'http://localhost:3000')
+    const apiUrl = env.get('APP_URL', 'http://localhost:3333')
+
+    await mail.send((message) => {
+      message
+        .to(user.email)
+        .from(env.get('MAIL_FROM', 'DH-Echo <contact@dh-echo.cloud>'))
+        .subject(
+          i18n.t('emails.reseller_user_invitation.subject', {
+            organization: organization.name,
+          })
+        )
+        .htmlView('emails/reseller_user_invitation', {
+          userName: user.fullName || `${user.firstName} ${user.lastName}`,
+          organizationName: organization.name,
+          role: userRole === UserRole.Administrator ? 'Administrator' : 'Member',
+          setupUrl: `${frontendUrl}/setup/${magicLinkToken}`,
+          expiresAt: DateTime.now().plus({ days: 7 }).toFormat('dd/MM/yyyy'),
+          i18n,
+          apiUrl,
+        })
+    })
+
+    return response.ok({
+      message: i18n.t('messages.reseller_api.invitation_resent'),
+      lastInvitationSentAt: user.lastInvitationSentAt?.toISO(),
     })
   }
 }

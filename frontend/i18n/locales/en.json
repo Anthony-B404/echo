@@ -1394,6 +1394,7 @@
         "noUsersDescription": "Add your first user to get started"
       },
       "pendingInvitation": "Pending invitation",
+      "lastInvitationSent": "Last invitation sent: {date}",
       "table": {
         "name": "Name",
         "email": "Email",
@@ -1406,7 +1407,14 @@
         "member": "Member"
       },
       "actions": {
-        "cannotDeleteOwner": "Cannot delete owner"
+        "cannotDeleteOwner": "Cannot delete owner",
+        "resendInvitation": "Resend invitation",
+        "resendCooldown": "Wait {time}"
+      },
+      "resend": {
+        "success": "Invitation resent successfully",
+        "rateLimited": "Please wait before sending another invitation",
+        "error": "Failed to resend invitation"
       },
       "add": {
         "title": "Add User",

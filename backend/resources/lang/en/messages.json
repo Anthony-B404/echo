@@ -30,7 +30,11 @@
     "initial_credits_from_reseller": "Initial credits from reseller",
     "user_created": "User created and invitation sent",
     "user_added_existing": "Existing user added to organization",
-    "cannot_remove_owner": "Cannot remove the organization owner"
+    "cannot_remove_owner": "Cannot remove the organization owner",
+    "user_not_in_organization": "User is not a member of this organization",
+    "user_already_verified": "This user has already completed their registration",
+    "invitation_rate_limit": "Please wait before sending another invitation",
+    "invitation_resent": "Invitation resent successfully"
   },
   "subscription": {
     "updated": "Subscription configuration updated successfully",

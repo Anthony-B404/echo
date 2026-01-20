@@ -10,6 +10,7 @@ defineProps<{
 
 const emit = defineEmits<{
   delete: [user: OrganizationUser]
+  resend: [user: OrganizationUser]
 }>()
 
 const { t } = useI18n()
@@ -65,26 +66,82 @@ function getRoleColor(role: number): BadgeColor {
   return roleConfig[role]?.color || 'neutral'
 }
 
+/**
+ * Check if a pending user can receive a new invitation (5 minute cooldown)
+ */
+function canResendInvitation(user: OrganizationUser): boolean {
+  if (user.onboardingCompleted) return false
+  if (!user.lastInvitationSentAt) return true
+
+  const cooldownMs = 5 * 60 * 1000 // 5 minutes
+  const lastSent = new Date(user.lastInvitationSentAt).getTime()
+  return Date.now() >= lastSent + cooldownMs
+}
+
+/**
+ * Get remaining cooldown seconds for resend
+ */
+function getResendCooldownSeconds(user: OrganizationUser): number {
+  if (!user.lastInvitationSentAt) return 0
+
+  const cooldownMs = 5 * 60 * 1000 // 5 minutes
+  const lastSent = new Date(user.lastInvitationSentAt).getTime()
+  const remaining = Math.max(0, (lastSent + cooldownMs - Date.now()) / 1000)
+  return Math.ceil(remaining)
+}
+
+/**
+ * Format cooldown seconds to readable string
+ */
+function formatCooldown(seconds: number): string {
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (minutes > 0) {
+    return `${minutes}m ${secs}s`
+  }
+  return `${secs}s`
+}
+
 function getRowActions(user: OrganizationUser) {
-  // Cannot delete owner
+  const actions = []
+
+  // Add resend invitation action for pending users (including owners)
+  if (!user.onboardingCompleted) {
+    const canResend = canResendInvitation(user)
+    const cooldownSeconds = getResendCooldownSeconds(user)
+
+    actions.push({
+      label: canResend
+        ? t('reseller.users.actions.resendInvitation')
+        : t('reseller.users.actions.resendCooldown', { time: formatCooldown(cooldownSeconds) }),
+      icon: 'i-lucide-mail',
+      disabled: !canResend,
+      onSelect: () => emit('resend', user),
+    })
+  }
+
+  // Cannot delete owner - show info message only
   if (user.role === USER_ROLES.OWNER) {
-    return [
-      {
+    if (actions.length === 0) {
+      // Only show this message if no other actions are available
+      actions.push({
         label: t('reseller.users.actions.cannotDeleteOwner'),
         icon: 'i-lucide-info',
         disabled: true,
-      },
-    ]
+      })
+    }
+    return actions
   }
 
-  return [
-    {
-      label: t('common.buttons.delete'),
-      icon: 'i-lucide-trash-2',
-      color: 'error' as const,
-      onSelect: () => emit('delete', user),
-    },
-  ]
+  // Delete action (for non-owners only)
+  actions.push({
+    label: t('common.buttons.delete'),
+    icon: 'i-lucide-trash-2',
+    color: 'error' as const,
+    onSelect: () => emit('delete', user),
+  })
+
+  return actions
 }
 </script>
 
@@ -95,12 +152,16 @@ function getRowActions(user: OrganizationUser) {
         <p class="font-medium text-gray-900 dark:text-white">
           {{ row.original.fullName || `${row.original.firstName} ${row.original.lastName}` }}
         </p>
-        <p
+        <UTooltip
           v-if="!row.original.onboardingCompleted"
-          class="text-xs text-orange-500"
+          :text="row.original.lastInvitationSentAt
+            ? t('reseller.users.lastInvitationSent', { date: formatDate(row.original.lastInvitationSentAt) })
+            : t('reseller.users.pendingInvitation')"
         >
-          {{ t('reseller.users.pendingInvitation') }}
-        </p>
+          <p class="text-xs text-orange-500 cursor-help">
+            {{ t('reseller.users.pendingInvitation') }}
+          </p>
+        </UTooltip>
       </div>
     </template>
 
@@ -121,7 +182,6 @@ function getRowActions(user: OrganizationUser) {
           variant="ghost"
           icon="i-lucide-more-horizontal"
           :aria-label="t('common.buttons.actions')"
-          :disabled="row.original.role === USER_ROLES.OWNER"
         />
       </UDropdownMenu>
     </template>

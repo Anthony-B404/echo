@@ -26,7 +26,7 @@ useSeoMeta({
 })
 
 // Composables
-const { fetchOrganization, fetchUsers, addUser, removeUser, loading, error } =
+const { fetchOrganization, fetchUsers, addUser, removeUser, resendInvitation, loading, error } =
   useResellerOrganizations()
 
 // State
@@ -45,6 +45,7 @@ const showDeleteModal = ref(false)
 const userToDelete = ref<OrganizationUser | null>(null)
 const addingUser = ref(false)
 const deletingUser = ref(false)
+const resendingInvitation = ref(false)
 
 // Load data
 onMounted(async () => {
@@ -144,6 +145,37 @@ async function confirmDelete() {
 function handlePageChange(page: number) {
   loadUsers(page)
 }
+
+async function handleResendInvitation(user: OrganizationUser) {
+  resendingInvitation.value = true
+  try {
+    const result = await resendInvitation(organizationId.value, user.id)
+    if (result) {
+      toast.add({
+        title: t('reseller.users.resend.success'),
+        color: 'success',
+      })
+      // Refresh the users list to get updated lastInvitationSentAt
+      await loadUsers(pagination.value.currentPage)
+    }
+  } catch (e: unknown) {
+    // Check if it's a rate limit error
+    const errorData = (e as { data?: { code?: string } })?.data
+    if (errorData?.code === 'INVITATION_RATE_LIMIT') {
+      toast.add({
+        title: t('reseller.users.resend.rateLimited'),
+        color: 'warning',
+      })
+    } else {
+      toast.add({
+        title: error.value || t('reseller.users.resend.error'),
+        color: 'error',
+      })
+    }
+  } finally {
+    resendingInvitation.value = false
+  }
+}
 </script>
 
 <template>
@@ -181,8 +213,9 @@ function handlePageChange(page: number) {
       <UCard :ui="{ body: 'p-0' }">
         <ResellerUserTable
           :users="users"
-          :loading="loading"
+          :loading="loading || resendingInvitation"
           @delete="openDeleteModal"
+          @resend="handleResendInvitation"
         />
 
         <!-- Empty state -->
