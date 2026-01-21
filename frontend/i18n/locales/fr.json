@@ -776,6 +776,8 @@
           "bonus": "Bonus",
           "refund": "Remboursement"
         },
+        "usedBy": "par {name}",
+        "systemAction": "Action système",
         "insufficientCredits": "Crédits insuffisants",
         "insufficientCreditsMessage": "Crédits insuffisants. Requis : {required}, disponibles : {available}. Veuillez recharger votre compte pour continuer.",
         "creditInfo": "1 crédit = 1 minute d'audio"

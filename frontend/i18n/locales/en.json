@@ -774,6 +774,8 @@
           "bonus": "Bonus",
           "refund": "Refund"
         },
+        "usedBy": "by {name}",
+        "systemAction": "System action",
         "insufficientCredits": "Insufficient Credits",
         "insufficientCreditsMessage": "Insufficient credits. Required: {required}, available: {available}. Please purchase more credits to continue.",
         "creditInfo": "1 credit = 1 minute of audio"

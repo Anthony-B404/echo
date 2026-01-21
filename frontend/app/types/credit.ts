@@ -1,6 +1,6 @@
 export interface CreditTransaction {
     id: number
-    userId: number
+    userId: number | null
     amount: number
     balanceAfter: number
     type: 'usage' | 'purchase' | 'bonus' | 'refund'
@@ -11,6 +11,13 @@ export interface CreditTransaction {
         id: number
         title: string
         fileName: string
+    }
+    user?: {
+        id: number
+        fullName: string | null
+        firstName: string | null
+        lastName: string | null
+        email: string
     }
 }
 

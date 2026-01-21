@@ -66,6 +66,15 @@ function formatDate (dateString: string) {
     minute: '2-digit'
   })
 }
+
+function getUserDisplayName (tx: typeof transactions.value[0]) {
+  if (!tx.user) return null
+  if (tx.user.fullName) return tx.user.fullName
+  if (tx.user.firstName || tx.user.lastName) {
+    return [tx.user.firstName, tx.user.lastName].filter(Boolean).join(' ')
+  }
+  return tx.user.email
+}
 </script>
 
 <template>
@@ -156,6 +165,9 @@ function formatDate (dateString: string) {
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 max-w-md">
                 {{ tx.description || '-' }}
+              </p>
+              <p v-if="getUserDisplayName(tx)" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                {{ t('pages.dashboard.credits.usedBy', { name: getUserDisplayName(tx) }) }}
               </p>
             </div>
           </div>

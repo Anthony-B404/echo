@@ -40,6 +40,9 @@ export default class CreditsController {
       .where('organizationId', user.currentOrganizationId!)
       .orderBy('createdAt', 'desc')
       .preload('audio')
+      .preload('user', (userQuery) => {
+        userQuery.select('id', 'fullName', 'firstName', 'lastName', 'email')
+      })
 
     if (type) {
       query.where('type', type)
