@@ -4,42 +4,42 @@ import type {
   UpdateOrganizationPayload,
   SubscriptionStatus,
   ConfigureSubscriptionPayload,
-  BusinessSector
-} from '~/types/reseller'
-import { USER_ROLES } from '~/types/reseller'
+  BusinessSector,
+} from "~/types/reseller";
+import { USER_ROLES } from "~/types/reseller";
 
 definePageMeta({
-  layout: 'reseller',
-  middleware: ['auth', 'reseller']
-})
+  layout: "reseller",
+  middleware: ["auth", "reseller"],
+});
 
-const { t } = useI18n()
-const route = useRoute()
-const localePath = useLocalePath()
-const toast = useToast()
-const { formatDate, formatCredits } = useFormatters()
-const { sectorOptions, getSectorConfig, getSectorLabel } = useBusinessSectors()
+const { t } = useI18n();
+const route = useRoute();
+const localePath = useLocalePath();
+const toast = useToast();
+const { formatDate, formatCredits } = useFormatters();
+const { sectorOptions, getSectorConfig, getSectorLabel } = useBusinessSectors();
 
-const organizationId = computed(() => Number(route.params.id))
+const organizationId = computed(() => Number(route.params.id));
 
 // Breadcrumb (will be reactive once organization is loaded)
 const breadcrumbItems = computed(() => [
   {
-    label: t('reseller.navigation.dashboard'),
-    icon: 'i-lucide-home',
-    to: localePath('/reseller')
+    label: t("reseller.navigation.dashboard"),
+    icon: "i-lucide-home",
+    to: localePath("/reseller"),
   },
   {
-    label: t('reseller.navigation.organizations'),
-    icon: 'i-lucide-building-2',
-    to: localePath('/reseller/organizations')
+    label: t("reseller.navigation.organizations"),
+    icon: "i-lucide-building-2",
+    to: localePath("/reseller/organizations"),
   },
-  { label: organization.value?.name || '...', icon: 'i-lucide-building' }
-])
+  { label: organization.value?.name || "...", icon: "i-lucide-building" },
+]);
 
 useSeoMeta({
-  title: t('reseller.organizations.detail.title')
-})
+  title: t("reseller.organizations.detail.title"),
+});
 
 const {
   fetchOrganization,
@@ -48,239 +48,218 @@ const {
   restoreOrganization,
   deleteOrganization,
   loading,
-  error
-} = useResellerOrganizations()
+  error,
+} = useResellerOrganizations();
 const {
   fetchSubscription,
   configureSubscription,
   pauseSubscription,
   resumeSubscription,
-  loading: subscriptionLoading
-} = useResellerSubscriptions()
-const router = useRouter()
-const organization = ref<ResellerOrganization | null>(null)
-const subscription = ref<SubscriptionStatus | null>(null)
-const isEditing = ref(false)
-const editedBusinessSectors = ref<BusinessSector[]>([])
+  loading: subscriptionLoading,
+} = useResellerSubscriptions();
+const router = useRouter();
+const organization = ref<ResellerOrganization | null>(null);
+const subscription = ref<SubscriptionStatus | null>(null);
+const isEditing = ref(false);
+const editedBusinessSectors = ref<BusinessSector[]>([]);
 
 // Status management modal states
-const suspendModalOpen = ref(false)
-const restoreModalOpen = ref(false)
-const deleteModalOpen = ref(false)
-const statusLoading = ref(false)
+const suspendModalOpen = ref(false);
+const restoreModalOpen = ref(false);
+const deleteModalOpen = ref(false);
+const statusLoading = ref(false);
 
-// Badge color type for Nuxt UI
-type BadgeColor =
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'info'
-  | 'neutral';
+// Role labels
+const roleLabels: Record<number, string> = {
+  [USER_ROLES.OWNER]: t("reseller.users.roles.owner"),
+  [USER_ROLES.ADMINISTRATOR]: t("reseller.users.roles.administrator"),
+  [USER_ROLES.MEMBER]: t("reseller.users.roles.member"),
+};
 
-// Role configuration
-const roleConfig: Record<number, { label: string; color: BadgeColor }> = {
-  [USER_ROLES.OWNER]: {
-    label: t('reseller.users.roles.owner'),
-    color: 'primary'
-  },
-  [USER_ROLES.ADMINISTRATOR]: {
-    label: t('reseller.users.roles.administrator'),
-    color: 'info'
-  },
-  [USER_ROLES.MEMBER]: {
-    label: t('reseller.users.roles.member'),
-    color: 'neutral'
-  }
-}
-
-function getRoleLabel (role: number) {
-  return roleConfig[role]?.label || '-'
-}
-
-function getRoleColor (role: number): BadgeColor {
-  return roleConfig[role]?.color || 'neutral'
+function getRoleLabel(role: number) {
+  return roleLabels[role] || "-";
 }
 
 // Load organization and subscription
 onMounted(async () => {
-  organization.value = await fetchOrganization(organizationId.value)
-  subscription.value = await fetchSubscription(organizationId.value)
-})
+  organization.value = await fetchOrganization(organizationId.value);
+  subscription.value = await fetchSubscription(organizationId.value);
+});
 
 // Watch for route param changes
 watch(organizationId, async (newId) => {
   if (newId) {
-    isEditing.value = false
-    organization.value = await fetchOrganization(newId)
-    subscription.value = await fetchSubscription(newId)
+    isEditing.value = false;
+    organization.value = await fetchOrganization(newId);
+    subscription.value = await fetchSubscription(newId);
   }
-})
+});
 
-async function handleSubmit (data: UpdateOrganizationPayload) {
+async function handleSubmit(data: UpdateOrganizationPayload) {
   try {
-    const result = await updateOrganization(organizationId.value, data)
+    const result = await updateOrganization(organizationId.value, data);
     if (result) {
-      organization.value = result.organization
-      isEditing.value = false
+      organization.value = result.organization;
+      isEditing.value = false;
       toast.add({
-        title: t('reseller.organizations.detail.updateSuccess'),
-        color: 'success'
-      })
+        title: t("reseller.organizations.detail.updateSuccess"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: error.value || t('reseller.organizations.detail.updateError'),
-      color: 'error'
-    })
+      title: error.value || t("reseller.organizations.detail.updateError"),
+      color: "error",
+    });
   }
 }
 
-function handleCancel () {
-  isEditing.value = false
+function handleCancel() {
+  isEditing.value = false;
 }
 
 // Subscription handlers
-async function handleSubscriptionSubmit (data: ConfigureSubscriptionPayload) {
+async function handleSubscriptionSubmit(data: ConfigureSubscriptionPayload) {
   try {
-    const result = await configureSubscription(organizationId.value, data)
+    const result = await configureSubscription(organizationId.value, data);
     if (result) {
-      subscription.value = result.subscription
+      subscription.value = result.subscription;
       toast.add({
-        title: t('reseller.subscription.configureSuccess'),
-        color: 'success'
-      })
+        title: t("reseller.subscription.configureSuccess"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: t('reseller.subscription.configureError'),
-      color: 'error'
-    })
+      title: t("reseller.subscription.configureError"),
+      color: "error",
+    });
   }
 }
 
-async function handlePauseSubscription () {
+async function handlePauseSubscription() {
   try {
-    const result = await pauseSubscription(organizationId.value)
+    const result = await pauseSubscription(organizationId.value);
     if (result) {
-      subscription.value = result.subscription
+      subscription.value = result.subscription;
       toast.add({
-        title: t('reseller.subscription.pauseSuccess'),
-        color: 'success'
-      })
+        title: t("reseller.subscription.pauseSuccess"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: t('reseller.subscription.pauseError'),
-      color: 'error'
-    })
+      title: t("reseller.subscription.pauseError"),
+      color: "error",
+    });
   }
 }
 
-async function handleResumeSubscription () {
+async function handleResumeSubscription() {
   try {
-    const result = await resumeSubscription(organizationId.value)
+    const result = await resumeSubscription(organizationId.value);
     if (result) {
-      subscription.value = result.subscription
+      subscription.value = result.subscription;
       toast.add({
-        title: t('reseller.subscription.resumeSuccess'),
-        color: 'success'
-      })
+        title: t("reseller.subscription.resumeSuccess"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: t('reseller.subscription.resumeError'),
-      color: 'error'
-    })
+      title: t("reseller.subscription.resumeError"),
+      color: "error",
+    });
   }
 }
 
 // Status management handlers
-async function handleSuspend (reason?: string) {
-  statusLoading.value = true
+async function handleSuspend(reason?: string) {
+  statusLoading.value = true;
   try {
     const result = await suspendOrganization(
       organizationId.value,
-      reason ? { reason } : undefined
-    )
+      reason ? { reason } : undefined,
+    );
     if (result) {
-      organization.value = result.organization
-      suspendModalOpen.value = false
+      organization.value = result.organization;
+      suspendModalOpen.value = false;
       toast.add({
-        title: t('reseller.organizations.suspend.success'),
-        color: 'success'
-      })
+        title: t("reseller.organizations.suspend.success"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: error.value || t('reseller.organizations.suspend.error'),
-      color: 'error'
-    })
+      title: error.value || t("reseller.organizations.suspend.error"),
+      color: "error",
+    });
   } finally {
-    statusLoading.value = false
+    statusLoading.value = false;
   }
 }
 
-async function handleRestore () {
-  statusLoading.value = true
+async function handleRestore() {
+  statusLoading.value = true;
   try {
-    const result = await restoreOrganization(organizationId.value)
+    const result = await restoreOrganization(organizationId.value);
     if (result) {
-      organization.value = result.organization
-      restoreModalOpen.value = false
+      organization.value = result.organization;
+      restoreModalOpen.value = false;
       toast.add({
-        title: t('reseller.organizations.restore.success'),
-        color: 'success'
-      })
+        title: t("reseller.organizations.restore.success"),
+        color: "success",
+      });
     }
   } catch (_e) {
     toast.add({
-      title: error.value || t('reseller.organizations.restore.error'),
-      color: 'error'
-    })
+      title: error.value || t("reseller.organizations.restore.error"),
+      color: "error",
+    });
   } finally {
-    statusLoading.value = false
+    statusLoading.value = false;
   }
 }
 
-async function handleDelete () {
-  statusLoading.value = true
+async function handleDelete() {
+  statusLoading.value = true;
   try {
-    const result = await deleteOrganization(organizationId.value)
+    const result = await deleteOrganization(organizationId.value);
     if (result) {
-      deleteModalOpen.value = false
+      deleteModalOpen.value = false;
       toast.add({
-        title: t('reseller.organizations.delete.success'),
-        color: 'success'
-      })
+        title: t("reseller.organizations.delete.success"),
+        color: "success",
+      });
       // Redirect to organizations list after deletion
-      router.push(localePath('/reseller/organizations'))
+      router.push(localePath("/reseller/organizations"));
     }
   } catch (_e) {
     toast.add({
-      title: error.value || t('reseller.organizations.delete.error'),
-      color: 'error'
-    })
+      title: error.value || t("reseller.organizations.delete.error"),
+      color: "error",
+    });
   } finally {
-    statusLoading.value = false
+    statusLoading.value = false;
   }
 }
 
 // Computed for days until purge (for deleted organizations)
 const daysUntilPurge = computed(() => {
-  if (!organization.value?.deletedAt) { return null }
-  const deletedDate = new Date(organization.value.deletedAt)
-  const purgeDate = new Date(deletedDate)
-  purgeDate.setDate(purgeDate.getDate() + 30)
-  const now = new Date()
-  const diff = purgeDate.getTime() - now.getTime()
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
-})
+  if (!organization.value?.deletedAt) {
+    return null;
+  }
+  const deletedDate = new Date(organization.value.deletedAt);
+  const purgeDate = new Date(deletedDate);
+  purgeDate.setDate(purgeDate.getDate() + 30);
+  const now = new Date();
+  const diff = purgeDate.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+});
 </script>
 
 <template>
-  <div class="space-y-6 p-6">
+  <div class="min-h-0 space-y-6 overflow-y-auto p-6">
     <!-- Breadcrumb -->
     <UBreadcrumb :items="breadcrumbItems" />
 
@@ -485,10 +464,8 @@ const daysUntilPurge = computed(() => {
               <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold">
                   {{ t("reseller.organizations.detail.members") }}
-                  <UBadge color="neutral" class="ml-2">
-                    {{
-                      organization.usersCount || organization.users.length
-                    }}
+                  <UBadge color="neutral" variant="outline" class="ml-2">
+                    {{ organization.usersCount || organization.users.length }}
                   </UBadge>
                 </h2>
                 <UButton
@@ -524,7 +501,7 @@ const daysUntilPurge = computed(() => {
                     {{ user.email }}
                   </p>
                 </div>
-                <UBadge :color="getRoleColor(user.role)">
+                <UBadge color="neutral" variant="subtle">
                   {{ getRoleLabel(user.role) }}
                 </UBadge>
               </div>
@@ -607,16 +584,20 @@ const daysUntilPurge = computed(() => {
               <div
                 v-if="
                   organization.status === 'suspended' &&
-                    organization.suspendedAt
+                  organization.suspendedAt
                 "
                 class="text-sm text-gray-600 dark:text-gray-400"
               >
                 <p>
-                  <span class="font-medium">{{ t("reseller.organizations.status.suspendedAt") }}:</span>
+                  <span class="font-medium"
+                    >{{ t("reseller.organizations.status.suspendedAt") }}:</span
+                  >
                   {{ formatDate(organization.suspendedAt) }}
                 </p>
                 <p v-if="organization.suspensionReason" class="mt-1">
-                  <span class="font-medium">{{ t("reseller.organizations.status.reason") }}:</span>
+                  <span class="font-medium"
+                    >{{ t("reseller.organizations.status.reason") }}:</span
+                  >
                   {{ organization.suspensionReason }}
                 </p>
               </div>
@@ -628,7 +609,9 @@ const daysUntilPurge = computed(() => {
                 class="text-sm text-gray-600 dark:text-gray-400"
               >
                 <p>
-                  <span class="font-medium">{{ t("reseller.organizations.status.deletedAt") }}:</span>
+                  <span class="font-medium"
+                    >{{ t("reseller.organizations.status.deletedAt") }}:</span
+                  >
                   {{ formatDate(organization.deletedAt) }}
                 </p>
                 <p v-if="daysUntilPurge !== null" class="text-error-500 mt-1">

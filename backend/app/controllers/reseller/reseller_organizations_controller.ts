@@ -71,7 +71,9 @@ export default class ResellerOrganizationsController {
     const organization = await Organization.query()
       .where('id', params.id)
       .preload('users', (query) => {
-        query.select(['id', 'email', 'first_name', 'last_name', 'created_at'])
+        query
+          .select(['id', 'email', 'first_name', 'last_name', 'created_at'])
+          .pivotColumns(['role'])
       })
       .withCount('users')
       .first()
@@ -89,7 +91,21 @@ export default class ResellerOrganizationsController {
       })
     }
 
-    return response.ok(organization)
+    // Transform users to include role from pivot table
+    const transformedUsers = organization.users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
+      role: user.$extras.pivot_role,
+      createdAt: user.createdAt,
+    }))
+
+    return response.ok({
+      ...organization.serialize(),
+      users: transformedUsers,
+    })
   }
 
   /**

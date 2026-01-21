@@ -164,7 +164,7 @@ async function handleLogout () {
     </UDashboardSidebar>
 
     <UDashboardPanel>
-      <div class="mx-auto w-full max-w-7xl">
+      <div class="mx-auto h-full w-full max-w-7xl overflow-y-auto">
         <slot />
       </div>
     </UDashboardPanel>
