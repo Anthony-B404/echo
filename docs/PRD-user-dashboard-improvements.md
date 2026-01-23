@@ -1,7 +1,7 @@
 # PRD: Améliorations du Dashboard Utilisateur
 
-**Version**: 1.2
-**Date**: 22 janvier 2026
+**Version**: 1.3
+**Date**: 23 janvier 2026
 **Auteur**: DH-Echo Product Team
 **Statut**: Draft
 
@@ -22,6 +22,7 @@ Le dashboard utilisateur permet actuellement aux membres d'une organisation de g
 - Permettre aux Owners de distribuer des crédits aux membres avec options de recharge automatique
 - Créer un système de demande de crédits entre membres et Owner/Reseller
 - Prévenir les uploads sans crédits suffisants avec système de demande intégré
+- Notifier les utilisateurs des événements importants liés aux crédits
 - Offrir une gestion modulaire des permissions par rôle
 - Transformer la gestion des audios en système de dossiers type "Drive"
 - Permettre l'édition des analyses avec historique des modifications
@@ -1085,6 +1086,7 @@ export default class TranscriptionVersionService {
 | 🔴 P1 | Vérification crédits avant upload | Quick win, améliore l'UX immédiatement |
 | 🔴 P1 | Distribution crédits par Owner | Fondation pour le système de crédits utilisateur |
 | 🟡 P2 | Système de demande de crédits | Complète le workflow de crédits |
+| 🟡 P2 | Notifications in-app | Alertes crédits et demandes, complète Feature 2 |
 | 🟡 P2 | Édition des analyses | Forte demande utilisateur, valeur immédiate |
 | 🟢 P3 | Permissions modulaires | Améliore la flexibilité, effort modéré |
 | 🟢 P3 | Système de dossiers | Plus complexe, transformation majeure de l'UX |
@@ -1096,6 +1098,7 @@ export default class TranscriptionVersionService {
 │                    Modifications de base                     │
 │  - Migration: créer table user_credits                      │
 │  - Migration: créer table credit_requests                   │
+│  - Migration: créer table notifications                     │
 │  - Migration: créer table organization_role_permissions     │
 │  - Migration: créer table folders + folder_access           │
 │  - Migration: créer table transcription_versions            │
@@ -1116,11 +1119,12 @@ export default class TranscriptionVersionService {
 │ (dépend de Feature 1 pour le modèle user_credits)         │
 └───────────────────────────────────────────────────────────┘
         │
-        ▼
-┌───────────────────────────────────────────────────────────┐
-│ Feature 3: Vérification avant upload                       │
-│ (dépend de Feature 1 + 2 pour la logique complète)        │
-└───────────────────────────────────────────────────────────┘
+        ├───────────────────────────────────────────────────┐
+        ▼                                                   ▼
+┌───────────────────────────────────────┐   ┌───────────────────────────────────────┐
+│ Feature 3: Vérification avant upload   │   │ Feature 7: Notifications in-app       │
+│ (dépend de Feature 1 + 2)             │   │ (dépend de Feature 2 pour alertes)   │
+└───────────────────────────────────────┘   └───────────────────────────────────────┘
 
 ┌───────────────────────────────────────────────────────────┐
 │ Feature 5: Système de dossiers                             │
@@ -1136,6 +1140,7 @@ export default class TranscriptionVersionService {
 | Distribution crédits | Moyen | Moyen | 3-4 jours |
 | Demandes de crédits | Moyen | Moyen | 2-3 jours |
 | Vérif avant upload | Faible | Moyen | 1-2 jours |
+| Notifications in-app | Faible | Moyen | 2-3 jours |
 | Permissions modulaires | Moyen | Moyen | 3-4 jours |
 | Système de dossiers | Élevé | Élevé | 5-7 jours |
 | Édition analyses | Moyen | Moyen | 3-4 jours |
@@ -1181,6 +1186,294 @@ export default class TranscriptionVersionService {
 
 ---
 
+## 10. Feature 7: Système de notifications in-app
+
+### 10.1 Description
+
+Système de notifications in-app pour alerter les utilisateurs des événements importants liés aux crédits, avec icône cloche dans le header et badge de compteur.
+
+### 10.2 User Stories
+
+| ID | En tant que | Je veux | Afin de |
+|----|-------------|---------|---------|
+| US-7.1 | Owner | Être notifié quand un membre demande des crédits | Traiter rapidement les demandes |
+| US-7.2 | Owner | Être alerté quand le pool passe sous 100 crédits | Anticiper le rechargement |
+| US-7.3 | Owner | Être averti si l'auto-refill ne pourra pas s'exécuter | Éviter les échecs de recharge |
+| US-7.4 | Owner | Être notifié quand le Reseller distribue des crédits | Savoir quand le pool est rechargé |
+| US-7.5 | Member | Être notifié quand je reçois des crédits | Savoir que je peux travailler |
+| US-7.6 | User | Voir le nombre de notifications non lues | Savoir si j'ai des actions à faire |
+| US-7.7 | User | Marquer mes notifications comme lues | Garder une interface propre |
+
+### 10.3 Règles métier
+
+1. **Types de notifications** :
+
+   | Type | Destinataire | Déclencheur |
+   |------|--------------|-------------|
+   | `credit_request` | Owner | Membre crée une demande de crédits |
+   | `low_credits` | Owner | Pool organisation < 100 crédits |
+   | `insufficient_refill` | Owner | Pool insuffisant pour prochain auto-refill (vérifié 24h avant) |
+   | `reseller_distribution` | Owner | Reseller distribue des crédits |
+   | `credits_received` | Member | Recharge ponctuelle ou automatique reçue |
+
+2. **Comportement du badge** :
+   - Affiche le nombre de notifications non lues
+   - Disparaît quand = 0
+   - Se met à jour en temps réel (polling toutes les 60 secondes)
+
+3. **Marquage comme lu** :
+   - Click sur la cloche → ouvre le panel
+   - Click sur une notification individuelle → marque celle-ci comme lue
+   - Bouton "Tout marquer comme lu" disponible
+
+4. **Rétention** :
+   - Notifications non lues : conservation illimitée
+   - Notifications lues : supprimées après 30 jours (job CRON)
+
+5. **Déduplication** :
+   - Une notification par événement (pas de groupage)
+   - Éviter les doublons : `low_credits` envoyé une seule fois jusqu'à ce que le pool remonte au-dessus du seuil
+
+6. **Périmètre MVP** :
+   - ❌ Pas d'envoi d'emails
+   - ❌ Pas de notifications push
+   - ✅ Notifications in-app uniquement
+   - ✅ Persistance en base de données
+   - ✅ Marquage comme lu
+
+### 10.4 Spécifications techniques
+
+#### Base de données
+
+```sql
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NULL,
+  data JSONB NULL,
+  is_read BOOLEAN DEFAULT false,
+  read_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = false;
+CREATE INDEX idx_notifications_cleanup ON notifications(read_at) WHERE read_at IS NOT NULL;
+```
+
+#### API Endpoints
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/notifications` | Liste paginée des notifications |
+| `GET` | `/api/notifications/unread-count` | Nombre de non lues |
+| `POST` | `/api/notifications/:id/read` | Marquer une comme lue |
+| `POST` | `/api/notifications/read-all` | Marquer toutes comme lues |
+
+#### Modèle Notification
+
+```typescript
+// app/models/notification.ts
+export default class Notification extends BaseModel {
+  @column({ isPrimary: true })
+  declare id: number
+
+  @column()
+  declare userId: number
+
+  @column()
+  declare organizationId: number
+
+  @column()
+  declare type: 'credit_request' | 'low_credits' | 'insufficient_refill' | 'reseller_distribution' | 'credits_received'
+
+  @column()
+  declare title: string
+
+  @column()
+  declare message: string | null
+
+  @column()
+  declare data: Record<string, any> | null
+
+  @column()
+  declare isRead: boolean
+
+  @column.dateTime()
+  declare readAt: DateTime | null
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @belongsTo(() => User)
+  declare user: BelongsTo<typeof User>
+
+  @belongsTo(() => Organization)
+  declare organization: BelongsTo<typeof Organization>
+}
+```
+
+#### Service de notification
+
+```typescript
+// app/services/notification_service.ts
+export default class NotificationService {
+  /**
+   * Crée une notification pour l'Owner de l'organisation
+   */
+  async createForOwner(
+    organizationId: number,
+    type: NotificationType,
+    title: string,
+    message?: string,
+    data?: Record<string, any>
+  ): Promise<Notification>
+
+  /**
+   * Crée une notification pour un utilisateur spécifique
+   */
+  async createForUser(
+    userId: number,
+    organizationId: number,
+    type: NotificationType,
+    title: string,
+    message?: string,
+    data?: Record<string, any>
+  ): Promise<Notification>
+
+  /**
+   * Vérifie si une notification low_credits a déjà été envoyée
+   * (déduplication)
+   */
+  async hasRecentLowCreditsNotification(organizationId: number): Promise<boolean>
+}
+```
+
+### 10.5 Interface utilisateur
+
+#### Header dashboard
+
+- Icône cloche (`UButton` avec `i-heroicons-bell`)
+- Badge numérique si notifications non lues (via `UChip` ou badge CSS)
+- Click → Ouvre `USlideover` avec liste des notifications
+
+#### USlideover notifications (pattern Nuxt UI)
+
+```vue
+<USlideover v-model:open="isNotificationsOpen" title="Notifications">
+  <template #header>
+    <div class="flex items-center justify-between w-full">
+      <span>Notifications</span>
+      <UButton
+        v-if="unreadCount > 0"
+        variant="ghost"
+        size="xs"
+        @click="markAllAsRead"
+      >
+        Tout marquer comme lu
+      </UButton>
+    </div>
+  </template>
+
+  <template #body>
+    <div v-if="notifications.length === 0" class="text-center text-muted py-8">
+      Aucune notification
+    </div>
+    <NuxtLink
+      v-for="notification in notifications"
+      :key="notification.id"
+      :to="getNotificationLink(notification)"
+      class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg"
+      @click="markAsRead(notification.id)"
+    >
+      <UChip color="error" :show="!notification.isRead" inset>
+        <UAvatar :icon="getNotificationIcon(notification.type)" size="md" />
+      </UChip>
+      <div class="text-sm flex-1">
+        <p class="flex items-center justify-between">
+          <span class="text-highlighted font-medium">{{ notification.title }}</span>
+          <time :datetime="notification.createdAt" class="text-muted text-xs">
+            {{ formatTimeAgo(new Date(notification.createdAt)) }}
+          </time>
+        </p>
+        <p v-if="notification.message" class="text-dimmed">{{ notification.message }}</p>
+      </div>
+    </NuxtLink>
+  </template>
+</USlideover>
+```
+
+#### Icônes par type de notification
+
+| Type | Icône | Couleur |
+|------|-------|---------|
+| `credit_request` | `i-heroicons-hand-raised` | `primary` |
+| `low_credits` | `i-heroicons-exclamation-triangle` | `warning` |
+| `insufficient_refill` | `i-heroicons-exclamation-circle` | `error` |
+| `reseller_distribution` | `i-heroicons-arrow-down-tray` | `success` |
+| `credits_received` | `i-heroicons-plus-circle` | `success` |
+
+#### Comportement et navigation
+
+| Type | Action au click |
+|------|-----------------|
+| `credit_request` | Navigation vers `/dashboard/settings/credits` (section demandes) |
+| `low_credits` | Navigation vers `/dashboard/credits` |
+| `insufficient_refill` | Navigation vers `/dashboard/settings/credits` (section auto-refill) |
+| `reseller_distribution` | Navigation vers `/dashboard/credits` |
+| `credits_received` | Navigation vers `/dashboard/credits` |
+
+#### Composable useNotifications
+
+```typescript
+// composables/useNotifications.ts
+export function useNotifications() {
+  const unreadCount = ref(0)
+  const notifications = ref<Notification[]>([])
+  const isOpen = ref(false)
+
+  // Polling toutes les 60 secondes
+  const { pause, resume } = useIntervalFn(fetchUnreadCount, 60000)
+
+  async function fetchUnreadCount() { /* ... */ }
+  async function fetchNotifications() { /* ... */ }
+  async function markAsRead(id: number) { /* ... */ }
+  async function markAllAsRead() { /* ... */ }
+
+  function getNotificationIcon(type: string): string { /* ... */ }
+  function getNotificationLink(notification: Notification): string { /* ... */ }
+
+  return {
+    unreadCount,
+    notifications,
+    isOpen,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    getNotificationIcon,
+    getNotificationLink,
+  }
+}
+```
+
+### 10.6 Critères d'acceptation
+
+- [ ] L'icône cloche s'affiche dans le header du dashboard
+- [ ] Le badge affiche le bon nombre de notifications non lues
+- [ ] Le badge disparaît quand toutes sont lues
+- [ ] L'Owner reçoit une notification pour chaque demande de crédit
+- [ ] L'Owner reçoit une alerte quand le pool < 100 crédits
+- [ ] L'Owner reçoit une alerte 24h avant un auto-refill insuffisant
+- [ ] L'Owner est notifié quand le Reseller distribue des crédits
+- [ ] Le Member est notifié quand il reçoit des crédits
+- [ ] Les notifications lues sont supprimées après 30 jours (CRON)
+- [ ] La déduplication fonctionne pour `low_credits`
+- [ ] Le polling met à jour le compteur toutes les 60 secondes
+
+---
+
 ## Changelog
 
 | Date | Version | Auteur | Modifications |
@@ -1188,3 +1481,4 @@ export default class TranscriptionVersionService {
 | 2026-01-20 | 1.0 | Product Team | Création initiale |
 | 2026-01-20 | 1.1 | Product Team | Ajout décisions: pas de découvert crédits, pas de partage externe dossiers, historique versions illimité |
 | 2026-01-22 | 1.2 | Product Team | Alignement auto-refill users sur comportement organizations: ajout `last_refill_at` (idempotence), `autoRefillAmount` devient une CIBLE (pas un montant fixe), ajout méthodes helper au modèle |
+| 2026-01-23 | 1.3 | Product Team | Ajout Feature 7: Système de notifications in-app (alertes crédits, demandes, distributions). Seuil crédits bas = 100, rétention 30 jours après lecture, MVP sans emails/push |
