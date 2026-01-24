@@ -405,14 +405,14 @@ CREATE INDEX idx_credit_requests_requester ON credit_requests(requester_id, stat
 
 ### 3.6 Critères d'acceptation
 
-- [ ] Un membre peut créer une demande de crédits
-- [ ] L'Owner reçoit une notification pour les nouvelles demandes
-- [ ] L'Owner peut approuver et les crédits sont distribués automatiquement
-- [ ] L'Owner peut refuser avec un motif
-- [ ] Le membre voit le statut de ses demandes
-- [ ] L'Owner peut demander des crédits au Reseller
-- [ ] Le Reseller peut traiter les demandes des Owners
-- [ ] Maximum 1 demande pending par utilisateur
+- [x] Un membre peut créer une demande de crédits
+- [x] L'Owner reçoit une notification pour les nouvelles demandes
+- [x] L'Owner peut approuver et les crédits sont distribués automatiquement
+- [x] L'Owner peut refuser avec un motif
+- [x] Le membre voit le statut de ses demandes
+- [x] L'Owner peut demander des crédits au Reseller
+- [x] Le Reseller peut traiter les demandes des Owners
+- [x] Maximum 1 demande pending par utilisateur
 
 ---
 
