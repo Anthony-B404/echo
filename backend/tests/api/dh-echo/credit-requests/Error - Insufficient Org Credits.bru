@@ -1,0 +1,57 @@
+meta {
+  name: Error - Insufficient Org Credits
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/credit-requests/{{requestIdLargeAmount}}/approve
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{ownerToken}}
+}
+
+vars:pre-request {
+  requestIdLargeAmount: 999
+}
+
+docs {
+  Test that approving a credit request fails when organization doesn't have enough credits.
+
+  Prerequisites:
+  - User must be the owner of the organization
+  - There must be a pending credit request for an amount greater than organization's available credits
+
+  Expected: 400 Bad Request with code INSUFFICIENT_ORG_CREDITS
+}
+
+assert {
+  res.status: eq 400
+  res.body: isJson
+  res.body.code: eq INSUFFICIENT_ORG_CREDITS
+}
+
+tests {
+  test("should return 400 Bad Request", function() {
+    expect(res.status).to.equal(400);
+  });
+
+  test("should return error code INSUFFICIENT_ORG_CREDITS", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('code');
+    expect(data.code).to.equal('INSUFFICIENT_ORG_CREDITS');
+  });
+
+  test("should include error message about insufficient credits", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data.message).to.be.a('string');
+  });
+}

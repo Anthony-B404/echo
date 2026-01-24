@@ -3,3 +3,7 @@
 
 # Subscription Renewal - Runs daily at 0:05 AM
 5 0 * * * node ace subscription:renew
+
+# Credit Requests Cleanup - Runs weekly on Sunday at 3:00 AM
+# Deletes processed credit requests older than 90 days (pending requests are preserved)
+0 3 * * 0 node ace cleanup:credit-requests

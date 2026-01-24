@@ -13,6 +13,7 @@ useSeoMeta({
 })
 const localePath = useLocalePath()
 const creditsStore = useCreditsStore()
+const creditRequestsStore = useCreditRequestsStore()
 const { isOwner } = useSettingsPermissions()
 const {
   canChangeMode,
@@ -22,6 +23,11 @@ const {
   showPersonalBalance,
   showOrganizationPool,
 } = useCreditsPermissions()
+const {
+  canRequestCredits,
+  canRequestFromReseller,
+  canProcessRequests,
+} = useCreditRequestsPermissions()
 
 const {
   credits,
@@ -33,12 +39,17 @@ const {
   isIndividualMode,
 } = storeToRefs(creditsStore)
 
-// UI state
-const activeTab = ref('history')
+// URL query handling for tab
+const route = useRoute()
+
+// UI state - initialize from query param or default to 'history'
+const activeTab = ref((route.query.tab as string) || 'history')
 const distributeModalOpen = ref(false)
 const recoverModalOpen = ref(false)
 const autoRefillModalOpen = ref(false)
 const historyModalOpen = ref(false)
+const requestCreditsModalOpen = ref(false)
+const requestType = ref<'member_to_owner' | 'owner_to_reseller'>('member_to_owner')
 const selectedMember = ref<UserCreditBalance | null>(null)
 
 // Load data on mount
@@ -51,6 +62,11 @@ onMounted(async () => {
   }
 
   await creditsStore.fetchHistory(1, 20)
+
+  // Load pending requests count for owner
+  if (canProcessRequests.value) {
+    await creditRequestsStore.fetchPendingCount()
+  }
 })
 
 // Watch for mode changes to load member credits
@@ -72,6 +88,27 @@ const tabs = computed(() => {
       icon: 'i-lucide-history',
     },
   ]
+
+  // Tab My Requests (Member in individual mode)
+  if (canRequestCredits.value) {
+    items.push({
+      value: 'myRequests',
+      label: t('pages.dashboard.credits.requests.myRequests'),
+      icon: 'i-lucide-file-text',
+    })
+  }
+
+  // Tab Pending Requests (Owner only)
+  if (canProcessRequests.value) {
+    const pendingLabel = creditRequestsStore.pendingCount > 0
+      ? `${t('pages.dashboard.credits.requests.pendingRequests')} (${creditRequestsStore.pendingCount})`
+      : t('pages.dashboard.credits.requests.pendingRequests')
+    items.push({
+      value: 'pendingRequests',
+      label: pendingLabel,
+      icon: 'i-lucide-inbox',
+    })
+  }
 
   // Tab Configuration (Owner only)
   if (canChangeMode.value) {
@@ -113,6 +150,18 @@ function openAutoRefillModal(member: UserCreditBalance) {
 function openHistoryModal(member: UserCreditBalance) {
   selectedMember.value = member
   historyModalOpen.value = true
+}
+
+function openRequestCreditsModal(type: 'member_to_owner' | 'owner_to_reseller' = 'member_to_owner') {
+  requestType.value = type
+  requestCreditsModalOpen.value = true
+}
+
+async function handleRequestSuccess() {
+  // Refresh pending count for owner
+  if (canProcessRequests.value) {
+    await creditRequestsStore.fetchPendingCount()
+  }
 }
 
 async function handleModeChange() {
@@ -225,14 +274,35 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
         </div>
         <CreditsCreditModeBadge :mode="creditMode" />
       </div>
-      <UButton
-        :to="localePath('/dashboard')"
-        color="neutral"
-        variant="ghost"
-        icon="i-lucide-arrow-left"
-      >
-        {{ t('pages.dashboard.library.backToWorkshop') }}
-      </UButton>
+      <div class="flex items-center gap-2">
+        <!-- Request Credits Button (Member in individual mode) -->
+        <UButton
+          v-if="canRequestCredits"
+          color="primary"
+          icon="i-lucide-hand-coins"
+          @click="openRequestCreditsModal('member_to_owner')"
+        >
+          {{ t('pages.dashboard.credits.requests.requestCredits') }}
+        </UButton>
+        <!-- Request from Reseller Button (Owner only) -->
+        <UButton
+          v-if="canRequestFromReseller"
+          color="primary"
+          variant="outline"
+          icon="i-lucide-hand-coins"
+          @click="openRequestCreditsModal('owner_to_reseller')"
+        >
+          {{ t('pages.dashboard.credits.requests.requestFromReseller') }}
+        </UButton>
+        <UButton
+          :to="localePath('/dashboard')"
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-arrow-left"
+        >
+          {{ t('pages.dashboard.library.backToWorkshop') }}
+        </UButton>
+      </div>
     </div>
 
     <!-- Balance Cards -->
@@ -449,6 +519,16 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
           </div>
         </UCard>
 
+        <!-- My Requests Tab (Member in individual mode) -->
+        <UCard v-else-if="item.value === 'myRequests'" class="mt-4">
+          <CreditsMyRequestsList />
+        </UCard>
+
+        <!-- Pending Requests Tab (Owner only) -->
+        <UCard v-else-if="item.value === 'pendingRequests'" class="mt-4">
+          <CreditsPendingRequestsList />
+        </UCard>
+
         <!-- Configuration Tab (Owner only) -->
         <div v-else-if="item.value === 'configuration'" class="mt-4 space-y-4">
           <!-- Credit Mode Selector -->
@@ -478,6 +558,13 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
     </UTabs>
 
     <!-- Modals -->
+    <CreditsRequestCreditsModal
+      v-model:open="requestCreditsModalOpen"
+      :current-balance="credits"
+      :type="requestType"
+      @success="handleRequestSuccess"
+    />
+
     <CreditsDistributeCreditsModal
       v-model:open="distributeModalOpen"
       :member="selectedMember"

@@ -1,0 +1,60 @@
+meta {
+  name: Error - Pending Request Exists
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/credit-requests
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{memberToken}}
+}
+
+body:json {
+  {
+    "amount": 50,
+    "justification": "Second request while first is pending"
+  }
+}
+
+docs {
+  Test that a member cannot create a new credit request while they already have one pending.
+
+  Prerequisites:
+  - User must be a member (not owner) in an organization with individual credit mode
+  - User must already have a pending credit request
+
+  Expected: 409 Conflict with code PENDING_REQUEST_EXISTS
+}
+
+assert {
+  res.status: eq 409
+  res.body: isJson
+  res.body.code: eq PENDING_REQUEST_EXISTS
+}
+
+tests {
+  test("should return 409 Conflict", function() {
+    expect(res.status).to.equal(409);
+  });
+
+  test("should return error code PENDING_REQUEST_EXISTS", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('code');
+    expect(data.code).to.equal('PENDING_REQUEST_EXISTS');
+  });
+
+  test("should include error message", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data.message).to.be.a('string');
+  });
+}

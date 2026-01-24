@@ -1,0 +1,37 @@
+meta {
+  name: Get Credit Requests Pending Count
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/reseller/credit-requests/pending-count
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{resellerToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return count object", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('count');
+  });
+
+  test("count should be a non-negative number", function() {
+    const data = res.getBody();
+    expect(data.count).to.be.a('number');
+    expect(data.count).to.be.at.least(0);
+  });
+}

@@ -1,0 +1,62 @@
+meta {
+  name: Get Credit Requests
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/reseller/credit-requests
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  limit: 20
+  ~status: pending
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{resellerToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return paginated credit requests", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('data');
+    expect(data).to.have.property('meta');
+    expect(data.data).to.be.an('array');
+  });
+
+  test("should return pagination meta", function() {
+    const data = res.getBody();
+    expect(data.meta).to.have.property('total');
+    expect(data.meta).to.have.property('perPage');
+    expect(data.meta).to.have.property('currentPage');
+  });
+
+  test("requests should be owner_to_reseller type", function() {
+    const data = res.getBody();
+    data.data.forEach(function(request) {
+      expect(request.type).to.equal('owner_to_reseller');
+    });
+  });
+
+  test("requests should include requester and organization", function() {
+    const data = res.getBody();
+    if (data.data.length > 0) {
+      const request = data.data[0];
+      expect(request).to.have.property('requester');
+      expect(request).to.have.property('organization');
+    }
+  });
+}

@@ -193,5 +193,52 @@
     "closing": "Cordialement",
     "team": "L'équipe DH-Echo",
     "footer": "Si vous n'attendiez pas cet ajout, veuillez contacter votre administrateur."
+  },
+  "credit_request_created": {
+    "subject": "Nouvelle demande de crédits",
+    "preview": "{requesterName} a demandé {amount} crédits",
+    "title": "Nouvelle demande de crédits",
+    "greeting": "Bonjour",
+    "intro": "{requesterName} a demandé {amount} crédits.",
+    "justification_label": "Justification :",
+    "button": "Examiner la demande",
+    "closing": "Cordialement",
+    "team": "L'équipe DH-Echo",
+    "footer": "Cet email vous a été envoyé car un membre de votre équipe a demandé des crédits."
+  },
+  "credit_request_approved": {
+    "subject": "Votre demande de crédits a été approuvée",
+    "preview": "Votre demande de {amount} crédits a été approuvée",
+    "title": "Demande approuvée !",
+    "greeting": "Bonjour",
+    "intro": "Votre demande de {amount} crédits a été approuvée et les crédits ont été ajoutés à votre solde.",
+    "credits": "crédits",
+    "button": "Voir mes crédits",
+    "closing": "Cordialement",
+    "team": "L'équipe DH-Echo"
+  },
+  "credit_request_rejected": {
+    "subject": "Votre demande de crédits a été refusée",
+    "preview": "Votre demande de crédits a été refusée",
+    "title": "Demande refusée",
+    "greeting": "Bonjour",
+    "intro": "Votre demande de {amount} crédits a été refusée.",
+    "reason_label": "Motif :",
+    "outro": "Vous pouvez soumettre une nouvelle demande avec une justification supplémentaire si nécessaire.",
+    "button": "Faire une nouvelle demande",
+    "closing": "Cordialement",
+    "team": "L'équipe DH-Echo"
+  },
+  "credit_request_owner_created": {
+    "subject": "Nouvelle demande de crédits de {organizationName}",
+    "preview": "{organizationName} a demandé {amount} crédits",
+    "title": "Demande de crédits d'une organisation",
+    "greeting": "Bonjour",
+    "intro": "{organizationName} a demandé {amount} crédits depuis le pool revendeur.",
+    "justification_label": "Justification :",
+    "button": "Examiner la demande",
+    "closing": "Cordialement",
+    "team": "L'équipe DH-Echo",
+    "footer": "Cet email vous a été envoyé car une organisation a demandé des crédits."
   }
 }

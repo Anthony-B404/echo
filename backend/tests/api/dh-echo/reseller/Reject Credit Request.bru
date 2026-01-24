@@ -1,0 +1,59 @@
+meta {
+  name: Reject Credit Request
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/reseller/credit-requests/{{requestId}}/reject
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{resellerToken}}
+}
+
+body:json {
+  {
+    "reason": "Reseller pool currently depleted"
+  }
+}
+
+vars:pre-request {
+  requestId: 1
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should reject request successfully", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data).to.have.property('request');
+  });
+
+  test("request should be rejected", function() {
+    const data = res.getBody();
+    expect(data.request.status).to.equal('rejected');
+    expect(data.request).to.have.property('processedAt');
+  });
+
+  test("should include rejection reason", function() {
+    const data = res.getBody();
+    expect(data.request).to.have.property('rejectionReason');
+    expect(data.request.rejectionReason).to.equal('Reseller pool currently depleted');
+  });
+
+  test("should include processedBy info", function() {
+    const data = res.getBody();
+    expect(data.request).to.have.property('processedBy');
+  });
+}

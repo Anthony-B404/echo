@@ -8,6 +8,7 @@ definePageMeta({
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const route = useRoute()
 
 // Breadcrumb
 const breadcrumbItems = computed(() => [
@@ -21,6 +22,24 @@ useSeoMeta({
 
 // Composables
 const { fetchCredits, loading, error } = useResellerProfile()
+const creditRequestsStore = useCreditRequestsStore()
+
+// Tabs
+const activeTab = ref(route.query.tab === 'requests' ? 'requests' : 'balance')
+
+const tabs = computed(() => [
+  {
+    value: 'balance',
+    label: t('reseller.credits.tabs.balance'),
+    icon: 'i-lucide-coins',
+  },
+  {
+    value: 'requests',
+    label: t('reseller.credits.tabs.requests'),
+    icon: 'i-lucide-inbox',
+    badge: creditRequestsStore.resellerPendingCount > 0 ? creditRequestsStore.resellerPendingCount : undefined,
+  },
+])
 
 // State
 const creditBalance = ref(0)
@@ -37,7 +56,10 @@ const typeFilter = ref<ResellerTransactionType | undefined>(undefined)
 
 // Load data
 onMounted(async () => {
-  await loadCredits()
+  await Promise.all([
+    loadCredits(),
+    creditRequestsStore.fetchResellerPendingCount(),
+  ])
 })
 
 async function loadCredits (page = 1) {
@@ -91,69 +113,95 @@ const typeOptions = [
       </p>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading && transactions.length === 0" class="flex items-center justify-center py-12">
-      <UIcon name="i-lucide-loader-2" class="h-8 w-8 animate-spin text-primary-500" />
-    </div>
-
-    <!-- Error -->
-    <UAlert v-else-if="error" color="error" :title="t('common.error')">
-      {{ error }}
-    </UAlert>
-
-    <!-- Content -->
-    <template v-else>
-      <!-- Balance card -->
-      <UCard>
-        <div class="text-center py-8">
-          <div class="text-5xl font-bold text-primary-500 mb-2">
-            {{ creditBalance.toLocaleString() }}
+    <!-- Tabs -->
+    <UTabs v-model="activeTab" :items="tabs" class="w-full">
+      <template #content="{ item }">
+        <!-- Balance Tab -->
+        <div v-if="item.value === 'balance'">
+          <!-- Loading -->
+          <div v-if="loading && transactions.length === 0" class="flex items-center justify-center py-12">
+            <UIcon name="i-lucide-loader-2" class="h-8 w-8 animate-spin text-primary-500" />
           </div>
-          <div class="text-lg text-gray-500">
-            {{ t('reseller.credits.availableCredits') }}
+
+          <!-- Error -->
+          <UAlert v-else-if="error" color="error" :title="t('common.error')">
+            {{ error }}
+          </UAlert>
+
+          <!-- Content -->
+          <div v-else class="space-y-6 pt-4">
+            <!-- Balance card -->
+            <UCard>
+              <div class="text-center py-8">
+                <div class="text-5xl font-bold text-primary-500 mb-2">
+                  {{ creditBalance.toLocaleString() }}
+                </div>
+                <div class="text-lg text-gray-500">
+                  {{ t('reseller.credits.availableCredits') }}
+                </div>
+                <p class="mt-4 text-sm text-gray-400">
+                  {{ t('reseller.credits.purchaseInfo') }}
+                </p>
+              </div>
+            </UCard>
+
+            <!-- Transactions -->
+            <UCard>
+              <template #header>
+                <div class="flex items-center justify-between">
+                  <h2 class="text-lg font-semibold">
+                    {{ t('reseller.credits.transactionHistory') }}
+                  </h2>
+                  <USelect
+                    v-model="typeFilter"
+                    :items="typeOptions"
+                    value-key="value"
+                    :placeholder="t('reseller.credits.filters.type')"
+                    class="w-40"
+                  />
+                </div>
+              </template>
+
+              <ResellerTransactionHistory
+                :transactions="transactions"
+                :loading="loading"
+                show-organization
+              />
+
+              <!-- Pagination -->
+              <div
+                v-if="pagination.lastPage > 1"
+                class="flex justify-center pt-4 border-t border-gray-200 dark:border-gray-700 mt-4"
+              >
+                <UPagination
+                  :default-page="pagination.currentPage"
+                  :total="pagination.total"
+                  :items-per-page="pagination.perPage"
+                  @update:page="handlePageChange"
+                />
+              </div>
+            </UCard>
           </div>
-          <p class="mt-4 text-sm text-gray-400">
-            {{ t('reseller.credits.purchaseInfo') }}
-          </p>
         </div>
-      </UCard>
 
-      <!-- Transactions -->
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">
-              {{ t('reseller.credits.transactionHistory') }}
-            </h2>
-            <USelect
-              v-model="typeFilter"
-              :items="typeOptions"
-              value-key="value"
-              :placeholder="t('reseller.credits.filters.type')"
-              class="w-40"
-            />
-          </div>
-        </template>
+        <!-- Requests Tab -->
+        <div v-else-if="item.value === 'requests'" class="pt-4">
+          <UCard>
+            <template #header>
+              <div>
+                <h2 class="text-lg font-semibold">
+                  {{ t('reseller.creditRequests.title') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                  {{ t('reseller.creditRequests.subtitle') }}
+                </p>
+              </div>
+            </template>
 
-        <ResellerTransactionHistory
-          :transactions="transactions"
-          :loading="loading"
-          show-organization
-        />
-
-        <!-- Pagination -->
-        <div
-          v-if="pagination.lastPage > 1"
-          class="flex justify-center pt-4 border-t border-gray-200 dark:border-gray-700 mt-4"
-        >
-          <UPagination
-            :default-page="pagination.currentPage"
-            :total="pagination.total"
-            :items-per-page="pagination.perPage"
-            @update:page="handlePageChange"
-          />
+            <ResellerPendingRequestsList />
+          </UCard>
         </div>
-      </UCard>
-    </template>
+      </template>
+    </UTabs>
   </div>
 </template>

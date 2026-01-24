@@ -1,0 +1,53 @@
+meta {
+  name: Approve Credit Request
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{baseUrl}}/reseller/credit-requests/{{requestId}}/approve
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{resellerToken}}
+}
+
+vars:pre-request {
+  requestId: 1
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should approve request successfully", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data).to.have.property('request');
+  });
+
+  test("request should be approved", function() {
+    const data = res.getBody();
+    expect(data.request.status).to.equal('approved');
+    expect(data.request).to.have.property('processedAt');
+  });
+
+  test("should return credits distributed", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('creditsDistributed');
+    expect(data.creditsDistributed).to.be.a('number');
+  });
+
+  test("should include processedBy info", function() {
+    const data = res.getBody();
+    expect(data.request).to.have.property('processedBy');
+  });
+}

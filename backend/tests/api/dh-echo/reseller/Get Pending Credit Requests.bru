@@ -1,0 +1,50 @@
+meta {
+  name: Get Pending Credit Requests
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/reseller/credit-requests/pending
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{resellerToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isJson
+}
+
+tests {
+  test("should return pending requests array", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('data');
+    expect(data.data).to.be.an('array');
+  });
+
+  test("all requests should be pending", function() {
+    const data = res.getBody();
+    data.data.forEach(function(request) {
+      expect(request.status).to.equal('pending');
+      expect(request.type).to.equal('owner_to_reseller');
+    });
+  });
+
+  test("requests should include organization info", function() {
+    const data = res.getBody();
+    if (data.data.length > 0) {
+      const request = data.data[0];
+      expect(request).to.have.property('organization');
+      expect(request.organization).to.have.property('id');
+      expect(request.organization).to.have.property('name');
+    }
+  });
+}

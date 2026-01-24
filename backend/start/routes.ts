@@ -23,6 +23,7 @@ const AudiosController = () => import('#controllers/audios_controller')
 const PromptsController = () => import('#controllers/prompts_controller')
 const PromptCategoriesController = () => import('#controllers/prompt_categories_controller')
 const CreditsController = () => import('#controllers/credits_controller')
+const CreditRequestsController = () => import('#controllers/credit_requests_controller')
 const AudioSharesController = () => import('#controllers/audio_shares_controller')
 const SharedAudioController = () => import('#controllers/shared_audio_controller')
 const GdprController = () => import('#controllers/gdpr_controller')
@@ -181,6 +182,15 @@ router
     router.put('/credits/auto-refill', [CreditsController, 'configureGlobalAutoRefill'])
     router.delete('/credits/auto-refill', [CreditsController, 'disableGlobalAutoRefill'])
 
+    // Credit request routes (member to owner)
+    router.get('/credit-requests', [CreditRequestsController, 'index'])
+    router.post('/credit-requests', [CreditRequestsController, 'create'])
+    router.post('/credit-requests/to-reseller', [CreditRequestsController, 'createToReseller'])
+    router.get('/credit-requests/pending', [CreditRequestsController, 'pending'])
+    router.get('/credit-requests/pending-count', [CreditRequestsController, 'pendingCount'])
+    router.post('/credit-requests/:id/approve', [CreditRequestsController, 'approve'])
+    router.post('/credit-requests/:id/reject', [CreditRequestsController, 'reject'])
+
     // Contact support route
     router.post('/contact', [ContactController, 'send'])
   })
@@ -225,6 +235,8 @@ const ResellerOrganizationsController = () =>
 const ResellerUsersController = () => import('#controllers/reseller/reseller_users_controller')
 const ResellerSubscriptionsController = () =>
   import('#controllers/reseller/reseller_subscriptions_controller')
+const ResellerCreditRequestsController = () =>
+  import('#controllers/reseller/reseller_credit_requests_controller')
 
 // Reseller API routes
 router
@@ -270,6 +282,13 @@ router
       ResellerSubscriptionsController,
       'resume',
     ])
+
+    // Credit requests from organizations
+    router.get('/credit-requests', [ResellerCreditRequestsController, 'index'])
+    router.get('/credit-requests/pending', [ResellerCreditRequestsController, 'pending'])
+    router.get('/credit-requests/pending-count', [ResellerCreditRequestsController, 'pendingCount'])
+    router.post('/credit-requests/:id/approve', [ResellerCreditRequestsController, 'approve'])
+    router.post('/credit-requests/:id/reject', [ResellerCreditRequestsController, 'reject'])
   })
   .prefix('/reseller')
   .use([middleware.auth({ guards: ['api'] }), middleware.reseller()])

@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import db from '@adonisjs/lucid/services/db'
 import Organization from './organization.js'
 import ResellerTransaction, { ResellerTransactionType } from './reseller_transaction.js'
@@ -83,19 +84,27 @@ export default class Reseller extends BaseModel {
    * Deduct credits from reseller pool and transfer to organization
    * Creates a distribution transaction record
    *
+   * @param amount - Amount of credits to distribute
+   * @param organizationId - Target organization ID
+   * @param description - Transaction description
+   * @param performedByUserId - User who performed the action
+   * @param existingTrx - Optional existing transaction to reuse (prevents deadlocks)
    * @throws {InsufficientCreditsError} If reseller doesn't have enough credits
    */
   async distributeCredits(
     amount: number,
     organizationId: number,
     description: string,
-    performedByUserId: number
+    performedByUserId: number,
+    existingTrx?: TransactionClientContract
   ): Promise<ResellerTransaction> {
     if (!this.hasEnoughCredits(amount)) {
       throw new InsufficientCreditsError(this.creditBalance, amount)
     }
 
-    const trx = await db.transaction()
+    // If an existing transaction is provided, use it; otherwise create a new one
+    const shouldCommit = !existingTrx
+    const trx = existingTrx ?? (await db.transaction())
 
     try {
       this.creditBalance -= amount
@@ -113,10 +122,11 @@ export default class Reseller extends BaseModel {
         { client: trx }
       )
 
-      await trx.commit()
+      // Only commit if we created our own transaction
+      if (shouldCommit) await trx.commit()
       return transaction
     } catch (error) {
-      await trx.rollback()
+      if (shouldCommit) await trx.rollback()
       throw error
     }
   }

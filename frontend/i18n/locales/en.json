@@ -872,6 +872,70 @@
           "normal": "Normal",
           "low": "Low",
           "empty": "Empty"
+        },
+        "requests": {
+          "title": "Credit Requests",
+          "myRequests": "My Requests",
+          "pendingRequests": "Pending Requests",
+          "requestCredits": "Request Credits",
+          "requestFromReseller": "Request from Reseller",
+          "noRequests": "No requests",
+          "noRequestsDescription": "You haven't made any credit requests yet",
+          "noPendingRequests": "No pending requests",
+          "noPendingRequestsDescription": "No credit requests to process",
+          "pendingBadge": "{count} pending request | {count} pending requests",
+          "status": {
+            "pending": "Pending",
+            "approved": "Approved",
+            "rejected": "Rejected"
+          },
+          "type": {
+            "member_to_owner": "Member → Owner",
+            "owner_to_reseller": "Owner → Reseller"
+          },
+          "form": {
+            "amount": "Amount requested",
+            "amountPlaceholder": "Number of credits",
+            "justification": "Justification (optional)",
+            "justificationPlaceholder": "Reason for your request...",
+            "currentBalance": "My current balance",
+            "submit": "Submit Request",
+            "description": "Fill out the form to submit a credit request"
+          },
+          "approve": {
+            "title": "Approve Request",
+            "confirm": "Approve",
+            "success": "Request approved and {amount} credits distributed",
+            "error": "Error approving request"
+          },
+          "reject": {
+            "title": "Reject Request",
+            "description": "Provide a reason for rejecting this request",
+            "reason": "Rejection reason (optional)",
+            "reasonPlaceholder": "Reason for rejection...",
+            "confirm": "Reject",
+            "success": "Request rejected",
+            "error": "Error rejecting request"
+          },
+          "create": {
+            "success": "Credit request submitted",
+            "error": "Error submitting request",
+            "pendingExists": "You already have a pending request"
+          },
+          "columns": {
+            "requester": "Requester",
+            "amount": "Amount",
+            "justification": "Justification",
+            "status": "Status",
+            "date": "Date",
+            "processedBy": "Processed by",
+            "rejectionReason": "Rejection reason"
+          },
+          "noJustification": "No justification",
+          "validation": {
+            "amountRequired": "Amount is required",
+            "amountPositive": "Amount must be positive"
+          }
         }
       },
       "settings": {
@@ -1462,6 +1526,10 @@
       "distribute": "Distribute Credits",
       "noTransactions": "No transactions",
       "noTransactionsDescription": "Your transaction history will appear here",
+      "tabs": {
+        "balance": "Balance",
+        "requests": "Requests"
+      },
       "filters": {
         "all": "All types",
         "type": "Type"
@@ -1649,6 +1717,28 @@
         "affectedOrganizations": "Affected organizations:",
         "andMore": "... and {count} more",
         "addCredits": "Add credits"
+      }
+    },
+    "creditRequests": {
+      "title": "Credit Requests",
+      "subtitle": "Credit requests from organizations",
+      "empty": "No pending requests",
+      "organization": "Organization",
+      "requester": "Requester",
+      "approve": {
+        "title": "Approve Request",
+        "confirm": "Approve",
+        "confirmMessage": "Do you want to approve this request of {amount} credits for {organization}?",
+        "success": "Request approved successfully",
+        "error": "Error approving request",
+        "insufficientCredits": "Insufficient credits in your pool"
+      },
+      "reject": {
+        "title": "Reject Request",
+        "description": "Provide a reason for rejecting this credit request",
+        "confirm": "Reject",
+        "success": "Request rejected",
+        "error": "Error rejecting request"
       }
     }
   },

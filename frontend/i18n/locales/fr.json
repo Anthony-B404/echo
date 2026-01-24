@@ -874,6 +874,70 @@
           "normal": "Normal",
           "low": "Bas",
           "empty": "Vide"
+        },
+        "requests": {
+          "title": "Demandes de crédits",
+          "myRequests": "Mes demandes",
+          "pendingRequests": "Demandes en attente",
+          "requestCredits": "Demander des crédits",
+          "requestFromReseller": "Demander au revendeur",
+          "noRequests": "Aucune demande",
+          "noRequestsDescription": "Vous n'avez pas encore fait de demande de crédits",
+          "noPendingRequests": "Aucune demande en attente",
+          "noPendingRequestsDescription": "Aucune demande de crédits à traiter",
+          "pendingBadge": "{count} demande en attente | {count} demandes en attente",
+          "status": {
+            "pending": "En attente",
+            "approved": "Approuvé",
+            "rejected": "Rejeté"
+          },
+          "type": {
+            "member_to_owner": "Membre → Propriétaire",
+            "owner_to_reseller": "Propriétaire → Revendeur"
+          },
+          "form": {
+            "amount": "Montant demandé",
+            "amountPlaceholder": "Nombre de crédits",
+            "justification": "Justification (optionnel)",
+            "justificationPlaceholder": "Raison de votre demande...",
+            "currentBalance": "Mon solde actuel",
+            "submit": "Envoyer la demande",
+            "description": "Remplissez le formulaire pour soumettre une demande de crédits"
+          },
+          "approve": {
+            "title": "Approuver la demande",
+            "confirm": "Approuver",
+            "success": "Demande approuvée et {amount} crédits distribués",
+            "error": "Erreur lors de l'approbation"
+          },
+          "reject": {
+            "title": "Refuser la demande",
+            "description": "Indiquez un motif de refus pour cette demande",
+            "reason": "Motif du refus (optionnel)",
+            "reasonPlaceholder": "Raison du refus...",
+            "confirm": "Refuser",
+            "success": "Demande refusée",
+            "error": "Erreur lors du refus"
+          },
+          "create": {
+            "success": "Demande de crédits envoyée",
+            "error": "Erreur lors de l'envoi de la demande",
+            "pendingExists": "Vous avez déjà une demande en attente"
+          },
+          "columns": {
+            "requester": "Demandeur",
+            "amount": "Montant",
+            "justification": "Justification",
+            "status": "Statut",
+            "date": "Date",
+            "processedBy": "Traité par",
+            "rejectionReason": "Motif de refus"
+          },
+          "noJustification": "Aucune justification",
+          "validation": {
+            "amountRequired": "Le montant est requis",
+            "amountPositive": "Le montant doit être positif"
+          }
         }
       },
       "settings": {
@@ -1464,6 +1528,10 @@
       "distribute": "Distribuer les crédits",
       "noTransactions": "Aucune transaction",
       "noTransactionsDescription": "Votre historique de transactions apparaîtra ici",
+      "tabs": {
+        "balance": "Solde",
+        "requests": "Demandes"
+      },
       "filters": {
         "all": "Tous les types",
         "type": "Type"
@@ -1651,6 +1719,28 @@
         "affectedOrganizations": "Organisations concernées :",
         "andMore": "... et {count} autre(s)",
         "addCredits": "Ajouter des crédits"
+      }
+    },
+    "creditRequests": {
+      "title": "Demandes de crédits",
+      "subtitle": "Demandes de crédits des organisations",
+      "empty": "Aucune demande en attente",
+      "organization": "Organisation",
+      "requester": "Demandeur",
+      "approve": {
+        "title": "Approuver la demande",
+        "confirm": "Approuver",
+        "confirmMessage": "Voulez-vous approuver cette demande de {amount} crédits pour {organization} ?",
+        "success": "Demande approuvée avec succès",
+        "error": "Erreur lors de l'approbation",
+        "insufficientCredits": "Crédits insuffisants dans votre pool"
+      },
+      "reject": {
+        "title": "Refuser la demande",
+        "description": "Indiquez un motif de refus pour cette demande de crédits",
+        "confirm": "Refuser",
+        "success": "Demande refusée",
+        "error": "Erreur lors du refus"
       }
     }
   },

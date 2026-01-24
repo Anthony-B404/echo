@@ -1,12 +1,13 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, manyToMany, hasMany, belongsTo } from '@adonisjs/lucid/orm'
+import type { ManyToMany, HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import User, { UserRole } from './user.js'
 import Invitation from './invitation.js'
 import Reseller from './reseller.js'
 import CreditTransaction, { CreditTransactionType } from './credit_transaction.js'
 import UserCredit from './user_credit.js'
 import UserCreditTransaction from './user_credit_transaction.js'
-import type { ManyToMany, HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export type CreditMode = 'shared' | 'individual'
 
@@ -216,24 +217,39 @@ export default class Organization extends BaseModel {
 
   /**
    * Add credits to organization (from reseller distribution)
+   *
+   * @param amount - Amount of credits to add
+   * @param type - Transaction type
+   * @param description - Transaction description
+   * @param userId - User who performed the action
+   * @param existingTrx - Optional existing transaction to reuse (prevents deadlocks)
    */
   async addCredits(
     amount: number,
     type: CreditTransactionType,
     description: string,
-    userId: number
+    userId: number,
+    existingTrx?: TransactionClientContract
   ): Promise<CreditTransaction> {
     this.credits += amount
-    await this.save()
 
-    const transaction = await CreditTransaction.create({
-      userId,
-      organizationId: this.id,
-      amount: amount,
-      balanceAfter: this.credits,
-      type,
-      description,
-    })
+    if (existingTrx) {
+      await this.useTransaction(existingTrx).save()
+    } else {
+      await this.save()
+    }
+
+    const transaction = await CreditTransaction.create(
+      {
+        userId,
+        organizationId: this.id,
+        amount: amount,
+        balanceAfter: this.credits,
+        type,
+        description,
+      },
+      existingTrx ? { client: existingTrx } : undefined
+    )
 
     return transaction
   }

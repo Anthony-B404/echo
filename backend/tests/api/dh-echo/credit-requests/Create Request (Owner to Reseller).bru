@@ -1,0 +1,52 @@
+meta {
+  name: Create Request (Owner to Reseller)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/credit-requests/to-reseller
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "amount": 500,
+    "justification": "Monthly credit allocation for team"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body: isJson
+}
+
+tests {
+  test("should create credit request to reseller successfully", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data).to.have.property('request');
+  });
+
+  test("should return request with correct type", function() {
+    const data = res.getBody();
+    expect(data.request).to.have.property('id');
+    expect(data.request.amount).to.equal(500);
+    expect(data.request.type).to.equal('owner_to_reseller');
+    expect(data.request.status).to.equal('pending');
+  });
+
+  test("should include organization info", function() {
+    const data = res.getBody();
+    expect(data.request).to.have.property('organization');
+  });
+}

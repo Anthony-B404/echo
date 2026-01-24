@@ -216,6 +216,17 @@
     "sales": "Vente et Commerce",
     "hr": "Ressources humaines"
   },
+  "credit_requests": {
+    "created": "Demande de crédits créée avec succès",
+    "approved": "{amount} crédits approuvés et distribués",
+    "rejected": "Demande de crédits refusée",
+    "not_found": "Demande de crédits introuvable",
+    "pending_exists": "Vous avez déjà une demande en attente",
+    "already_processed": "Cette demande a déjà été traitée",
+    "invalid_mode_shared": "Les demandes de crédits ne sont disponibles qu'en mode distribution individuelle",
+    "owner_cannot_request_from_self": "En tant que propriétaire, utilisez l'option de demande au revendeur",
+    "no_reseller": "Aucun revendeur associé à cette organisation"
+  },
   "credits": {
     "mode_changed": "Mode de crédits changé pour {mode}",
     "mode_shared": "pool partagé",

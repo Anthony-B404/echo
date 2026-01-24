@@ -4,10 +4,13 @@ import type { NavigationMenuItem, DropdownMenuItem } from '@nuxt/ui'
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
-const { canAccessOrganization, canManageMembers } = useSettingsPermissions()
+const { canAccessOrganization, canManageMembers, isOwner } = useSettingsPermissions()
 const creditsStore = useCreditsStore()
 const { credits } = storeToRefs(creditsStore)
 const { fetchBalance } = creditsStore
+
+const creditRequestsStore = useCreditRequestsStore()
+const { pendingCount } = storeToRefs(creditRequestsStore)
 
 const organizationStore = useOrganizationStore()
 const { organizations } = storeToRefs(organizationStore)
@@ -18,11 +21,15 @@ const open = ref(false)
 const contactModalOpen = ref(false)
 
 // Fetch credits and organizations on mount
-onMounted(() => {
+onMounted(async () => {
   fetchBalance()
   // Always fetch organizations to ensure role is available for permissions
   if (organizations.value.length === 0) {
-    organizationStore.fetchUserOrganizations()
+    await organizationStore.fetchUserOrganizations()
+  }
+  // Fetch pending credit requests count for owners
+  if (isOwner.value) {
+    await creditRequestsStore.fetchPendingCount()
   }
 })
 
@@ -185,6 +192,16 @@ onMounted(async () => {
 
           <!-- Right: Actions -->
           <div class="hidden md:flex items-center gap-3">
+            <!-- Pending Credit Requests Badge (Owner only) -->
+            <NuxtLink
+              v-if="isOwner && pendingCount > 0"
+              :to="localePath('/dashboard/credits') + '?tab=pendingRequests'"
+              class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+            >
+              <UIcon name="i-lucide-bell" class="w-4 h-4 text-amber-500" />
+              <span class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ pendingCount }}</span>
+            </NuxtLink>
+
             <!-- Credits Badge -->
             <NuxtLink :to="localePath('/dashboard/credits')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
               <UIcon name="i-lucide-coins" class="w-4 h-4 text-indigo-500" />

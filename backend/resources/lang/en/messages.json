@@ -216,6 +216,17 @@
     "sales": "Sales & Commerce",
     "hr": "Human Resources"
   },
+  "credit_requests": {
+    "created": "Credit request created successfully",
+    "approved": "{amount} credits approved and distributed",
+    "rejected": "Credit request rejected",
+    "not_found": "Credit request not found",
+    "pending_exists": "You already have a pending request",
+    "already_processed": "This request has already been processed",
+    "invalid_mode_shared": "Credit requests are only available in individual distribution mode",
+    "owner_cannot_request_from_self": "As owner, use the request from reseller option",
+    "no_reseller": "No reseller assigned to this organization"
+  },
   "credits": {
     "mode_changed": "Credit mode changed to {mode}",
     "mode_shared": "shared pool",

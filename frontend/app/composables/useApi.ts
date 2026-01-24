@@ -33,13 +33,20 @@ export const useApi = () => {
       ? url
       : `${options.baseURL || config.public.apiUrl}${url}`
 
-    const result = await $fetch(fullUrl, {
+    console.log('[useApi] options received:', options)
+    console.log('[useApi] method:', options.method)
+
+    const fetchOptions = {
       ...options,
       headers: {
         'Accept-Language': locale,
         ...options.headers
       }
-    } as NitroFetchOptions<NitroFetchRequest>)
+    } as NitroFetchOptions<NitroFetchRequest>
+
+    console.log('[useApi] fetchOptions:', fetchOptions)
+
+    const result = await $fetch(fullUrl, fetchOptions)
 
     return result as T
   }

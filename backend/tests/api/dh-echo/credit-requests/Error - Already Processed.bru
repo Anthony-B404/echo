@@ -1,0 +1,57 @@
+meta {
+  name: Error - Already Processed
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/credit-requests/{{processedRequestId}}/approve
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept-Language: en
+}
+
+auth:bearer {
+  token: {{ownerToken}}
+}
+
+vars:pre-request {
+  processedRequestId: 999
+}
+
+docs {
+  Test that trying to approve a credit request that has already been processed returns an error.
+
+  Prerequisites:
+  - User must be the owner of the organization
+  - The credit request must have already been approved or rejected (status != 'pending')
+
+  Expected: 409 Conflict with code REQUEST_ALREADY_PROCESSED
+}
+
+assert {
+  res.status: eq 409
+  res.body: isJson
+  res.body.code: eq REQUEST_ALREADY_PROCESSED
+}
+
+tests {
+  test("should return 409 Conflict", function() {
+    expect(res.status).to.equal(409);
+  });
+
+  test("should return error code REQUEST_ALREADY_PROCESSED", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('code');
+    expect(data.code).to.equal('REQUEST_ALREADY_PROCESSED');
+  });
+
+  test("should include error message", function() {
+    const data = res.getBody();
+    expect(data).to.have.property('message');
+    expect(data.message).to.be.a('string');
+  });
+}

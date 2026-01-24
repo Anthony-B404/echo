@@ -193,5 +193,52 @@
     "closing": "Best regards",
     "team": "The DH-Echo Team",
     "footer": "If you were not expecting this addition, please contact your administrator."
+  },
+  "credit_request_created": {
+    "subject": "New credit request",
+    "preview": "{requesterName} requested {amount} credits",
+    "title": "New credit request",
+    "greeting": "Hello",
+    "intro": "{requesterName} has requested {amount} credits.",
+    "justification_label": "Justification:",
+    "button": "Review request",
+    "closing": "Best regards",
+    "team": "The DH-Echo Team",
+    "footer": "This email was sent because a team member requested credits from the organization pool."
+  },
+  "credit_request_approved": {
+    "subject": "Your credit request has been approved",
+    "preview": "Your request for {amount} credits has been approved",
+    "title": "Request approved!",
+    "greeting": "Hello",
+    "intro": "Your request for {amount} credits has been approved and the credits have been added to your balance.",
+    "credits": "credits",
+    "button": "View my credits",
+    "closing": "Best regards",
+    "team": "The DH-Echo Team"
+  },
+  "credit_request_rejected": {
+    "subject": "Your credit request has been rejected",
+    "preview": "Your credit request has been rejected",
+    "title": "Request rejected",
+    "greeting": "Hello",
+    "intro": "Your request for {amount} credits has been rejected.",
+    "reason_label": "Reason:",
+    "outro": "You can submit a new request with additional justification if needed.",
+    "button": "Submit new request",
+    "closing": "Best regards",
+    "team": "The DH-Echo Team"
+  },
+  "credit_request_owner_created": {
+    "subject": "New credit request from {organizationName}",
+    "preview": "{organizationName} requested {amount} credits",
+    "title": "Credit request from organization",
+    "greeting": "Hello",
+    "intro": "{organizationName} has requested {amount} credits from the reseller pool.",
+    "justification_label": "Justification:",
+    "button": "Review request",
+    "closing": "Best regards",
+    "team": "The DH-Echo Team",
+    "footer": "This email was sent because an organization owner requested credits."
   }
 }
