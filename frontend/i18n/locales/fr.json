@@ -295,6 +295,12 @@
     }
   },
   "common": {
+    "error": "Erreur",
+    "credits": "crédits",
+    "loading": "Chargement...",
+    "loadMore": "Charger plus",
+    "words": "mots",
+    "unknown": "Inconnu",
     "buttons": {
       "cancel": "Annuler",
       "create": "Créer",
@@ -587,6 +593,58 @@
           "emailRequired": "L'email est requis",
           "invalidEmail": "Email invalide"
         }
+      },
+      "conflict": {
+        "title": "Conflit d'édition",
+        "description": "Ce contenu a été modifié par un autre utilisateur depuis que vous avez commencé à éditer.",
+        "editedBy": "Dernière modification par {name}, {time}",
+        "refresh": "Actualiser le contenu",
+        "dismiss": "Ignorer"
+      },
+      "editor": {
+        "placeholder": "Saisissez votre contenu ici...",
+        "changeSummaryPlaceholder": "Décrivez brièvement vos modifications (optionnel)",
+        "changeSummaryHint": "Cela permet de suivre ce qui a été modifié dans l'historique des versions.",
+        "addChangeSummary": "Ajouter un résumé des modifications",
+        "saveHint": "Cmd/Ctrl + Entrée pour enregistrer",
+        "saveHintEditor": "Appuyez sur Échap pour annuler",
+        "toolbar": {
+          "undo": "Annuler",
+          "redo": "Rétablir",
+          "headings": "Titres",
+          "heading1": "Titre 1",
+          "heading2": "Titre 2",
+          "heading3": "Titre 3",
+          "heading4": "Titre 4",
+          "bold": "Gras",
+          "italic": "Italique",
+          "underline": "Souligné",
+          "strikethrough": "Barré",
+          "code": "Code",
+          "codeBlock": "Bloc de code",
+          "bulletList": "Liste à puces",
+          "orderedList": "Liste numérotée",
+          "blockquote": "Citation",
+          "link": "Lien",
+          "horizontalRule": "Ligne horizontale"
+        }
+      },
+      "versionHistory": {
+        "title": "Historique des versions - {field}",
+        "current": "(actuelle)",
+        "selectedCount": "{count} version(s) sélectionnée(s)",
+        "compare": "Comparer",
+        "restore": "Restaurer",
+        "preview": "Aperçu",
+        "empty": "Aucun historique de version disponible",
+        "selectTwoVersions": "Veuillez sélectionner exactement deux versions à comparer"
+      },
+      "versionDiff": {
+        "title": "Comparaison de versions",
+        "linesAdded": "lignes ajoutées",
+        "linesRemoved": "lignes supprimées",
+        "linesChanged": "lignes modifiées",
+        "linesUnchanged": "lignes inchangées"
       }
     }
   },
@@ -668,7 +726,15 @@
           "titleUpdated": "Titre mis à jour",
           "titleUpdateError": "Erreur lors de la mise à jour du titre",
           "titlePlaceholder": "Entrez le titre de l'audio",
-          "clickToEdit": "Cliquez pour modifier le titre"
+          "clickToEdit": "Cliquez pour modifier le titre",
+          "edit": "Modifier",
+          "viewHistory": "Voir l'historique",
+          "lastEditedBy": "Dernière modification par {name}, {time}",
+          "editSaved": "Modifications enregistrées avec succès",
+          "editConflict": "Conflit d'édition détecté",
+          "editError": "Erreur lors de l'enregistrement",
+          "versionRestored": "Version restaurée avec succès",
+          "restoreError": "Erreur lors de la restauration de la version"
         }
       },
       "analyze": {

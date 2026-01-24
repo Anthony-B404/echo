@@ -3,6 +3,8 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Audio from './audio.js'
 import Document from './document.js'
+import TranscriptionVersion from './transcription_version.js'
+import User from './user.js'
 
 /**
  * Timestamp segment for transcription with timing info
@@ -44,8 +46,24 @@ export default class Transcription extends BaseModel {
   @column()
   declare analysis: string | null
 
+  // Version tracking fields
+  @column()
+  declare rawTextVersion: number
+
+  @column()
+  declare analysisVersion: number
+
+  @column()
+  declare lastEditedByUserId: number | null
+
+  @column.dateTime()
+  declare lastEditedAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+
+  @column.dateTime({ autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   // Relationships
 
@@ -54,6 +72,14 @@ export default class Transcription extends BaseModel {
 
   @hasMany(() => Document)
   declare documents: HasMany<typeof Document>
+
+  @hasMany(() => TranscriptionVersion)
+  declare versions: HasMany<typeof TranscriptionVersion>
+
+  @belongsTo(() => User, {
+    foreignKey: 'lastEditedByUserId',
+  })
+  declare lastEditedByUser: BelongsTo<typeof User>
 
   // Helper methods
 

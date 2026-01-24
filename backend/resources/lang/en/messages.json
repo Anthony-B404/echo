@@ -166,6 +166,13 @@
     "file_not_found": "Audio file not found in storage",
     "insufficient_credits_details": "Insufficient credits. Required: {creditsNeeded}, Available: {creditsAvailable}. Please purchase more credits to continue."
   },
+  "transcription": {
+    "not_found": "Transcription not found",
+    "updated": "Transcription updated successfully",
+    "restored": "Version restored successfully",
+    "version_not_found": "Version not found",
+    "edit_conflict": "This content has been modified by another user. Please refresh and try again."
+  },
   "export": {
     "no_transcription": "No transcription available for export",
     "no_analysis": "No analysis available for export",

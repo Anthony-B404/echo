@@ -90,8 +90,10 @@ export default class AudiosController {
       })
     }
 
-    // Load transcription relationship
-    await audio.load('transcription')
+    // Load transcription relationship with last edited user
+    await audio.load('transcription', (transcriptionQuery) => {
+      transcriptionQuery.preload('lastEditedByUser')
+    })
 
     return response.ok(audio)
   }

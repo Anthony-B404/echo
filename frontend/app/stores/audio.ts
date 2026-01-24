@@ -299,6 +299,18 @@ export const useAudioStore = defineStore('audio', {
     },
 
     /**
+     * Update current audio with new data (e.g., after edit)
+     */
+    updateCurrentAudio (audio: Audio) {
+      this.currentAudio = audio
+      // Also update in list if exists
+      const index = this.audios.findIndex(a => a.id === audio.id)
+      if (index !== -1) {
+        this.audios[index] = audio
+      }
+    },
+
+    /**
      * Reset store to initial state
      */
     reset () {
