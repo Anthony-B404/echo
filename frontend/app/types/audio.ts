@@ -21,6 +21,15 @@ export interface TranscriptionTimestamp {
 }
 
 /**
+ * Transcription User (minimal user info for last edited by)
+ */
+export interface TranscriptionUser {
+  id: number
+  fullName: string | null
+  email: string
+}
+
+/**
  * Transcription
  * The result of audio transcription
  */
@@ -33,6 +42,14 @@ export interface Transcription {
   confidence: number | null
   analysis: string | null
   createdAt: string
+  // Version tracking fields
+  rawTextVersion: number
+  analysisVersion: number
+  lastEditedByUserId: number | null
+  lastEditedAt: string | null
+  updatedAt: string | null
+  // Relations
+  lastEditedByUser?: TranscriptionUser | null
 }
 
 /**

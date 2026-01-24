@@ -9,6 +9,7 @@ import Audio, { AudioStatus } from '#models/audio'
 import User from '#models/user'
 import Organization from '#models/organization'
 import Transcription, { type TranscriptionTimestamp } from '#models/transcription'
+import transcriptionVersionService from '#services/transcription_version_service'
 import type { TranscriptionJobData, TranscriptionJobResult } from '#services/queue_service'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -345,13 +346,16 @@ async function processTranscriptionJob(
 
     // Save transcription AND analysis to database
     if (audio) {
-      await Transcription.create({
+      const transcription = await Transcription.create({
         audioId: audio.id,
         rawText: transcriptionResult.text,
         timestamps: transcriptionResult.segments,
         language: transcriptionResult.language || 'fr',
         analysis: analysis,
       })
+
+      // Create initial version entries (v1) for version history
+      await transcriptionVersionService.createInitialVersions(transcription, audio.userId)
     }
 
     // Stage 6: Cleanup and finalize (92-100%)

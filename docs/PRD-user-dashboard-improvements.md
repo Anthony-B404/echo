@@ -1,7 +1,7 @@
 # PRD: Améliorations du Dashboard Utilisateur
 
 **Version**: 1.3
-**Date**: 23 janvier 2026
+**Date**: 24 janvier 2026
 **Auteur**: DH-Echo Product Team
 **Statut**: Draft
 
@@ -910,25 +910,25 @@ export default class Folder extends BaseModel {
 
 ### 7.1 Description
 
-Permettre aux utilisateurs d'éditer les transcriptions et analyses générées, avec un système de versioning complet permettant de voir l'historique des modifications et de revenir à une version précédente.
+Permettre aux utilisateurs d'éditer les analyses générées, avec un système de versioning complet permettant de voir l'historique des modifications et de revenir à une version précédente.
+
+> **Note** : La transcription brute n'est pas éditable. Seule l'analyse peut être modifiée par l'utilisateur.
 
 ### 7.2 User Stories
 
 | ID | En tant que | Je veux | Afin de |
 |----|-------------|---------|---------|
-| US-6.1 | User | Éditer la transcription générée | Corriger les erreurs de reconnaissance |
-| US-6.2 | User | Éditer l'analyse générée | Affiner le résultat selon mes besoins |
-| US-6.3 | User | Voir l'historique des modifications | Savoir qui a modifié quoi et quand |
-| US-6.4 | User | Revenir à une version précédente | Annuler une modification indésirable |
-| US-6.5 | User | Voir les différences entre versions | Comprendre ce qui a changé |
-| US-6.6 | Owner/Admin | Voir qui a édité un document | Tracer les modifications pour audit |
+| US-6.1 | User | Éditer l'analyse générée | Affiner le résultat selon mes besoins |
+| US-6.2 | User | Voir l'historique des modifications | Savoir qui a modifié quoi et quand |
+| US-6.3 | User | Revenir à une version précédente | Annuler une modification indésirable |
+| US-6.4 | User | Voir les différences entre versions | Comprendre ce qui a changé |
+| US-6.5 | Owner/Admin | Voir qui a édité un document | Tracer les modifications pour audit |
 
 ### 7.3 Règles métier
 
 1. **Éléments éditables** :
-   - Transcription brute (`transcription.rawText`)
-   - Analyse (`transcription.analysis`)
-   - Segments avec timestamps (ajustement texte uniquement)
+   - Analyse (`transcription.analysis`) uniquement
+   - ⚠️ **La transcription brute n'est pas éditable** (lecture seule)
 
 2. **Versioning** :
    - Chaque sauvegarde crée une nouvelle version
@@ -963,7 +963,7 @@ CREATE TABLE transcription_versions (
   transcription_id INTEGER NOT NULL REFERENCES transcriptions(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id),
   version_number INTEGER NOT NULL,
-  field_name VARCHAR(50) NOT NULL, -- 'raw_text', 'analysis', 'segments'
+  field_name VARCHAR(50) NOT NULL, -- 'analysis' uniquement (transcription non éditable)
   content TEXT NOT NULL, -- Contenu de cette version
   change_summary VARCHAR(255) NULL, -- Résumé optionnel de la modification
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -972,7 +972,6 @@ CREATE TABLE transcription_versions (
 
 -- Modification table transcriptions
 ALTER TABLE transcriptions
-  ADD COLUMN raw_text_version INTEGER DEFAULT 1,
   ADD COLUMN analysis_version INTEGER DEFAULT 1,
   ADD COLUMN last_edited_by_user_id INTEGER NULL REFERENCES users(id),
   ADD COLUMN last_edited_at TIMESTAMP NULL;
@@ -998,7 +997,7 @@ CREATE INDEX idx_transcription_versions_lookup ON transcription_versions(transcr
 export default class TranscriptionVersionService {
   async saveVersion(
     transcriptionId: number,
-    fieldName: 'raw_text' | 'analysis',
+    fieldName: 'analysis', // Seule l'analyse est éditable
     newContent: string,
     userId: number,
     changeSummary?: string
@@ -1041,16 +1040,36 @@ export default class TranscriptionVersionService {
 
 **Page audio** (`/dashboard/:id`)
 
-- Bouton "Éditer" sur les tabs Transcription et Analyse
+- Bouton "Éditer" sur le tab Analyse uniquement (transcription en lecture seule)
 - Mode lecture (défaut) / Mode édition (toggle)
 - Indicateur "Dernière modification par X il y a Y"
 
 **Mode édition**
 
-- Textarea avec contenu éditable
-- Barre d'outils : Annuler (local), Sauvegarder, Historique
+⚠️ **Prérequis technique** : Mise à jour de Nuxt UI vers la version 4.4+ requise pour accéder aux nouveaux composants d'édition.
+
+**Composants Nuxt UI à utiliser** :
+- `UEditor` : Composant principal d'édition rich-text (basé sur TipTap)
+- `UEditorToolbar` : Barre d'outils avec formatage (gras, italique, listes, etc.)
+- `UEditorDragHandle` : Poignée de glisser-déposer pour réorganiser les blocs
+- `UEditorSuggestionMenu` : Menu de suggestions (slash commands)
+- `UEditorMentionMenu` : Menu de mentions (optionnel, pour collaboration future)
+- `UEditorEmojiMenu` : Sélecteur d'emojis (optionnel)
+
+**Interface d'édition** :
+- `UEditor` avec `UEditorToolbar` intégré pour le formatage
+- Barre d'actions : Annuler (local), Sauvegarder, Historique
 - Input "Résumé de la modification" (optionnel)
 - Boutons : "Sauvegarder" | "Annuler"
+
+```vue
+<!-- Exemple de structure recommandée -->
+<UEditor v-model="content" :editable="isEditing">
+  <template #toolbar>
+    <UEditorToolbar />
+  </template>
+</UEditor>
+```
 
 **Modal historique**
 
@@ -1066,14 +1085,15 @@ export default class TranscriptionVersionService {
 
 ### 7.6 Critères d'acceptation
 
-- [ ] L'utilisateur peut éditer la transcription
-- [ ] L'utilisateur peut éditer l'analyse
-- [ ] Chaque modification crée une nouvelle version
-- [ ] L'historique des versions est consultable
-- [ ] L'utilisateur peut voir les différences entre versions
-- [ ] L'utilisateur peut restaurer une version précédente
-- [ ] Les conflits d'édition sont détectés et gérés
-- [ ] L'auteur et la date de dernière modification sont affichés
+- [x] Nuxt UI est mis à jour vers la version 4.1+ (prérequis)
+- [x] L'éditeur utilise exclusivement les composants UEditor de Nuxt UI
+- [x] L'utilisateur peut éditer l'analyse (transcription en lecture seule)
+- [x] Chaque modification crée une nouvelle version
+- [x] L'historique des versions est consultable
+- [x] L'utilisateur peut voir les différences entre versions
+- [x] L'utilisateur peut restaurer une version précédente
+- [x] Les conflits d'édition sont détectés et gérés
+- [x] L'auteur et la date de dernière modification sont affichés
 
 ---
 
@@ -1102,6 +1122,7 @@ export default class TranscriptionVersionService {
 │  - Migration: créer table organization_role_permissions     │
 │  - Migration: créer table folders + folder_access           │
 │  - Migration: créer table transcription_versions            │
+│  - Frontend: Upgrade Nuxt UI vers 4.4+ (pour Feature 6)     │
 └─────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
@@ -1110,7 +1131,7 @@ export default class TranscriptionVersionService {
 │ Feature 1:    │   │ Feature 4:        │   │ Feature 6:    │
 │ Distribution  │   │ Permissions       │   │ Édition       │
 │ crédits       │   │ modulaires        │   │ analyses      │
-│ (indépendant) │   │ (indépendant)     │   │ (indépendant) │
+│ (indépendant) │   │ (indépendant)     │   │ (Nuxt UI 4.4+)│
 └───────────────┘   └───────────────────┘   └───────────────┘
         │
         ▼
@@ -1144,6 +1165,9 @@ export default class TranscriptionVersionService {
 | Permissions modulaires | Moyen | Moyen | 3-4 jours |
 | Système de dossiers | Élevé | Élevé | 5-7 jours |
 | Édition analyses | Moyen | Moyen | 3-4 jours |
+| **Upgrade Nuxt UI 4.4+** | - | Faible | 0.5 jour |
+
+> **Note** : L'upgrade Nuxt UI 4.4+ est un prérequis pour la Feature 6 (Édition analyses) et doit être effectué en premier.
 
 ---
 
@@ -1157,8 +1181,8 @@ export default class TranscriptionVersionService {
 - [ ] Popup crédits insuffisants avant upload
 - [ ] Page configuration permissions
 - [ ] Vue Drive avec arborescence dossiers
-- [ ] Mode édition transcription/analyse
-- [ ] Modal historique des versions avec diff
+- [x] Mode édition analyse (avec composants UEditor de Nuxt UI 4.1+)
+- [x] Modal historique des versions avec diff
 
 ### 9.2 Décisions prises
 
@@ -1167,6 +1191,8 @@ export default class TranscriptionVersionService {
 | **Crédits : Découvert temporaire ?** | ❌ Non | Bloquer si 0 crédits - simplicité et contrôle |
 | **Dossiers : Partage externe ?** | ❌ Non | Partage audio par audio uniquement - sécurité |
 | **Versions : Rétention ?** | ✅ Illimité | Conservation de tout l'historique |
+| **Éditeur : Composants UI ?** | ✅ Nuxt UI 4.1+ (UEditor) | Cohérence design system, composants TipTap intégrés, maintenance simplifiée |
+| **Transcription : Éditable ?** | ❌ Non | Transcription en lecture seule, seule l'analyse est éditable - intégrité des données |
 
 ### 9.3 Questions ouvertes restantes
 
@@ -1482,3 +1508,5 @@ export function useNotifications() {
 | 2026-01-20 | 1.1 | Product Team | Ajout décisions: pas de découvert crédits, pas de partage externe dossiers, historique versions illimité |
 | 2026-01-22 | 1.2 | Product Team | Alignement auto-refill users sur comportement organizations: ajout `last_refill_at` (idempotence), `autoRefillAmount` devient une CIBLE (pas un montant fixe), ajout méthodes helper au modèle |
 | 2026-01-23 | 1.3 | Product Team | Ajout Feature 7: Système de notifications in-app (alertes crédits, demandes, distributions). Seuil crédits bas = 100, rétention 30 jours après lecture, MVP sans emails/push |
+| 2026-01-23 | 1.3 | Product Team | Feature 6: Spécification composants UEditor de Nuxt UI 4.4+ pour l'édition (UEditor, UEditorToolbar, UEditorDragHandle, etc.) |
+| 2026-01-24 | 1.3 | Product Team | Feature 6: Transcription en lecture seule (seule l'analyse est éditable), critères d'acceptation validés |

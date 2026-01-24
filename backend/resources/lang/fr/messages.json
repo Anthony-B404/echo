@@ -166,6 +166,13 @@
     "file_not_found": "Fichier audio introuvable dans le stockage",
     "insufficient_credits_details": "Crédits insuffisants. Requis : {creditsNeeded}, Disponible : {creditsAvailable}. Veuillez recharger votre compte pour continuer."
   },
+  "transcription": {
+    "not_found": "Transcription introuvable",
+    "updated": "Transcription mise à jour avec succès",
+    "restored": "Version restaurée avec succès",
+    "version_not_found": "Version introuvable",
+    "edit_conflict": "Ce contenu a été modifié par un autre utilisateur. Veuillez rafraîchir et réessayer."
+  },
   "export": {
     "no_transcription": "Aucune transcription disponible pour l'export",
     "no_analysis": "Aucune analyse disponible pour l'export",

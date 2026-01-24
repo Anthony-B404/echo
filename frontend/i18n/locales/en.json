@@ -319,6 +319,9 @@
     "error": "Error",
     "credits": "credits",
     "loading": "Loading...",
+    "loadMore": "Load more",
+    "words": "words",
+    "unknown": "Unknown",
     "actions": {
       "copy": "Copy",
       "edit": "Edit",
@@ -585,6 +588,58 @@
           "emailRequired": "Email is required",
           "invalidEmail": "Invalid email"
         }
+      },
+      "conflict": {
+        "title": "Edit Conflict",
+        "description": "This content has been modified by another user since you started editing.",
+        "editedBy": "Last edited by {name}, {time}",
+        "refresh": "Refresh content",
+        "dismiss": "Dismiss"
+      },
+      "editor": {
+        "placeholder": "Enter your content here...",
+        "changeSummaryPlaceholder": "Briefly describe your changes (optional)",
+        "changeSummaryHint": "This helps track what was modified in the version history.",
+        "addChangeSummary": "Add change summary",
+        "saveHint": "Cmd/Ctrl + Enter to save",
+        "saveHintEditor": "Press Escape to cancel",
+        "toolbar": {
+          "undo": "Undo",
+          "redo": "Redo",
+          "headings": "Headings",
+          "heading1": "Heading 1",
+          "heading2": "Heading 2",
+          "heading3": "Heading 3",
+          "heading4": "Heading 4",
+          "bold": "Bold",
+          "italic": "Italic",
+          "underline": "Underline",
+          "strikethrough": "Strikethrough",
+          "code": "Code",
+          "codeBlock": "Code Block",
+          "bulletList": "Bullet List",
+          "orderedList": "Ordered List",
+          "blockquote": "Blockquote",
+          "link": "Link",
+          "horizontalRule": "Horizontal Rule"
+        }
+      },
+      "versionHistory": {
+        "title": "{field} Version History",
+        "current": "(current)",
+        "selectedCount": "{count} version(s) selected",
+        "compare": "Compare",
+        "restore": "Restore",
+        "preview": "Preview",
+        "empty": "No version history available",
+        "selectTwoVersions": "Please select exactly two versions to compare"
+      },
+      "versionDiff": {
+        "title": "Version Comparison",
+        "linesAdded": "lines added",
+        "linesRemoved": "lines removed",
+        "linesChanged": "lines changed",
+        "linesUnchanged": "lines unchanged"
       }
     }
   },
@@ -666,7 +721,15 @@
           "titleUpdated": "Title updated",
           "titleUpdateError": "Error updating title",
           "titlePlaceholder": "Enter audio title",
-          "clickToEdit": "Click to edit title"
+          "clickToEdit": "Click to edit title",
+          "edit": "Edit",
+          "viewHistory": "View history",
+          "lastEditedBy": "Last edited by {name}, {time}",
+          "editSaved": "Changes saved successfully",
+          "editConflict": "Edit conflict detected",
+          "editError": "Error saving changes",
+          "versionRestored": "Version restored successfully",
+          "restoreError": "Error restoring version"
         }
       },
       "analyze": {

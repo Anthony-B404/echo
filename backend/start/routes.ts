@@ -27,6 +27,7 @@ const CreditRequestsController = () => import('#controllers/credit_requests_cont
 const AudioSharesController = () => import('#controllers/audio_shares_controller')
 const SharedAudioController = () => import('#controllers/shared_audio_controller')
 const GdprController = () => import('#controllers/gdpr_controller')
+const TranscriptionsController = () => import('#controllers/transcriptions_controller')
 
 router.get('/', async () => {
   return {
@@ -144,6 +145,19 @@ router
     router.post('/audios/:id/share', [AudioSharesController, 'share'])
     router.get('/audios/:id/shares', [AudioSharesController, 'index'])
     router.delete('/shares/:id', [AudioSharesController, 'destroy'])
+
+    // Transcription editing routes
+    router.put('/audios/:id/transcription', [TranscriptionsController, 'update'])
+    router.get('/audios/:id/transcription/history', [TranscriptionsController, 'history'])
+    router.get('/audios/:id/transcription/version/:versionId', [
+      TranscriptionsController,
+      'showVersion',
+    ])
+    router.post('/audios/:id/transcription/restore/:versionId', [
+      TranscriptionsController,
+      'restore',
+    ])
+    router.get('/audios/:id/transcription/diff', [TranscriptionsController, 'diff'])
 
     // Prompt categories routes
     router.get('/prompt-categories', [PromptCategoriesController, 'index'])

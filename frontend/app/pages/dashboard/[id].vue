@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { AudioStatus } from '~/types/audio'
+import type { TranscriptionVersionField } from '~/types/transcription'
 
 definePageMeta({
   middleware: ['auth', 'pending-deletion', 'organization-status']
@@ -7,6 +8,7 @@ definePageMeta({
 
 const route = useRoute()
 const { t } = useI18n()
+const { formatRelativeTime } = useFormatters()
 
 useSeoMeta({
   title: t('seo.audioDetail.title'),
@@ -70,10 +72,52 @@ const titleInputRef = ref<HTMLInputElement | null>(null)
 const audioPlayerRef = ref<{ seekTo?: (time: number) => void } | null>(null)
 const currentTime = ref(0)
 
+// Analysis editing state (transcription is read-only)
+const isEditingAnalysis = ref(false)
+const historyModalOpen = ref(false)
+const historyModalField = ref<TranscriptionVersionField>('raw_text')
+const diffModalOpen = ref(false)
+const diffVersion1Id = ref<number | null>(null)
+const diffVersion2Id = ref<number | null>(null)
+
+// Transcription edit composable
+const {
+  loading: editLoading,
+  error: editError,
+  conflict: editConflict,
+  saveEdit,
+  restoreVersion,
+  clearConflict,
+  clearError: clearEditError
+} = useTranscriptionEdit(audioId)
+
 // Check if timestamps are available
 const hasTimestamps = computed(
   () => (audio.value?.transcription?.timestamps?.length ?? 0) > 0
 )
+
+// Current version numbers for optimistic locking
+const currentTranscriptionVersion = computed(() => audio.value?.transcription?.rawTextVersion ?? 1)
+const currentAnalysisVersion = computed(() => audio.value?.transcription?.analysisVersion ?? 1)
+
+// Check if currently editing
+const isEditing = computed(() => isEditingAnalysis.value)
+
+// Get current field being edited (only analysis is editable)
+const currentEditField = computed<TranscriptionVersionField | null>(() => {
+  if (isEditingAnalysis.value) return 'analysis'
+  return null
+})
+
+// Last edited info
+const lastEditedInfo = computed(() => {
+  const transcription = audio.value?.transcription
+  if (!transcription?.lastEditedAt || !transcription?.lastEditedByUser) return null
+  return {
+    user: transcription.lastEditedByUser,
+    time: transcription.lastEditedAt
+  }
+})
 
 // Markdown rendering
 const { renderMarkdown } = useMarkdown()
@@ -271,6 +315,94 @@ function formatFileSize (bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+// Analysis editing function (transcription is read-only)
+function startEditingAnalysis () {
+  clearEditError()
+  clearConflict()
+  isEditingAnalysis.value = true
+}
+
+function cancelEditing () {
+  isEditingAnalysis.value = false
+  clearConflict()
+}
+
+async function handleSave (content: string, changeSummary?: string) {
+  if (!audio.value?.transcription) return
+
+  const field = currentEditField.value
+  if (!field) return
+
+  const expectedVersion = field === 'raw_text'
+    ? currentTranscriptionVersion.value
+    : currentAnalysisVersion.value
+
+  const result = await saveEdit({
+    field,
+    content,
+    expectedVersion,
+    changeSummary
+  })
+
+  if (result.success && result.audio) {
+    // Update the audio in store with the new data
+    audioStore.updateCurrentAudio(result.audio)
+    cancelEditing()
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.editSaved'),
+      color: 'success'
+    })
+  } else if (result.conflict) {
+    // Conflict handled by composable, alert will show
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.editConflict'),
+      color: 'warning'
+    })
+  } else {
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.editError'),
+      description: editError.value || undefined,
+      color: 'error'
+    })
+  }
+}
+
+async function handleRefreshAfterConflict () {
+  await audioStore.fetchAudio(audioId.value)
+  clearConflict()
+}
+
+function openHistory (field: TranscriptionVersionField) {
+  historyModalField.value = field
+  historyModalOpen.value = true
+}
+
+async function handleRestore (versionId: number) {
+  const result = await restoreVersion(versionId)
+
+  if (result.success && result.audio) {
+    audioStore.updateCurrentAudio(result.audio)
+    historyModalOpen.value = false
+    diffModalOpen.value = false
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.versionRestored'),
+      color: 'success'
+    })
+  } else {
+    toast.add({
+      title: t('pages.dashboard.workshop.detail.restoreError'),
+      description: editError.value || undefined,
+      color: 'error'
+    })
+  }
+}
+
+function handleCompare (version1Id: number, version2Id: number) {
+  diffVersion1Id.value = version1Id
+  diffVersion2Id.value = version2Id
+  diffModalOpen.value = true
+}
+
 // Cleanup
 onUnmounted(() => {
   stopAllPolling()
@@ -445,10 +577,34 @@ const tabItems = computed(() => [
         <!-- Transcription/Analysis tabs -->
         <UPageCard v-if="isCompleted && audio.transcription" variant="subtle">
           <div class="flex items-center justify-between mb-4">
-            <UTabs v-model="activeTab" :items="tabItems" />
+            <UTabs v-model="activeTab" :items="tabItems" :disabled="isEditing" />
 
             <div class="flex items-center gap-2">
+              <!-- Edit button (only on analysis tab, transcription is read-only) -->
               <UButton
+                v-if="!isEditingAnalysis && activeTab === 'analysis'"
+                icon="i-lucide-pencil"
+                color="primary"
+                variant="ghost"
+                size="sm"
+                :label="t('common.buttons.edit')"
+                :disabled="!audio.transcription?.analysis"
+                @click="startEditingAnalysis"
+              />
+
+              <!-- History button -->
+              <UButton
+                v-if="!isEditing"
+                icon="i-lucide-history"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                :title="t('pages.dashboard.workshop.detail.viewHistory')"
+                @click="openHistory(activeTab === 'transcription' ? 'raw_text' : 'analysis')"
+              />
+
+              <UButton
+                v-if="!isEditing"
                 icon="i-lucide-copy"
                 color="neutral"
                 variant="ghost"
@@ -457,6 +613,7 @@ const tabItems = computed(() => [
                 @click="copyContent"
               />
               <WorkshopExportDropdown
+                v-if="!isEditing"
                 :audio-id="audio.id"
                 :audio-title="audio.title || audio.fileName"
                 :has-transcription="!!audio.transcription?.rawText"
@@ -465,7 +622,18 @@ const tabItems = computed(() => [
             </div>
           </div>
 
-          <!-- Transcription content -->
+          <!-- Last edited info -->
+          <div v-if="lastEditedInfo && !isEditing" class="flex items-center gap-2 mb-4 text-xs text-muted">
+            <UIcon name="i-lucide-user" class="w-3 h-3" />
+            <span>
+              {{ t('pages.dashboard.workshop.detail.lastEditedBy', {
+                name: lastEditedInfo.user.fullName || lastEditedInfo.user.email,
+                time: formatRelativeTime(lastEditedInfo.time)
+              }) }}
+            </span>
+          </div>
+
+          <!-- Transcription content (read-only) -->
           <div v-show="activeTab === 'transcription'">
             <!-- Segments with timestamps (clickable) -->
             <WorkshopTranscriptionSegments
@@ -494,26 +662,54 @@ const tabItems = computed(() => [
                 {{ t('pages.dashboard.workshop.detail.confidence') }}:
                 {{ (audio.transcription.confidence * 100).toFixed(0) }}%
               </span>
+              <span v-if="audio.transcription.rawTextVersion">
+                v{{ audio.transcription.rawTextVersion }}
+              </span>
             </div>
           </div>
 
           <!-- Analysis content -->
           <div v-show="activeTab === 'analysis'">
-            <!-- Analysis available -->
-            <div
-              v-if="audio.transcription?.analysis"
-              class="markdown-content text-sm"
-              v-html="renderedAnalysis"
+            <!-- Edit mode -->
+            <WorkshopTranscriptionEditor
+              v-if="isEditingAnalysis"
+              :content="audio.transcription.analysis || ''"
+              field="analysis"
+              :version="currentAnalysisVersion"
+              :loading="editLoading"
+              :conflict="editConflict"
+              @save="handleSave"
+              @cancel="cancelEditing"
+              @refresh="handleRefreshAfterConflict"
+              @dismiss-conflict="clearConflict"
             />
 
-            <!-- No analysis -->
-            <div v-else class="text-center py-8">
-              <WorkshopEmptyState
-                :title="t('pages.dashboard.workshop.detail.noAnalysis')"
-                :description="t('pages.dashboard.workshop.detail.noAnalysisDescription')"
-                icon="i-lucide-sparkles"
+            <!-- View mode -->
+            <template v-else>
+              <!-- Analysis available -->
+              <div
+                v-if="audio.transcription?.analysis"
+                class="markdown-content text-sm"
+                v-html="renderedAnalysis"
               />
-            </div>
+
+              <!-- No analysis -->
+              <div v-else class="text-center py-8">
+                <WorkshopEmptyState
+                  :title="t('pages.dashboard.workshop.detail.noAnalysis')"
+                  :description="t('pages.dashboard.workshop.detail.noAnalysisDescription')"
+                  icon="i-lucide-sparkles"
+                />
+              </div>
+
+              <!-- Version info -->
+              <div
+                v-if="audio.transcription?.analysis && audio.transcription?.analysisVersion"
+                class="mt-4 pt-4 border-t border-default text-sm text-muted"
+              >
+                <span>v{{ audio.transcription.analysisVersion }}</span>
+              </div>
+            </template>
           </div>
         </UPageCard>
 
@@ -542,6 +738,27 @@ const tabItems = computed(() => [
       v-model:open="shareModalOpen"
       :audio-id="audio.id"
       :audio-title="audio.title || audio.fileName"
+    />
+
+    <!-- Version history modal -->
+    <WorkshopVersionHistoryModal
+      v-if="audio"
+      v-model:open="historyModalOpen"
+      :audio-id="audio.id"
+      :field="historyModalField"
+      :current-version="historyModalField === 'raw_text' ? currentTranscriptionVersion : currentAnalysisVersion"
+      @restore="handleRestore"
+      @compare="handleCompare"
+    />
+
+    <!-- Version diff modal -->
+    <WorkshopVersionDiffModal
+      v-if="audio"
+      v-model:open="diffModalOpen"
+      :audio-id="audio.id"
+      :version1-id="diffVersion1Id"
+      :version2-id="diffVersion2Id"
+      @restore="handleRestore"
     />
   </div>
 </template>
