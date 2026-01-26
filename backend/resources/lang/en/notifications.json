@@ -1,0 +1,26 @@
+{
+  "credit_request": {
+    "title": "New credit request",
+    "message": "{name} requested {amount} credits"
+  },
+  "owner_credit_request": {
+    "title": "Credit request from organization",
+    "message": "{orgName} requested {amount} credits"
+  },
+  "low_credits": {
+    "title": "Low credits alert",
+    "message": "Your organization has only {balance} credits left"
+  },
+  "insufficient_refill": {
+    "title": "Auto-refill warning",
+    "message": "Insufficient credits for the next auto-refill"
+  },
+  "reseller_distribution": {
+    "title": "Credits received",
+    "message": "Your reseller added {amount} credits"
+  },
+  "credits_received": {
+    "title": "Credits received",
+    "message": "You received {amount} credits"
+  }
+}

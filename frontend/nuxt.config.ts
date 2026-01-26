@@ -26,7 +26,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiUrl: process.env.API_URL
+      apiUrl: process.env.API_URL,
+      notificationPollingInterval: parseInt(process.env.NOTIFICATION_POLLING_INTERVAL || '60000')
     }
   },
   alias: {

@@ -24,7 +24,6 @@ const requestType = computed(() => isOwner.value ? 'owner_to_reseller' : 'member
 
 // Show request credits modal
 const showRequestModal = ref(false)
-const creditsStore = useCreditsStore()
 
 function openRequestModal() {
   showRequestModal.value = true

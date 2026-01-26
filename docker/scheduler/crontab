@@ -7,3 +7,11 @@
 # Credit Requests Cleanup - Runs weekly on Sunday at 3:00 AM
 # Deletes processed credit requests older than 90 days (pending requests are preserved)
 0 3 * * 0 node ace cleanup:credit-requests
+
+# Notifications Cleanup - Runs daily at 3:00 AM
+# Deletes read notifications older than 30 days
+0 3 * * * node ace cleanup:notifications
+
+# Auto-Refill Check - Runs daily at 18:00 (6 PM)
+# Warns owners 24h before if there are insufficient credits for scheduled auto-refills
+0 18 * * * node ace check:auto-refill

@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import type { TranscriptionVersionField, EditConflict } from '~/types/transcription'
-import type { EditorToolbarItem } from '@nuxt/ui'
 import { marked } from 'marked'
 import TurndownService from 'turndown'
+
+// EditorToolbarItem type - defined locally as it may not be exported in all Nuxt UI versions
+type EditorToolbarItem = {
+  kind?: string
+  mark?: string
+  level?: number
+  icon?: string
+  label?: string
+  tooltip?: { text: string }
+  content?: { align: string }
+  items?: EditorToolbarItem[]
+}
 
 const { t: tToolbar } = useI18n()
 
@@ -140,7 +151,9 @@ watch(
   () => props.content,
   async (newContent) => {
     originalMarkdown.value = newContent
-    htmlContent.value = await marked.parse(newContent)
+    const parsed = marked.parse(newContent)
+    // Handle both sync and async return types from marked
+    htmlContent.value = typeof parsed === 'string' ? parsed : await parsed
   },
   { immediate: true }
 )
@@ -158,11 +171,10 @@ function handleSave() {
   emit('save', markdownContent, changeSummary.value || undefined)
 }
 
-function handleCancel() {
+async function handleCancel() {
   // Reset to original HTML content
-  marked.parse(props.content).then((html) => {
-    htmlContent.value = html
-  })
+  const parsed = marked.parse(props.content)
+  htmlContent.value = typeof parsed === 'string' ? parsed : await parsed
   changeSummary.value = ''
   showChangeSummary.value = false
   emit('cancel')

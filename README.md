@@ -64,6 +64,18 @@ Super Admin → Reseller Pool → Organization Pool → Consommation
 - Export PDF et Word formatés professionnellement
 - Historique et recherche
 
+### Demandes de Crédits
+- Membres peuvent demander des crédits à l'Owner
+- Owners peuvent demander des crédits au Reseller
+- Workflow d'approbation/rejet avec messages optionnels
+- Historique des demandes avec statuts
+
+### Notifications In-App
+- Icône cloche avec badge de compteur dans le header
+- Notifications temps réel (polling 60 secondes)
+- Types de notifications : demandes de crédits, crédits bas, distribution de crédits
+- Navigation contextuelle au clic sur la notification
+
 ## Expérience Utilisateur
 
 - Interface **minimaliste** et **rassurante**
@@ -300,6 +312,10 @@ pnpm typecheck       # TypeScript type checking
 node ace migration:run       # Exécuter les migrations
 node ace migration:rollback  # Rollback dernière migration
 node ace gdpr:scheduler      # Traiter les suppressions GDPR dues
+node ace subscription:renew  # Traiter les renouvellements d'abonnements
+node ace cleanup:credit-requests   # Nettoyage des demandes de crédits traitées (>90j)
+node ace cleanup:notifications     # Nettoyage des notifications lues (>30j)
+node ace check:auto-refill         # Vérifier les auto-refills du lendemain
 ```
 
 ### Frontend
@@ -401,6 +417,25 @@ node ace gdpr:scheduler
 1. **Traite les suppressions dues** : demandes avec `scheduled_for <= now`
 2. **Envoie les rappels** : emails à J-7 et J-1 avant suppression
 3. **Ajoute les jobs à BullMQ** : les workers traitent ensuite automatiquement
+
+### Tous les Jobs CRON (Production)
+
+| Horaire | Commande | Description |
+|---------|----------|-------------|
+| 0:05 | `node ace subscription:renew` | Renouvellements d'abonnements |
+| 2:00 | `node ace gdpr:scheduler` | Suppressions GDPR et rappels |
+| 3:00 | `node ace cleanup:credit-requests` | Nettoyage demandes de crédits (hebdo dimanche) |
+| 3:00 | `node ace cleanup:notifications` | Nettoyage notifications lues > 30 jours |
+| 18:00 | `node ace check:auto-refill` | Avertissement auto-refill insuffisant (24h avant) |
+
+**Configuration Production** (`docker/scheduler/crontab`) :
+```bash
+5 0 * * * node ace subscription:renew
+0 2 * * * node ace gdpr:scheduler
+0 3 * * 0 node ace cleanup:credit-requests
+0 3 * * * node ace cleanup:notifications
+0 18 * * * node ace check:auto-refill
+```
 
 #### Flow de suppression GDPR
 

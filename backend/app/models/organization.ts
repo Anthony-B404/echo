@@ -212,6 +212,12 @@ export default class Organization extends BaseModel {
       audioId: audioId || null,
     })
 
+    // Check if credits dropped below 100 and notify owner
+    if (this.credits < 100) {
+      const notificationService = await import('#services/notification_service')
+      await notificationService.default.notifyLowCredits(this.id, this.credits)
+    }
+
     return transaction
   }
 

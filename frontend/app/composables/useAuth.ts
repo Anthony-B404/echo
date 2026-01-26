@@ -39,9 +39,6 @@ export const useAuth = () => {
     url: string,
     options: AuthFetchOptions = {}
   ): Promise<T> => {
-    console.log('[authenticatedFetch] options received:', options)
-    console.log('[authenticatedFetch] method:', options.method)
-
     const api = useApi()
 
     const mergedOptions = {
@@ -51,8 +48,6 @@ export const useAuth = () => {
         ...getAuthHeaders()
       }
     }
-
-    console.log('[authenticatedFetch] mergedOptions:', mergedOptions)
 
     return await api<T>(url, mergedOptions)
   }

@@ -152,13 +152,13 @@ class GdprExportService {
       createdAt: audio.createdAt.toISO() || '',
       transcription: audio.transcription
         ? {
-          id: audio.transcription.id,
-          rawText: audio.transcription.rawText,
-          language: audio.transcription.language,
-          confidence: audio.transcription.confidence,
-          analysis: audio.transcription.analysis,
-          createdAt: audio.transcription.createdAt.toISO() || '',
-        }
+            id: audio.transcription.id,
+            rawText: audio.transcription.rawText,
+            language: audio.transcription.language,
+            confidence: audio.transcription.confidence,
+            analysis: audio.transcription.analysis,
+            createdAt: audio.transcription.createdAt.toISO() || '',
+          }
         : null,
       documents: audio.documents.map((doc) => ({
         id: doc.id,

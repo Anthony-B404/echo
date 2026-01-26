@@ -10,6 +10,7 @@ import {
 import mail from '@adonisjs/mail/services/main'
 import env from '#start/env'
 import User from '#models/user'
+import notificationService from '#services/notification_service'
 
 export default class CreditRequestsController {
   private creditRequestService = new CreditRequestService()
@@ -79,6 +80,15 @@ export default class CreditRequestsController {
               apiUrl: 'https://api.dh-echo.cloud',
             })
         })
+
+        // Create in-app notification for owner
+        await notificationService.notifyCreditRequest(
+          organization.id,
+          user.id,
+          user.fullName || user.email,
+          amount,
+          i18n.locale
+        )
       }
 
       return response.created({
@@ -158,6 +168,15 @@ export default class CreditRequestsController {
               })
           })
         }
+
+        // Create in-app notifications for reseller admins
+        await notificationService.notifyOwnerCreditRequest(
+          organization.resellerId,
+          organization.id,
+          organization.name,
+          amount,
+          i18n.locale
+        )
       }
 
       return response.created({
@@ -199,7 +218,11 @@ export default class CreditRequestsController {
       })
     }
 
-    const { page = 1, limit = 20, status } = await request.validateUsing(creditRequestQueryValidator)
+    const {
+      page = 1,
+      limit = 20,
+      status,
+    } = await request.validateUsing(creditRequestQueryValidator)
 
     const result = await this.creditRequestService.getUserRequests(
       user.id,
@@ -305,6 +328,16 @@ export default class CreditRequestsController {
               apiUrl: 'https://api.dh-echo.cloud',
             })
         })
+
+        // Create in-app notification for the requester
+        if (result.creditsDistributed !== undefined) {
+          await notificationService.notifyCreditsReceived(
+            requester.id,
+            creditRequest.organizationId,
+            result.creditsDistributed,
+            i18n.locale
+          )
+        }
       }
 
       return response.ok({

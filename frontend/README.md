@@ -69,5 +69,16 @@ pnpm typecheck    # Vérification TypeScript
 - **Pas d'inscription publique** : Les utilisateurs sont créés par les revendeurs
 - **Crédits au niveau Organisation** : Les crédits sont gérés par organisation, pas par utilisateur
 - **Redirection par rôle** : Après login, redirection automatique selon le type d'utilisateur
+- **Notifications in-app** : Icône cloche avec badge dans le header, polling 60s
+
+## Composables Clés
+
+| Composable | Description |
+|------------|-------------|
+| `useAuth` | Authentification, token, profil utilisateur |
+| `useApi` | Appels API avec Accept-Language automatique |
+| `useNotifications` | Notifications in-app (état partagé) |
+| `useDashboard` | État des slideovers (notifications, etc.) |
+| `useSettingsPermissions` | Permissions basées sur le rôle |
 
 Pour plus de détails, voir [CLAUDE.md](./CLAUDE.md).

@@ -67,7 +67,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to fetch credit requests'
-      console.error('Error fetching credit requests:', e)
       return null
     }
     finally {
@@ -93,7 +92,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to fetch pending requests'
-      console.error('Error fetching pending requests:', e)
       return null
     }
     finally {
@@ -112,8 +110,7 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
       pendingCount.value = response.count
       return response.count
     }
-    catch (e: unknown) {
-      console.error('Error fetching pending count:', e)
+    catch {
       return 0
     }
   }
@@ -141,7 +138,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to create credit request'
-      console.error('Error creating credit request:', e)
       throw e
     }
     finally {
@@ -172,7 +168,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to create credit request'
-      console.error('Error creating credit request to reseller:', e)
       throw e
     }
     finally {
@@ -203,7 +198,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to approve credit request'
-      console.error('Error approving credit request:', e)
       throw e
     }
     finally {
@@ -236,7 +230,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to reject credit request'
-      console.error('Error rejecting credit request:', e)
       throw e
     }
     finally {
@@ -266,7 +259,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to fetch reseller pending requests'
-      console.error('Error fetching reseller pending requests:', e)
       return null
     }
     finally {
@@ -285,8 +277,7 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
       resellerPendingCount.value = response.count
       return response.count
     }
-    catch (e: unknown) {
-      console.error('Error fetching reseller pending count:', e)
+    catch {
       return 0
     }
   }
@@ -314,7 +305,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to approve credit request'
-      console.error('Error approving reseller credit request:', e)
       throw e
     }
     finally {
@@ -347,7 +337,6 @@ export const useCreditRequestsStore = defineStore('creditRequests', () => {
     catch (e: unknown) {
       const apiError = e as ApiError
       error.value = apiError.message || 'Failed to reject credit request'
-      console.error('Error rejecting reseller credit request:', e)
       throw e
     }
     finally {

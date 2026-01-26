@@ -265,6 +265,10 @@
     "member_deletion_recovery_org_detail": "Récupération des crédits du membre supprimé #{userId}",
     "initial_credits_new_member": "Crédits initiaux pour nouveau membre"
   },
+  "notifications": {
+    "marked_as_read": "Notification marquée comme lue",
+    "all_marked_as_read": "Toutes les notifications marquées comme lues"
+  },
   "gdpr": {
     "account_pending_deletion": "Votre compte est en cours de suppression. L'accès à l'application est restreint. Vous pouvez annuler la suppression ou exporter vos données.",
     "export": {

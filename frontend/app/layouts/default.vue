@@ -4,16 +4,17 @@ import type { NavigationMenuItem, DropdownMenuItem } from '@nuxt/ui'
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
-const { canAccessOrganization, canManageMembers, isOwner } = useSettingsPermissions()
+const { canAccessOrganization, canManageMembers } = useSettingsPermissions()
 const creditsStore = useCreditsStore()
 const { credits } = storeToRefs(creditsStore)
 const { fetchBalance } = creditsStore
 
-const creditRequestsStore = useCreditRequestsStore()
-const { pendingCount } = storeToRefs(creditRequestsStore)
 
 const organizationStore = useOrganizationStore()
 const { organizations } = storeToRefs(organizationStore)
+
+const { isNotificationsSlideoverOpen } = useDashboard()
+const { unreadCount } = useNotifications()
 
 const hasSingleOrganization = computed(() => organizations.value.length <= 1)
 
@@ -26,10 +27,6 @@ onMounted(async () => {
   // Always fetch organizations to ensure role is available for permissions
   if (organizations.value.length === 0) {
     await organizationStore.fetchUserOrganizations()
-  }
-  // Fetch pending credit requests count for owners
-  if (isOwner.value) {
-    await creditRequestsStore.fetchPendingCount()
   }
 })
 
@@ -192,15 +189,21 @@ onMounted(async () => {
 
           <!-- Right: Actions -->
           <div class="hidden md:flex items-center gap-3">
-            <!-- Pending Credit Requests Badge (Owner only) -->
-            <NuxtLink
-              v-if="isOwner && pendingCount > 0"
-              :to="localePath('/dashboard/credits') + '?tab=pendingRequests'"
-              class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+            <!-- Notifications Bell -->
+            <UButton
+              icon="i-heroicons-bell"
+              color="neutral"
+              variant="ghost"
+              class="relative"
+              @click="isNotificationsSlideoverOpen = true"
             >
-              <UIcon name="i-lucide-bell" class="w-4 h-4 text-amber-500" />
-              <span class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ pendingCount }}</span>
-            </NuxtLink>
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </UButton>
 
             <!-- Credits Badge -->
             <NuxtLink :to="localePath('/dashboard/credits')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
@@ -229,6 +232,7 @@ onMounted(async () => {
 
     <!-- Global Components -->
     <ContactSupportModal v-model:open="contactModalOpen" />
+    <NotificationsSlideover />
 
     <!-- Mobile Slideover -->
     <USlideover v-model:open="open" title="Menu">
@@ -261,6 +265,25 @@ onMounted(async () => {
               orientation="vertical"
             />
           </div>
+
+          <USeparator />
+
+          <!-- Mobile Notifications Button -->
+          <button
+            class="flex items-center gap-3 px-2 py-2 w-full text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            @click="open = false; isNotificationsSlideoverOpen = true"
+          >
+            <div class="relative">
+              <UIcon name="i-heroicons-bell" class="w-5 h-5 text-gray-500" />
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </div>
+            <span class="text-sm font-medium">{{ t('components.notifications.title') }}</span>
+          </button>
 
           <div class="mt-auto">
             <UserMenu />

@@ -3,6 +3,7 @@ import CreditTransaction from '#models/credit_transaction'
 import UserCreditTransaction from '#models/user_credit_transaction'
 import User from '#models/user'
 import creditService from '#services/credit_service'
+import notificationService from '#services/notification_service'
 import {
   updateCreditModeValidator,
   distributeCreditValidator,
@@ -64,9 +65,7 @@ export default class CreditsController {
         .where('userId', user.id)
         .if(type, (query) => query.where('type', type!))
         .orderBy('createdAt', 'desc')
-        .preload('performedBy', (q) =>
-          q.select('id', 'fullName', 'firstName', 'lastName', 'email')
-        )
+        .preload('performedBy', (q) => q.select('id', 'fullName', 'firstName', 'lastName', 'email'))
         .preload('audio')
         .paginate(page, limit)
 
@@ -223,6 +222,14 @@ export default class CreditsController {
       )
 
       const targetName = targetUser.fullName || targetUser.firstName || targetUser.email
+
+      // Create in-app notification for the recipient
+      await notificationService.notifyCreditsReceived(
+        targetUser.id,
+        organization.id,
+        amount,
+        i18n.locale
+      )
 
       return response.ok({
         message: i18n.t('messages.credits.distribution_success', { amount, name: targetName }),

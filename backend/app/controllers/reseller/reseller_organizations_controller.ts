@@ -8,6 +8,7 @@ import env from '#start/env'
 import Organization, { OrganizationStatus } from '#models/organization'
 import User, { UserRole } from '#models/user'
 import { CreditTransactionType } from '#models/credit_transaction'
+import notificationService from '#services/notification_service'
 import {
   createResellerOrganizationValidator,
   updateResellerOrganizationValidator,
@@ -394,6 +395,13 @@ export default class ResellerOrganizationsController {
       // Reload to get updated balances
       await reseller!.refresh()
       await organization.refresh()
+
+      // Create in-app notification for the organization owner
+      await notificationService.notifyResellerDistribution(
+        organization.id,
+        payload.amount,
+        i18n.locale
+      )
 
       return response.ok({
         message: i18n.t('messages.reseller_api.credits_distributed', { amount: payload.amount }),

@@ -5,7 +5,8 @@ import TranscriptionVersion, { TranscriptionVersionField } from '#models/transcr
 
 export default class BackfillInitialVersions extends BaseCommand {
   static commandName = 'backfill:initial-versions'
-  static description = 'Create initial version entries (v1) for transcriptions that do not have them'
+  static description =
+    'Create initial version entries (v1) for transcriptions that do not have them'
 
   static options: CommandOptions = {
     startApp: true,
@@ -77,6 +78,8 @@ export default class BackfillInitialVersions extends BaseCommand {
       }
     }
 
-    this.logger.success(`Backfill complete: ${createdCount} version entries created, ${skippedCount} transcriptions skipped`)
+    this.logger.success(
+      `Backfill complete: ${createdCount} version entries created, ${skippedCount} transcriptions skipped`
+    )
   }
 }

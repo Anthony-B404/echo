@@ -20,4 +20,5 @@ export const policies = {
   ResellerOrganizationPolicy: () => import('#policies/reseller_organization_policy'),
   CreditPolicy: () => import('#policies/credit_policy'),
   CreditRequestPolicy: () => import('#policies/credit_request_policy'),
+  NotificationPolicy: () => import('#policies/notification_policy'),
 }

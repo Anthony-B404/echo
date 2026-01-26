@@ -387,7 +387,13 @@
   },
   "components": {
     "notifications": {
-      "title": "Notifications"
+      "title": "Notifications",
+      "markAllRead": "Tout marquer comme lu",
+      "empty": "Aucune notification",
+      "loadMore": "Charger plus",
+      "errorTitle": "Erreur de chargement",
+      "errorDescription": "Impossible de charger les notifications",
+      "retry": "Réessayer"
     },
     "teams": {
       "loading": "Chargement...",

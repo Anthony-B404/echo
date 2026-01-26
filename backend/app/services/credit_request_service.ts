@@ -50,9 +50,7 @@ export default class CreditRequestService {
     }
 
     // Check no pending request exists
-    if (
-      await this.hasPendingRequest(user.id, organization.id, CreditRequestType.MemberToOwner)
-    ) {
+    if (await this.hasPendingRequest(user.id, organization.id, CreditRequestType.MemberToOwner)) {
       throw new Error('PENDING_REQUEST_EXISTS')
     }
 
@@ -84,9 +82,7 @@ export default class CreditRequestService {
     }
 
     // Check no pending request exists
-    if (
-      await this.hasPendingRequest(user.id, organization.id, CreditRequestType.OwnerToReseller)
-    ) {
+    if (await this.hasPendingRequest(user.id, organization.id, CreditRequestType.OwnerToReseller)) {
       throw new Error('PENDING_REQUEST_EXISTS')
     }
 

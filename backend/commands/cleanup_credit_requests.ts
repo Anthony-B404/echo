@@ -22,7 +22,9 @@ export default class CleanupCreditRequests extends BaseCommand {
       return
     }
 
-    this.logger.info(`Starting credit requests cleanup (keeping requests from last ${daysToKeep} days)...`)
+    this.logger.info(
+      `Starting credit requests cleanup (keeping requests from last ${daysToKeep} days)...`
+    )
     this.logger.info('')
 
     const result = await cleanupOldCreditRequests(daysToKeep)

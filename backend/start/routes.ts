@@ -28,6 +28,7 @@ const AudioSharesController = () => import('#controllers/audio_shares_controller
 const SharedAudioController = () => import('#controllers/shared_audio_controller')
 const GdprController = () => import('#controllers/gdpr_controller')
 const TranscriptionsController = () => import('#controllers/transcriptions_controller')
+const NotificationsController = () => import('#controllers/notifications_controller')
 
 router.get('/', async () => {
   return {
@@ -205,6 +206,12 @@ router
     router.post('/credit-requests/:id/approve', [CreditRequestsController, 'approve'])
     router.post('/credit-requests/:id/reject', [CreditRequestsController, 'reject'])
 
+    // Notifications routes
+    router.get('/notifications', [NotificationsController, 'index'])
+    router.get('/notifications/unread-count', [NotificationsController, 'unreadCount'])
+    router.post('/notifications/:id/read', [NotificationsController, 'markRead'])
+    router.post('/notifications/read-all', [NotificationsController, 'markAllRead'])
+
     // Contact support route
     router.post('/contact', [ContactController, 'send'])
   })
@@ -251,6 +258,8 @@ const ResellerSubscriptionsController = () =>
   import('#controllers/reseller/reseller_subscriptions_controller')
 const ResellerCreditRequestsController = () =>
   import('#controllers/reseller/reseller_credit_requests_controller')
+const ResellerNotificationsController = () =>
+  import('#controllers/reseller/reseller_notifications_controller')
 
 // Reseller API routes
 router
@@ -303,6 +312,12 @@ router
     router.get('/credit-requests/pending-count', [ResellerCreditRequestsController, 'pendingCount'])
     router.post('/credit-requests/:id/approve', [ResellerCreditRequestsController, 'approve'])
     router.post('/credit-requests/:id/reject', [ResellerCreditRequestsController, 'reject'])
+
+    // Notifications routes
+    router.get('/notifications', [ResellerNotificationsController, 'index'])
+    router.get('/notifications/unread-count', [ResellerNotificationsController, 'unreadCount'])
+    router.post('/notifications/:id/read', [ResellerNotificationsController, 'markRead'])
+    router.post('/notifications/read-all', [ResellerNotificationsController, 'markAllRead'])
   })
   .prefix('/reseller')
   .use([middleware.auth({ guards: ['api'] }), middleware.reseller()])

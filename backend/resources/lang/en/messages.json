@@ -265,6 +265,10 @@
     "member_deletion_recovery_org_detail": "Credits recovered from removed member #{userId}",
     "initial_credits_new_member": "Initial credits for new member"
   },
+  "notifications": {
+    "marked_as_read": "Notification marked as read",
+    "all_marked_as_read": "All notifications marked as read"
+  },
   "gdpr": {
     "account_pending_deletion": "Your account is pending deletion. Access to the application is restricted. You can cancel the deletion or export your data.",
     "export": {

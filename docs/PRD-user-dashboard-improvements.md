@@ -12,6 +12,7 @@
 ### 1.1 Contexte
 
 Le dashboard utilisateur permet actuellement aux membres d'une organisation de gérer leurs audios : upload, transcription, analyse et export. Cependant, plusieurs limitations ont été identifiées :
+
 - Les crédits sont uniquement gérés au niveau organisation, sans possibilité de distribution aux membres
 - L'interface de gestion des audios est plate (liste simple) sans organisation en dossiers
 - Les analyses générées ne peuvent pas être éditées après génération
@@ -29,11 +30,11 @@ Le dashboard utilisateur permet actuellement aux membres d'une organisation de g
 
 ### 1.3 Utilisateurs cibles
 
-| Persona | Besoins |
-|---------|---------|
-| **Owner** | Gérer la distribution des crédits, configurer les permissions, organiser l'espace de travail |
-| **Administrator** | Gérer les membres et audios selon les permissions accordées |
-| **Member** | Demander des crédits, organiser ses audios, éditer ses analyses |
+| Persona           | Besoins                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| **Owner**         | Gérer la distribution des crédits, configurer les permissions, organiser l'espace de travail |
+| **Administrator** | Gérer les membres et audios selon les permissions accordées                                  |
+| **Member**        | Demander des crédits, organiser ses audios, éditer ses analyses                              |
 
 ---
 
@@ -45,16 +46,16 @@ Permettre aux Owners de distribuer des crédits du pool organisation vers les me
 
 ### 2.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-1.0 | Owner | Choisir le mode de gestion des crédits (pool commun ou distribution individuelle) | Adapter la gestion à la taille et culture de mon équipe |
-| US-1.1 | Owner | Distribuer des crédits ponctuels à un membre (mode individuel) | Lui permettre de traiter des audios |
-| US-1.2 | Owner | Configurer une recharge mensuelle automatique pour un membre (mode individuel) | Simplifier la gestion récurrente |
-| US-1.3 | Owner | Voir le solde de crédits de chaque membre | Suivre l'utilisation individuelle |
-| US-1.4 | Owner | Récupérer les crédits non utilisés d'un membre (mode individuel) | Redistribuer les ressources |
-| US-1.5 | Owner | Définir un plafond de crédits par membre (mode individuel) | Contrôler les dépenses |
-| US-1.6 | Member | Voir mon solde de crédits personnel | Savoir combien je peux utiliser |
-| US-1.7 | Owner | Basculer d'un mode à l'autre | Adapter la gestion selon l'évolution de l'équipe |
+| ID     | En tant que | Je veux                                                                           | Afin de                                                 |
+| ------ | ----------- | --------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| US-1.0 | Owner       | Choisir le mode de gestion des crédits (pool commun ou distribution individuelle) | Adapter la gestion à la taille et culture de mon équipe |
+| US-1.1 | Owner       | Distribuer des crédits ponctuels à un membre (mode individuel)                    | Lui permettre de traiter des audios                     |
+| US-1.2 | Owner       | Configurer une recharge mensuelle automatique pour un membre (mode individuel)    | Simplifier la gestion récurrente                        |
+| US-1.3 | Owner       | Voir le solde de crédits de chaque membre                                         | Suivre l'utilisation individuelle                       |
+| US-1.4 | Owner       | Récupérer les crédits non utilisés d'un membre (mode individuel)                  | Redistribuer les ressources                             |
+| US-1.5 | Owner       | Définir un plafond de crédits par membre (mode individuel)                        | Contrôler les dépenses                                  |
+| US-1.6 | Member      | Voir mon solde de crédits personnel                                               | Savoir combien je peux utiliser                         |
+| US-1.7 | Owner       | Basculer d'un mode à l'autre                                                      | Adapter la gestion selon l'évolution de l'équipe        |
 
 ### 2.3 Règles métier
 
@@ -62,10 +63,10 @@ Permettre aux Owners de distribuer des crédits du pool organisation vers les me
 
    L'Owner configure le mode de gestion des crédits pour son organisation. Ce choix est modifiable à tout moment.
 
-   | Mode | Description | Cas d'usage |
-   |------|-------------|-------------|
-   | **Pool commun** | Tous les membres puisent dans le pool organisation | Petites équipes, confiance élevée, simplicité |
-   | **Distribution individuelle** | Crédits alloués par membre avec contrôle | Grandes équipes, contrôle budgétaire, suivi individuel |
+   | Mode                          | Description                                        | Cas d'usage                                            |
+   | ----------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+   | **Pool commun**               | Tous les membres puisent dans le pool organisation | Petites équipes, confiance élevée, simplicité          |
+   | **Distribution individuelle** | Crédits alloués par membre avec contrôle           | Grandes équipes, contrôle budgétaire, suivi individuel |
 
    **Mode Pool commun** (`credit_mode = 'shared'`) :
    - Les crédits restent dans `organization.credits`
@@ -157,17 +158,17 @@ CREATE INDEX idx_user_credit_transactions_user ON user_credit_transactions(user_
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/credits/mode` | Mode actuel de l'organisation (`shared` ou `individual`) |
-| `PUT` | `/api/credits/mode` | Changer le mode (Owner only) |
-| `GET` | `/api/credits/members` | Liste des membres avec leurs soldes/consommation |
-| `POST` | `/api/credits/distribute` | Distribution ponctuelle (mode individual) |
-| `POST` | `/api/credits/recover` | Récupération de crédits (mode individual) |
-| `PUT` | `/api/credits/members/:userId/auto-refill` | Configurer recharge auto (mode individual) |
-| `DELETE` | `/api/credits/members/:userId/auto-refill` | Désactiver recharge auto (mode individual) |
-| `GET` | `/api/credits/my-balance` | Solde personnel du membre |
-| `GET` | `/api/credits/my-transactions` | Historique personnel |
+| Méthode  | Endpoint                                   | Description                                              |
+| -------- | ------------------------------------------ | -------------------------------------------------------- |
+| `GET`    | `/api/credits/mode`                        | Mode actuel de l'organisation (`shared` ou `individual`) |
+| `PUT`    | `/api/credits/mode`                        | Changer le mode (Owner only)                             |
+| `GET`    | `/api/credits/members`                     | Liste des membres avec leurs soldes/consommation         |
+| `POST`   | `/api/credits/distribute`                  | Distribution ponctuelle (mode individual)                |
+| `POST`   | `/api/credits/recover`                     | Récupération de crédits (mode individual)                |
+| `PUT`    | `/api/credits/members/:userId/auto-refill` | Configurer recharge auto (mode individual)               |
+| `DELETE` | `/api/credits/members/:userId/auto-refill` | Désactiver recharge auto (mode individual)               |
+| `GET`    | `/api/credits/my-balance`                  | Solde personnel du membre                                |
+| `GET`    | `/api/credits/my-transactions`             | Historique personnel                                     |
 
 #### Modèle UserCredit
 
@@ -175,45 +176,53 @@ CREATE INDEX idx_user_credit_transactions_user ON user_credit_transactions(user_
 // app/models/user_credit.ts
 export default class UserCredit extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare userId: number
+  declare userId: number;
 
   @column()
-  declare organizationId: number
+  declare organizationId: number;
 
   @column()
-  declare balance: number
+  declare balance: number;
 
   @column()
-  declare creditCap: number | null
+  declare creditCap: number | null;
 
   @column()
-  declare autoRefillEnabled: boolean
+  declare autoRefillEnabled: boolean;
 
   @column()
-  declare autoRefillAmount: number | null
+  declare autoRefillAmount: number | null;
 
   @column()
-  declare autoRefillDay: number | null
+  declare autoRefillDay: number | null;
 
   @column.dateTime()
-  declare lastRefillAt: DateTime | null
+  declare lastRefillAt: DateTime | null;
 
   @belongsTo(() => User)
-  declare user: BelongsTo<typeof User>
+  declare user: BelongsTo<typeof User>;
 
   @belongsTo(() => Organization)
-  declare organization: BelongsTo<typeof Organization>
+  declare organization: BelongsTo<typeof Organization>;
 
   // Méthodes
-  hasEnoughCredits(amount: number): boolean
-  canReceiveCredits(amount: number): boolean
-  getMaxReceivableCredits(): number | null
-  getCreditsNeededForRefill(): number // Calcule la différence pour atteindre autoRefillAmount (cible)
-  async deductCredits(amount: number, performedBy: User, audioId?: number): Promise<UserCreditTransaction>
-  async addCredits(amount: number, type: string, performedBy: User): Promise<UserCreditTransaction>
+  hasEnoughCredits(amount: number): boolean;
+  canReceiveCredits(amount: number): boolean;
+  getMaxReceivableCredits(): number | null;
+  getCreditsNeededForRefill(): number; // Calcule la différence pour atteindre autoRefillAmount (cible)
+  async deductCredits(
+    amount: number,
+    performedBy: User,
+    audioId?: number,
+  ): Promise<UserCreditTransaction>;
+  async addCredits(
+    amount: number,
+    type: string,
+    performedBy: User,
+  ): Promise<UserCreditTransaction>;
 }
 ```
 
@@ -269,16 +278,19 @@ export default class UserCredit extends BaseModel {
 ### 2.6 Critères d'acceptation
 
 **Mode de gestion :**
+
 - [x] L'Owner peut choisir le mode de gestion des crédits (pool commun ou distribution individuelle)
 - [x] Le mode par défaut est "pool commun" pour les nouvelles organisations
 - [x] L'Owner peut basculer d'un mode à l'autre avec confirmation
 - [x] Le changement Individual → Shared récupère automatiquement les crédits des membres vers le pool
 
 **Mode Pool commun :**
+
 - [x] Tous les membres consomment directement depuis le pool organisation
 - [x] L'Owner voit la consommation par membre dans l'historique
 
 **Mode Distribution individuelle :**
+
 - [x] L'Owner peut distribuer des crédits ponctuels à un membre
 - [x] Les crédits sont correctement déduits du pool organisation
 - [x] L'Owner peut configurer une recharge automatique pour un membre
@@ -286,6 +298,7 @@ export default class UserCredit extends BaseModel {
 - [x] L'Owner peut récupérer des crédits non utilisés
 
 **Affichage :**
+
 - [x] Chaque membre voit le bon solde dans le header (pool ou perso selon le mode)
 - [x] L'historique des transactions utilisateur est visible
 - [x] Les transactions sont auditables avec qui/quand/combien
@@ -302,14 +315,14 @@ Permettre aux membres de demander des crédits à l'Owner, et à l'Owner de dema
 
 ### 3.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-2.1 | Member | Demander des crédits à l'Owner | Pouvoir continuer à travailler |
-| US-2.2 | Member | Voir le statut de mes demandes | Savoir si je dois attendre |
-| US-2.3 | Owner | Voir les demandes de crédits des membres | Traiter les besoins |
-| US-2.4 | Owner | Approuver ou refuser une demande | Contrôler les distributions |
-| US-2.5 | Owner | Demander des crédits au Reseller | Recharger le pool organisation |
-| US-2.6 | Reseller | Voir et traiter les demandes des Owners | Maintenir l'activité des clients |
+| ID     | En tant que | Je veux                                  | Afin de                          |
+| ------ | ----------- | ---------------------------------------- | -------------------------------- |
+| US-2.1 | Member      | Demander des crédits à l'Owner           | Pouvoir continuer à travailler   |
+| US-2.2 | Member      | Voir le statut de mes demandes           | Savoir si je dois attendre       |
+| US-2.3 | Owner       | Voir les demandes de crédits des membres | Traiter les besoins              |
+| US-2.4 | Owner       | Approuver ou refuser une demande         | Contrôler les distributions      |
+| US-2.5 | Owner       | Demander des crédits au Reseller         | Recharger le pool organisation   |
+| US-2.6 | Reseller    | Voir et traiter les demandes des Owners  | Maintenir l'activité des clients |
 
 ### 3.3 Règles métier
 
@@ -367,14 +380,14 @@ CREATE INDEX idx_credit_requests_requester ON credit_requests(requester_id, stat
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `POST` | `/api/credit-requests` | Créer une demande |
-| `GET` | `/api/credit-requests` | Mes demandes (requester) |
-| `GET` | `/api/credit-requests/pending` | Demandes à traiter (Owner) |
-| `POST` | `/api/credit-requests/:id/approve` | Approuver une demande |
-| `POST` | `/api/credit-requests/:id/reject` | Refuser une demande |
-| `GET` | `/api/reseller/credit-requests` | Demandes des Owners (Reseller) |
+| Méthode | Endpoint                           | Description                    |
+| ------- | ---------------------------------- | ------------------------------ |
+| `POST`  | `/api/credit-requests`             | Créer une demande              |
+| `GET`   | `/api/credit-requests`             | Mes demandes (requester)       |
+| `GET`   | `/api/credit-requests/pending`     | Demandes à traiter (Owner)     |
+| `POST`  | `/api/credit-requests/:id/approve` | Approuver une demande          |
+| `POST`  | `/api/credit-requests/:id/reject`  | Refuser une demande            |
+| `GET`   | `/api/reseller/credit-requests`    | Demandes des Owners (Reseller) |
 
 ### 3.5 Interface utilisateur
 
@@ -424,12 +437,12 @@ Vérifier que l'utilisateur dispose de suffisamment de crédits avant de lancer 
 
 ### 4.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-3.1 | User | Être averti si je n'ai pas assez de crédits avant upload | Éviter une erreur frustrante |
-| US-3.2 | Member | Demander des crédits directement depuis le popup | Gagner du temps |
-| US-3.3 | Owner | Demander au Reseller depuis le popup | Recharger rapidement |
-| US-3.4 | User | Voir combien de crédits seront consommés | Anticiper ma consommation |
+| ID     | En tant que | Je veux                                                  | Afin de                      |
+| ------ | ----------- | -------------------------------------------------------- | ---------------------------- |
+| US-3.1 | User        | Être averti si je n'ai pas assez de crédits avant upload | Éviter une erreur frustrante |
+| US-3.2 | Member      | Demander des crédits directement depuis le popup         | Gagner du temps              |
+| US-3.3 | Owner       | Demander au Reseller depuis le popup                     | Recharger rapidement         |
+| US-3.4 | User        | Voir combien de crédits seront consommés                 | Anticiper ma consommation    |
 
 ### 4.3 Règles métier
 
@@ -462,27 +475,27 @@ Vérifier que l'utilisateur dispose de suffisamment de crédits avant de lancer 
 ```typescript
 // composables/useCreditsCheck.ts
 export function useCreditsCheck() {
-  const { user } = useAuth()
-  const creditsStore = useCreditsStore()
+  const { user } = useAuth();
+  const creditsStore = useCreditsStore();
 
   async function checkCreditsForUpload(duration: number): Promise<{
-    hasEnough: boolean
-    required: number
-    available: number
-    canRequestFrom: 'owner' | 'reseller' | null
+    hasEnough: boolean;
+    required: number;
+    available: number;
+    canRequestFrom: "owner" | "reseller" | null;
   }> {
-    const required = Math.ceil(duration / 60)
-    const available = creditsStore.userBalance // Nouveau: solde utilisateur
+    const required = Math.ceil(duration / 60);
+    const available = creditsStore.userBalance; // Nouveau: solde utilisateur
 
     return {
       hasEnough: available >= required,
       required,
       available,
-      canRequestFrom: user.value?.isOwnerOf ? 'reseller' : 'owner'
-    }
+      canRequestFrom: user.value?.isOwnerOf ? "reseller" : "owner",
+    };
   }
 
-  return { checkCreditsForUpload }
+  return { checkCreditsForUpload };
 }
 ```
 
@@ -501,9 +514,16 @@ export function useCreditsCheck() {
       </template>
 
       <div class="space-y-4">
-        <p>Vous avez besoin de <strong>{{ required }}</strong> crédits pour cet audio.</p>
-        <p>Votre solde actuel : <strong>{{ available }}</strong> crédits.</p>
-        <p class="text-red-600">Il vous manque <strong>{{ required - available }}</strong> crédits.</p>
+        <p>
+          Vous avez besoin de <strong>{{ required }}</strong> crédits pour cet
+          audio.
+        </p>
+        <p>
+          Votre solde actuel : <strong>{{ available }}</strong> crédits.
+        </p>
+        <p class="text-red-600">
+          Il vous manque <strong>{{ required - available }}</strong> crédits.
+        </p>
       </div>
 
       <template #footer>
@@ -554,41 +574,41 @@ Permettre à l'Owner de configurer les permissions de chaque rôle (Administrato
 
 ### 5.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-4.1 | Owner | Configurer les permissions des Administrators | Déléguer certaines responsabilités |
-| US-4.2 | Owner | Configurer les permissions des Members | Contrôler l'accès aux fonctionnalités |
-| US-4.3 | Owner | Voir un aperçu des permissions actuelles | Comprendre qui peut faire quoi |
-| US-4.4 | User | Voir uniquement les fonctionnalités auxquelles j'ai accès | Éviter la confusion |
+| ID     | En tant que | Je veux                                                   | Afin de                               |
+| ------ | ----------- | --------------------------------------------------------- | ------------------------------------- |
+| US-4.1 | Owner       | Configurer les permissions des Administrators             | Déléguer certaines responsabilités    |
+| US-4.2 | Owner       | Configurer les permissions des Members                    | Contrôler l'accès aux fonctionnalités |
+| US-4.3 | Owner       | Voir un aperçu des permissions actuelles                  | Comprendre qui peut faire quoi        |
+| US-4.4 | User        | Voir uniquement les fonctionnalités auxquelles j'ai accès | Éviter la confusion                   |
 
 ### 5.3 Règles métier
 
 1. **Catégories de permissions** :
 
-| Catégorie | Permissions |
-|-----------|-------------|
-| **Audios** | `audio.upload`, `audio.view_own`, `audio.view_all`, `audio.edit`, `audio.delete`, `audio.export` |
-| **Dossiers** | `folder.create`, `folder.manage_own`, `folder.manage_all`, `folder.share` |
-| **Crédits** | `credits.view_own`, `credits.view_all`, `credits.distribute`, `credits.request` |
-| **Membres** | `members.view`, `members.invite`, `members.edit`, `members.remove` |
-| **Settings** | `settings.organization`, `settings.billing`, `settings.permissions` |
+| Catégorie    | Permissions                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| **Audios**   | `audio.upload`, `audio.view_own`, `audio.view_all`, `audio.edit`, `audio.delete`, `audio.export` |
+| **Dossiers** | `folder.create`, `folder.manage_own`, `folder.manage_all`, `folder.share`                        |
+| **Crédits**  | `credits.view_own`, `credits.view_all`, `credits.distribute`, `credits.request`                  |
+| **Membres**  | `members.view`, `members.invite`, `members.edit`, `members.remove`                               |
+| **Settings** | `settings.organization`, `settings.billing`, `settings.permissions`                              |
 
 2. **Permissions par défaut** :
 
-| Permission | Owner | Administrator | Member |
-|------------|-------|---------------|--------|
-| `audio.upload` | ✅ | ✅ | ✅ |
-| `audio.view_own` | ✅ | ✅ | ✅ |
-| `audio.view_all` | ✅ | ✅ | ❌ |
-| `audio.edit` | ✅ | ✅ | ✅ (own) |
-| `audio.delete` | ✅ | ✅ | ✅ (own) |
-| `folder.create` | ✅ | ✅ | ❌ |
-| `folder.share` | ✅ | ✅ | ❌ |
-| `credits.view_all` | ✅ | ❌ | ❌ |
-| `credits.distribute` | ✅ | ❌ | ❌ |
-| `members.invite` | ✅ | ✅ | ❌ |
-| `members.remove` | ✅ | ❌ | ❌ |
-| `settings.permissions` | ✅ | ❌ | ❌ |
+| Permission             | Owner | Administrator | Member   |
+| ---------------------- | ----- | ------------- | -------- |
+| `audio.upload`         | ✅    | ✅            | ✅       |
+| `audio.view_own`       | ✅    | ✅            | ✅       |
+| `audio.view_all`       | ✅    | ✅            | ❌       |
+| `audio.edit`           | ✅    | ✅            | ✅ (own) |
+| `audio.delete`         | ✅    | ✅            | ✅ (own) |
+| `folder.create`        | ✅    | ✅            | ❌       |
+| `folder.share`         | ✅    | ✅            | ❌       |
+| `credits.view_all`     | ✅    | ❌            | ❌       |
+| `credits.distribute`   | ✅    | ❌            | ❌       |
+| `members.invite`       | ✅    | ✅            | ❌       |
+| `members.remove`       | ✅    | ❌            | ❌       |
+| `settings.permissions` | ✅    | ❌            | ❌       |
 
 3. **Règles de modification** :
    - Seul l'Owner peut modifier les permissions
@@ -627,12 +647,12 @@ FROM organizations o;
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/permissions` | Permissions de l'utilisateur courant |
-| `GET` | `/api/permissions/roles` | Config permissions par rôle (Owner) |
-| `PUT` | `/api/permissions/roles/:role` | Modifier permissions d'un rôle |
-| `GET` | `/api/permissions/available` | Liste toutes les permissions disponibles |
+| Méthode | Endpoint                       | Description                              |
+| ------- | ------------------------------ | ---------------------------------------- |
+| `GET`   | `/api/permissions`             | Permissions de l'utilisateur courant     |
+| `GET`   | `/api/permissions/roles`       | Config permissions par rôle (Owner)      |
+| `PUT`   | `/api/permissions/roles/:role` | Modifier permissions d'un rôle           |
+| `GET`   | `/api/permissions/available`   | Liste toutes les permissions disponibles |
 
 #### Middleware de vérification
 
@@ -642,30 +662,33 @@ export default class PermissionMiddleware {
   async handle(
     ctx: HttpContext,
     next: NextFn,
-    options: { permission: string }
+    options: { permission: string },
   ) {
-    const { user } = ctx.auth
-    const hasPermission = await this.checkPermission(user, options.permission)
+    const { user } = ctx.auth;
+    const hasPermission = await this.checkPermission(user, options.permission);
 
     if (!hasPermission) {
-      return ctx.response.forbidden({ error: 'PERMISSION_DENIED' })
+      return ctx.response.forbidden({ error: "PERMISSION_DENIED" });
     }
 
-    await next()
+    await next();
   }
 
-  private async checkPermission(user: User, permission: string): Promise<boolean> {
+  private async checkPermission(
+    user: User,
+    permission: string,
+  ): Promise<boolean> {
     // Owner a toutes les permissions
     if (await user.isOwnerOf(user.currentOrganizationId)) {
-      return true
+      return true;
     }
 
     const rolePermissions = await OrganizationRolePermission.query()
-      .where('organizationId', user.currentOrganizationId)
-      .where('role', user.organizationRole)
-      .first()
+      .where("organizationId", user.currentOrganizationId)
+      .where("role", user.organizationRole)
+      .first();
 
-    return rolePermissions?.permissions.includes(permission) ?? false
+    return rolePermissions?.permissions.includes(permission) ?? false;
   }
 }
 ```
@@ -704,15 +727,15 @@ Remplacer la liste plate d'audios par un système de dossiers hiérarchique avec
 
 ### 6.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-5.1 | User | Créer des dossiers pour organiser mes audios | Retrouver facilement mes fichiers |
-| US-5.2 | User | Avoir des dossiers privés (visibles que par moi) | Protéger mon travail personnel |
-| US-5.3 | Owner/Admin | Créer des dossiers partagés avec l'organisation | Collaborer avec l'équipe |
-| US-5.4 | User | Déplacer des audios entre dossiers | Réorganiser mon contenu |
-| US-5.5 | User | Partager l'accès à un dossier spécifique | Collaborer de manière ciblée |
-| US-5.6 | User | Naviguer dans l'arborescence de dossiers | Explorer le contenu organisé |
-| US-5.7 | User | Rechercher dans tous les dossiers | Trouver rapidement un audio |
+| ID     | En tant que | Je veux                                          | Afin de                           |
+| ------ | ----------- | ------------------------------------------------ | --------------------------------- |
+| US-5.1 | User        | Créer des dossiers pour organiser mes audios     | Retrouver facilement mes fichiers |
+| US-5.2 | User        | Avoir des dossiers privés (visibles que par moi) | Protéger mon travail personnel    |
+| US-5.3 | Owner/Admin | Créer des dossiers partagés avec l'organisation  | Collaborer avec l'équipe          |
+| US-5.4 | User        | Déplacer des audios entre dossiers               | Réorganiser mon contenu           |
+| US-5.5 | User        | Partager l'accès à un dossier spécifique         | Collaborer de manière ciblée      |
+| US-5.6 | User        | Naviguer dans l'arborescence de dossiers         | Explorer le contenu organisé      |
+| US-5.7 | User        | Rechercher dans tous les dossiers                | Trouver rapidement un audio       |
 
 ### 6.3 Règles métier
 
@@ -789,17 +812,17 @@ CREATE INDEX idx_audios_folder ON audios(folder_id);
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/folders` | Arborescence des dossiers accessibles |
-| `GET` | `/api/folders/:id` | Contenu d'un dossier |
-| `POST` | `/api/folders` | Créer un dossier |
-| `PUT` | `/api/folders/:id` | Modifier un dossier |
-| `DELETE` | `/api/folders/:id` | Supprimer un dossier |
-| `POST` | `/api/folders/:id/move` | Déplacer un dossier |
-| `POST` | `/api/folders/:id/access` | Ajouter accès utilisateur |
-| `DELETE` | `/api/folders/:id/access/:userId` | Retirer accès utilisateur |
-| `POST` | `/api/audios/:id/move` | Déplacer un audio |
+| Méthode  | Endpoint                          | Description                           |
+| -------- | --------------------------------- | ------------------------------------- |
+| `GET`    | `/api/folders`                    | Arborescence des dossiers accessibles |
+| `GET`    | `/api/folders/:id`                | Contenu d'un dossier                  |
+| `POST`   | `/api/folders`                    | Créer un dossier                      |
+| `PUT`    | `/api/folders/:id`                | Modifier un dossier                   |
+| `DELETE` | `/api/folders/:id`                | Supprimer un dossier                  |
+| `POST`   | `/api/folders/:id/move`           | Déplacer un dossier                   |
+| `POST`   | `/api/folders/:id/access`         | Ajouter accès utilisateur             |
+| `DELETE` | `/api/folders/:id/access/:userId` | Retirer accès utilisateur             |
+| `POST`   | `/api/audios/:id/move`            | Déplacer un audio                     |
 
 #### Modèle Folder
 
@@ -807,43 +830,43 @@ CREATE INDEX idx_audios_folder ON audios(folder_id);
 // app/models/folder.ts
 export default class Folder extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare organizationId: number
+  declare organizationId: number;
 
   @column()
-  declare createdByUserId: number
+  declare createdByUserId: number;
 
   @column()
-  declare parentId: number | null
+  declare parentId: number | null;
 
   @column()
-  declare name: string
+  declare name: string;
 
   @column()
-  declare type: 'private' | 'shared' | 'restricted'
+  declare type: "private" | "shared" | "restricted";
 
   @column()
-  declare isRoot: boolean
+  declare isRoot: boolean;
 
   @column()
-  declare depth: number
+  declare depth: number;
 
-  @belongsTo(() => Folder, { foreignKey: 'parentId' })
-  declare parent: BelongsTo<typeof Folder>
+  @belongsTo(() => Folder, { foreignKey: "parentId" })
+  declare parent: BelongsTo<typeof Folder>;
 
-  @hasMany(() => Folder, { foreignKey: 'parentId' })
-  declare children: HasMany<typeof Folder>
+  @hasMany(() => Folder, { foreignKey: "parentId" })
+  declare children: HasMany<typeof Folder>;
 
   @hasMany(() => Audio)
-  declare audios: HasMany<typeof Audio>
+  declare audios: HasMany<typeof Audio>;
 
   @manyToMany(() => User, {
-    pivotTable: 'folder_access',
-    pivotColumns: ['can_edit'],
+    pivotTable: "folder_access",
+    pivotColumns: ["can_edit"],
   })
-  declare accessUsers: ManyToMany<typeof User>
+  declare accessUsers: ManyToMany<typeof User>;
 }
 ```
 
@@ -916,13 +939,13 @@ Permettre aux utilisateurs d'éditer les analyses générées, avec un système 
 
 ### 7.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-6.1 | User | Éditer l'analyse générée | Affiner le résultat selon mes besoins |
-| US-6.2 | User | Voir l'historique des modifications | Savoir qui a modifié quoi et quand |
-| US-6.3 | User | Revenir à une version précédente | Annuler une modification indésirable |
-| US-6.4 | User | Voir les différences entre versions | Comprendre ce qui a changé |
-| US-6.5 | Owner/Admin | Voir qui a édité un document | Tracer les modifications pour audit |
+| ID     | En tant que | Je veux                             | Afin de                               |
+| ------ | ----------- | ----------------------------------- | ------------------------------------- |
+| US-6.1 | User        | Éditer l'analyse générée            | Affiner le résultat selon mes besoins |
+| US-6.2 | User        | Voir l'historique des modifications | Savoir qui a modifié quoi et quand    |
+| US-6.3 | User        | Revenir à une version précédente    | Annuler une modification indésirable  |
+| US-6.4 | User        | Voir les différences entre versions | Comprendre ce qui a changé            |
+| US-6.5 | Owner/Admin | Voir qui a édité un document        | Tracer les modifications pour audit   |
 
 ### 7.3 Règles métier
 
@@ -982,13 +1005,13 @@ CREATE INDEX idx_transcription_versions_lookup ON transcription_versions(transcr
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `PUT` | `/api/audios/:id/transcription` | Éditer transcription/analyse |
-| `GET` | `/api/audios/:id/transcription/history` | Historique des versions |
-| `GET` | `/api/audios/:id/transcription/version/:versionId` | Contenu d'une version |
-| `POST` | `/api/audios/:id/transcription/restore/:versionId` | Restaurer une version |
-| `GET` | `/api/audios/:id/transcription/diff` | Comparer deux versions |
+| Méthode | Endpoint                                           | Description                  |
+| ------- | -------------------------------------------------- | ---------------------------- |
+| `PUT`   | `/api/audios/:id/transcription`                    | Éditer transcription/analyse |
+| `GET`   | `/api/audios/:id/transcription/history`            | Historique des versions      |
+| `GET`   | `/api/audios/:id/transcription/version/:versionId` | Contenu d'une version        |
+| `POST`  | `/api/audios/:id/transcription/restore/:versionId` | Restaurer une version        |
+| `GET`   | `/api/audios/:id/transcription/diff`               | Comparer deux versions       |
 
 #### Service de versioning
 
@@ -997,10 +1020,10 @@ CREATE INDEX idx_transcription_versions_lookup ON transcription_versions(transcr
 export default class TranscriptionVersionService {
   async saveVersion(
     transcriptionId: number,
-    fieldName: 'analysis', // Seule l'analyse est éditable
+    fieldName: "analysis", // Seule l'analyse est éditable
     newContent: string,
     userId: number,
-    changeSummary?: string
+    changeSummary?: string,
   ): Promise<TranscriptionVersion> {
     // 1. Récupérer le dernier numéro de version
     // 2. Créer la nouvelle version
@@ -1011,7 +1034,7 @@ export default class TranscriptionVersionService {
 
   async getHistory(
     transcriptionId: number,
-    fieldName: string
+    fieldName: string,
   ): Promise<TranscriptionVersion[]> {
     // Retourne toutes les versions triées par version_number DESC
   }
@@ -1019,7 +1042,7 @@ export default class TranscriptionVersionService {
   async restore(
     transcriptionId: number,
     versionId: number,
-    userId: number
+    userId: number,
   ): Promise<TranscriptionVersion> {
     // 1. Récupérer le contenu de la version cible
     // 2. Créer une nouvelle version avec ce contenu
@@ -1029,7 +1052,7 @@ export default class TranscriptionVersionService {
   async getDiff(
     transcriptionId: number,
     fromVersion: number,
-    toVersion: number
+    toVersion: number,
   ): Promise<DiffResult> {
     // Utiliser une lib comme 'diff' pour générer le diff
   }
@@ -1049,6 +1072,7 @@ export default class TranscriptionVersionService {
 ⚠️ **Prérequis technique** : Mise à jour de Nuxt UI vers la version 4.4+ requise pour accéder aux nouveaux composants d'édition.
 
 **Composants Nuxt UI à utiliser** :
+
 - `UEditor` : Composant principal d'édition rich-text (basé sur TipTap)
 - `UEditorToolbar` : Barre d'outils avec formatage (gras, italique, listes, etc.)
 - `UEditorDragHandle` : Poignée de glisser-déposer pour réorganiser les blocs
@@ -1057,6 +1081,7 @@ export default class TranscriptionVersionService {
 - `UEditorEmojiMenu` : Sélecteur d'emojis (optionnel)
 
 **Interface d'édition** :
+
 - `UEditor` avec `UEditorToolbar` intégré pour le formatage
 - Barre d'actions : Annuler (local), Sauvegarder, Historique
 - Input "Résumé de la modification" (optionnel)
@@ -1101,15 +1126,15 @@ export default class TranscriptionVersionService {
 
 ### 8.1 Ordre de priorité suggéré
 
-| Priorité | Feature | Justification |
-|----------|---------|---------------|
-| 🔴 P1 | Vérification crédits avant upload | Quick win, améliore l'UX immédiatement |
-| 🔴 P1 | Distribution crédits par Owner | Fondation pour le système de crédits utilisateur |
-| 🟡 P2 | Système de demande de crédits | Complète le workflow de crédits |
-| 🟡 P2 | Notifications in-app | Alertes crédits et demandes, complète Feature 2 |
-| 🟡 P2 | Édition des analyses | Forte demande utilisateur, valeur immédiate |
-| 🟢 P3 | Permissions modulaires | Améliore la flexibilité, effort modéré |
-| 🟢 P3 | Système de dossiers | Plus complexe, transformation majeure de l'UX |
+| Priorité | Feature                           | Justification                                    |
+| -------- | --------------------------------- | ------------------------------------------------ |
+| 🔴 P1    | Vérification crédits avant upload | Quick win, améliore l'UX immédiatement           |
+| 🔴 P1    | Distribution crédits par Owner    | Fondation pour le système de crédits utilisateur |
+| 🟡 P2    | Système de demande de crédits     | Complète le workflow de crédits                  |
+| 🟡 P2    | Notifications in-app              | Alertes crédits et demandes, complète Feature 2  |
+| 🟡 P2    | Édition des analyses              | Forte demande utilisateur, valeur immédiate      |
+| 🟢 P3    | Permissions modulaires            | Améliore la flexibilité, effort modéré           |
+| 🟢 P3    | Système de dossiers               | Plus complexe, transformation majeure de l'UX    |
 
 ### 8.2 Dépendances techniques
 
@@ -1156,16 +1181,16 @@ export default class TranscriptionVersionService {
 
 ### 8.3 Estimation d'effort
 
-| Feature | Backend | Frontend | Total estimé |
-|---------|---------|----------|--------------|
-| Distribution crédits | Moyen | Moyen | 3-4 jours |
-| Demandes de crédits | Moyen | Moyen | 2-3 jours |
-| Vérif avant upload | Faible | Moyen | 1-2 jours |
-| Notifications in-app | Faible | Moyen | 2-3 jours |
-| Permissions modulaires | Moyen | Moyen | 3-4 jours |
-| Système de dossiers | Élevé | Élevé | 5-7 jours |
-| Édition analyses | Moyen | Moyen | 3-4 jours |
-| **Upgrade Nuxt UI 4.4+** | - | Faible | 0.5 jour |
+| Feature                  | Backend | Frontend | Total estimé |
+| ------------------------ | ------- | -------- | ------------ |
+| Distribution crédits     | Moyen   | Moyen    | 3-4 jours    |
+| Demandes de crédits      | Moyen   | Moyen    | 2-3 jours    |
+| Vérif avant upload       | Faible  | Moyen    | 1-2 jours    |
+| Notifications in-app     | Faible  | Moyen    | 2-3 jours    |
+| Permissions modulaires   | Moyen   | Moyen    | 3-4 jours    |
+| Système de dossiers      | Élevé   | Élevé    | 5-7 jours    |
+| Édition analyses         | Moyen   | Moyen    | 3-4 jours    |
+| **Upgrade Nuxt UI 4.4+** | -       | Faible   | 0.5 jour     |
 
 > **Note** : L'upgrade Nuxt UI 4.4+ est un prérequis pour la Feature 6 (Édition analyses) et doit être effectué en premier.
 
@@ -1186,13 +1211,13 @@ export default class TranscriptionVersionService {
 
 ### 9.2 Décisions prises
 
-| Question | Décision | Justification |
-|----------|----------|---------------|
-| **Crédits : Découvert temporaire ?** | ❌ Non | Bloquer si 0 crédits - simplicité et contrôle |
-| **Dossiers : Partage externe ?** | ❌ Non | Partage audio par audio uniquement - sécurité |
-| **Versions : Rétention ?** | ✅ Illimité | Conservation de tout l'historique |
-| **Éditeur : Composants UI ?** | ✅ Nuxt UI 4.1+ (UEditor) | Cohérence design system, composants TipTap intégrés, maintenance simplifiée |
-| **Transcription : Éditable ?** | ❌ Non | Transcription en lecture seule, seule l'analyse est éditable - intégrité des données |
+| Question                             | Décision                  | Justification                                                                        |
+| ------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------ |
+| **Crédits : Découvert temporaire ?** | ❌ Non                    | Bloquer si 0 crédits - simplicité et contrôle                                        |
+| **Dossiers : Partage externe ?**     | ❌ Non                    | Partage audio par audio uniquement - sécurité                                        |
+| **Versions : Rétention ?**           | ✅ Illimité               | Conservation de tout l'historique                                                    |
+| **Éditeur : Composants UI ?**        | ✅ Nuxt UI 4.1+ (UEditor) | Cohérence design system, composants TipTap intégrés, maintenance simplifiée          |
+| **Transcription : Éditable ?**       | ❌ Non                    | Transcription en lecture seule, seule l'analyse est éditable - intégrité des données |
 
 ### 9.3 Questions ouvertes restantes
 
@@ -1202,13 +1227,13 @@ export default class TranscriptionVersionService {
 
 ### 9.3 Risques identifiés
 
-| Risque | Impact | Mitigation |
-|--------|--------|------------|
-| Conflit d'édition simultanée | Moyen | Détection optimiste + résolution manuelle |
-| Migration des audios vers dossiers | Élevé | Script de migration + mode maintenance |
-| Complexité UI dossiers | Moyen | Design itératif + tests utilisateurs |
-| Performance arborescence | Moyen | Lazy loading + cache client |
-| Incohérence permissions | Élevé | Tests automatisés + audit logging |
+| Risque                             | Impact | Mitigation                                |
+| ---------------------------------- | ------ | ----------------------------------------- |
+| Conflit d'édition simultanée       | Moyen  | Détection optimiste + résolution manuelle |
+| Migration des audios vers dossiers | Élevé  | Script de migration + mode maintenance    |
+| Complexité UI dossiers             | Moyen  | Design itératif + tests utilisateurs      |
+| Performance arborescence           | Moyen  | Lazy loading + cache client               |
+| Incohérence permissions            | Élevé  | Tests automatisés + audit logging         |
 
 ---
 
@@ -1220,27 +1245,29 @@ Système de notifications in-app pour alerter les utilisateurs des événements 
 
 ### 10.2 User Stories
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| US-7.1 | Owner | Être notifié quand un membre demande des crédits | Traiter rapidement les demandes |
-| US-7.2 | Owner | Être alerté quand le pool passe sous 100 crédits | Anticiper le rechargement |
-| US-7.3 | Owner | Être averti si l'auto-refill ne pourra pas s'exécuter | Éviter les échecs de recharge |
-| US-7.4 | Owner | Être notifié quand le Reseller distribue des crédits | Savoir quand le pool est rechargé |
-| US-7.5 | Member | Être notifié quand je reçois des crédits | Savoir que je peux travailler |
-| US-7.6 | User | Voir le nombre de notifications non lues | Savoir si j'ai des actions à faire |
-| US-7.7 | User | Marquer mes notifications comme lues | Garder une interface propre |
+| ID     | En tant que | Je veux                                               | Afin de                                        |
+| ------ | ----------- | ----------------------------------------------------- | ---------------------------------------------- |
+| US-7.1 | Owner       | Être notifié quand un membre demande des crédits      | Traiter rapidement les demandes                |
+| US-7.2 | Owner       | Être alerté quand le pool passe sous 100 crédits      | Anticiper le rechargement                      |
+| US-7.3 | Owner       | Être averti si l'auto-refill ne pourra pas s'exécuter | Éviter les échecs de recharge                  |
+| US-7.4 | Owner       | Être notifié quand le Reseller distribue des crédits  | Savoir quand le pool est rechargé              |
+| US-7.5 | Member      | Être notifié quand je reçois des crédits              | Savoir que je peux travailler                  |
+| US-7.6 | User        | Voir le nombre de notifications non lues              | Savoir si j'ai des actions à faire             |
+| US-7.7 | User        | Marquer mes notifications comme lues                  | Garder une interface propre                    |
+| US-7.8 | Reseller    | Être notifié quand un Owner demande des crédits       | Traiter rapidement les demandes de mes clients |
 
 ### 10.3 Règles métier
 
 1. **Types de notifications** :
 
-   | Type | Destinataire | Déclencheur |
-   |------|--------------|-------------|
-   | `credit_request` | Owner | Membre crée une demande de crédits |
-   | `low_credits` | Owner | Pool organisation < 100 crédits |
-   | `insufficient_refill` | Owner | Pool insuffisant pour prochain auto-refill (vérifié 24h avant) |
-   | `reseller_distribution` | Owner | Reseller distribue des crédits |
-   | `credits_received` | Member | Recharge ponctuelle ou automatique reçue |
+   | Type                    | Destinataire | Déclencheur                                                    |
+   | ----------------------- | ------------ | -------------------------------------------------------------- |
+   | `credit_request`        | Owner        | Membre crée une demande de crédits                             |
+   | `owner_credit_request`  | Reseller     | Owner crée une demande de crédits                              |
+   | `low_credits`           | Owner        | Pool organisation < 100 crédits                                |
+   | `insufficient_refill`   | Owner        | Pool insuffisant pour prochain auto-refill (vérifié 24h avant) |
+   | `reseller_distribution` | Owner        | Reseller distribue des crédits                                 |
+   | `credits_received`      | Member       | Recharge ponctuelle ou automatique reçue                       |
 
 2. **Comportement du badge** :
    - Affiche le nombre de notifications non lues
@@ -1291,12 +1318,12 @@ CREATE INDEX idx_notifications_cleanup ON notifications(read_at) WHERE read_at I
 
 #### API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/notifications` | Liste paginée des notifications |
-| `GET` | `/api/notifications/unread-count` | Nombre de non lues |
-| `POST` | `/api/notifications/:id/read` | Marquer une comme lue |
-| `POST` | `/api/notifications/read-all` | Marquer toutes comme lues |
+| Méthode | Endpoint                          | Description                     |
+| ------- | --------------------------------- | ------------------------------- |
+| `GET`   | `/api/notifications`              | Liste paginée des notifications |
+| `GET`   | `/api/notifications/unread-count` | Nombre de non lues              |
+| `POST`  | `/api/notifications/:id/read`     | Marquer une comme lue           |
+| `POST`  | `/api/notifications/read-all`     | Marquer toutes comme lues       |
 
 #### Modèle Notification
 
@@ -1304,40 +1331,46 @@ CREATE INDEX idx_notifications_cleanup ON notifications(read_at) WHERE read_at I
 // app/models/notification.ts
 export default class Notification extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare userId: number
+  declare userId: number;
 
   @column()
-  declare organizationId: number
+  declare organizationId: number;
 
   @column()
-  declare type: 'credit_request' | 'low_credits' | 'insufficient_refill' | 'reseller_distribution' | 'credits_received'
+  declare type:
+    | "credit_request"
+    | "owner_credit_request"
+    | "low_credits"
+    | "insufficient_refill"
+    | "reseller_distribution"
+    | "credits_received";
 
   @column()
-  declare title: string
+  declare title: string;
 
   @column()
-  declare message: string | null
+  declare message: string | null;
 
   @column()
-  declare data: Record<string, any> | null
+  declare data: Record<string, any> | null;
 
   @column()
-  declare isRead: boolean
+  declare isRead: boolean;
 
   @column.dateTime()
-  declare readAt: DateTime | null
+  declare readAt: DateTime | null;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @belongsTo(() => User)
-  declare user: BelongsTo<typeof User>
+  declare user: BelongsTo<typeof User>;
 
   @belongsTo(() => Organization)
-  declare organization: BelongsTo<typeof Organization>
+  declare organization: BelongsTo<typeof Organization>;
 }
 ```
 
@@ -1354,8 +1387,8 @@ export default class NotificationService {
     type: NotificationType,
     title: string,
     message?: string,
-    data?: Record<string, any>
-  ): Promise<Notification>
+    data?: Record<string, any>,
+  ): Promise<Notification>;
 
   /**
    * Crée une notification pour un utilisateur spécifique
@@ -1366,14 +1399,27 @@ export default class NotificationService {
     type: NotificationType,
     title: string,
     message?: string,
-    data?: Record<string, any>
-  ): Promise<Notification>
+    data?: Record<string, any>,
+  ): Promise<Notification>;
+
+  /**
+   * Crée une notification pour le Reseller d'une organisation
+   */
+  async createForReseller(
+    organizationId: number,
+    type: NotificationType,
+    title: string,
+    message?: string,
+    data?: Record<string, any>,
+  ): Promise<Notification>;
 
   /**
    * Vérifie si une notification low_credits a déjà été envoyée
    * (déduplication)
    */
-  async hasRecentLowCreditsNotification(organizationId: number): Promise<boolean>
+  async hasRecentLowCreditsNotification(
+    organizationId: number,
+  ): Promise<boolean>;
 }
 ```
 
@@ -1433,43 +1479,57 @@ export default class NotificationService {
 
 #### Icônes par type de notification
 
-| Type | Icône | Couleur |
-|------|-------|---------|
-| `credit_request` | `i-heroicons-hand-raised` | `primary` |
-| `low_credits` | `i-heroicons-exclamation-triangle` | `warning` |
-| `insufficient_refill` | `i-heroicons-exclamation-circle` | `error` |
-| `reseller_distribution` | `i-heroicons-arrow-down-tray` | `success` |
-| `credits_received` | `i-heroicons-plus-circle` | `success` |
+| Type                    | Icône                              | Couleur   |
+| ----------------------- | ---------------------------------- | --------- |
+| `credit_request`        | `i-heroicons-hand-raised`          | `primary` |
+| `owner_credit_request`  | `i-heroicons-building-office`      | `primary` |
+| `low_credits`           | `i-heroicons-exclamation-triangle` | `warning` |
+| `insufficient_refill`   | `i-heroicons-exclamation-circle`   | `error`   |
+| `reseller_distribution` | `i-heroicons-arrow-down-tray`      | `success` |
+| `credits_received`      | `i-heroicons-plus-circle`          | `success` |
 
 #### Comportement et navigation
 
-| Type | Action au click |
-|------|-----------------|
-| `credit_request` | Navigation vers `/dashboard/settings/credits` (section demandes) |
-| `low_credits` | Navigation vers `/dashboard/credits` |
-| `insufficient_refill` | Navigation vers `/dashboard/settings/credits` (section auto-refill) |
-| `reseller_distribution` | Navigation vers `/dashboard/credits` |
-| `credits_received` | Navigation vers `/dashboard/credits` |
+| Type                    | Action au click                                                             |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `credit_request`        | Navigation vers `/dashboard/settings/credits` (section demandes)            |
+| `owner_credit_request`  | Navigation vers `/reseller/organizations/:orgId/credits` (section demandes) |
+| `low_credits`           | Navigation vers `/dashboard/credits`                                        |
+| `insufficient_refill`   | Navigation vers `/dashboard/settings/credits` (section auto-refill)         |
+| `reseller_distribution` | Navigation vers `/dashboard/credits`                                        |
+| `credits_received`      | Navigation vers `/dashboard/credits`                                        |
 
 #### Composable useNotifications
 
 ```typescript
 // composables/useNotifications.ts
 export function useNotifications() {
-  const unreadCount = ref(0)
-  const notifications = ref<Notification[]>([])
-  const isOpen = ref(false)
+  const unreadCount = ref(0);
+  const notifications = ref<Notification[]>([]);
+  const isOpen = ref(false);
 
   // Polling toutes les 60 secondes
-  const { pause, resume } = useIntervalFn(fetchUnreadCount, 60000)
+  const { pause, resume } = useIntervalFn(fetchUnreadCount, 60000);
 
-  async function fetchUnreadCount() { /* ... */ }
-  async function fetchNotifications() { /* ... */ }
-  async function markAsRead(id: number) { /* ... */ }
-  async function markAllAsRead() { /* ... */ }
+  async function fetchUnreadCount() {
+    /* ... */
+  }
+  async function fetchNotifications() {
+    /* ... */
+  }
+  async function markAsRead(id: number) {
+    /* ... */
+  }
+  async function markAllAsRead() {
+    /* ... */
+  }
 
-  function getNotificationIcon(type: string): string { /* ... */ }
-  function getNotificationLink(notification: Notification): string { /* ... */ }
+  function getNotificationIcon(type: string): string {
+    /* ... */
+  }
+  function getNotificationLink(notification: Notification): string {
+    /* ... */
+  }
 
   return {
     unreadCount,
@@ -1480,33 +1540,35 @@ export function useNotifications() {
     markAllAsRead,
     getNotificationIcon,
     getNotificationLink,
-  }
+  };
 }
 ```
 
 ### 10.6 Critères d'acceptation
 
-- [ ] L'icône cloche s'affiche dans le header du dashboard
-- [ ] Le badge affiche le bon nombre de notifications non lues
-- [ ] Le badge disparaît quand toutes sont lues
-- [ ] L'Owner reçoit une notification pour chaque demande de crédit
-- [ ] L'Owner reçoit une alerte quand le pool < 100 crédits
-- [ ] L'Owner reçoit une alerte 24h avant un auto-refill insuffisant
-- [ ] L'Owner est notifié quand le Reseller distribue des crédits
-- [ ] Le Member est notifié quand il reçoit des crédits
-- [ ] Les notifications lues sont supprimées après 30 jours (CRON)
-- [ ] La déduplication fonctionne pour `low_credits`
-- [ ] Le polling met à jour le compteur toutes les 60 secondes
+- [x] L'icône cloche s'affiche dans le header du dashboard (default.vue et reseller.vue)
+- [x] Le badge affiche le bon nombre de notifications non lues
+- [x] Le badge disparaît quand toutes sont lues
+- [x] L'Owner reçoit une notification pour chaque demande de crédit d'un membre
+- [x] Le Reseller reçoit une notification pour chaque demande de crédit d'un Owner
+- [x] L'Owner reçoit une alerte quand le pool < 100 crédits
+- [x] L'Owner reçoit une alerte 24h avant un auto-refill insuffisant (`node ace check:auto-refill`)
+- [x] L'Owner est notifié quand le Reseller distribue des crédits
+- [x] Le Member est notifié quand il reçoit des crédits
+- [x] Les notifications lues sont supprimées après 30 jours (`node ace cleanup:notifications`)
+- [x] La déduplication fonctionne pour `low_credits`
+- [x] Le polling met à jour le compteur toutes les 60 secondes
 
 ---
 
 ## Changelog
 
-| Date | Version | Auteur | Modifications |
-|------|---------|--------|---------------|
-| 2026-01-20 | 1.0 | Product Team | Création initiale |
-| 2026-01-20 | 1.1 | Product Team | Ajout décisions: pas de découvert crédits, pas de partage externe dossiers, historique versions illimité |
-| 2026-01-22 | 1.2 | Product Team | Alignement auto-refill users sur comportement organizations: ajout `last_refill_at` (idempotence), `autoRefillAmount` devient une CIBLE (pas un montant fixe), ajout méthodes helper au modèle |
-| 2026-01-23 | 1.3 | Product Team | Ajout Feature 7: Système de notifications in-app (alertes crédits, demandes, distributions). Seuil crédits bas = 100, rétention 30 jours après lecture, MVP sans emails/push |
-| 2026-01-23 | 1.3 | Product Team | Feature 6: Spécification composants UEditor de Nuxt UI 4.4+ pour l'édition (UEditor, UEditorToolbar, UEditorDragHandle, etc.) |
-| 2026-01-24 | 1.3 | Product Team | Feature 6: Transcription en lecture seule (seule l'analyse est éditable), critères d'acceptation validés |
+| Date       | Version | Auteur       | Modifications                                                                                                                                                                                  |
+| ---------- | ------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-01-20 | 1.0     | Product Team | Création initiale                                                                                                                                                                              |
+| 2026-01-20 | 1.1     | Product Team | Ajout décisions: pas de découvert crédits, pas de partage externe dossiers, historique versions illimité                                                                                       |
+| 2026-01-22 | 1.2     | Product Team | Alignement auto-refill users sur comportement organizations: ajout `last_refill_at` (idempotence), `autoRefillAmount` devient une CIBLE (pas un montant fixe), ajout méthodes helper au modèle |
+| 2026-01-23 | 1.3     | Product Team | Ajout Feature 7: Système de notifications in-app (alertes crédits, demandes, distributions). Seuil crédits bas = 100, rétention 30 jours après lecture, MVP sans emails/push                   |
+| 2026-01-23 | 1.3     | Product Team | Feature 6: Spécification composants UEditor de Nuxt UI 4.4+ pour l'édition (UEditor, UEditorToolbar, UEditorDragHandle, etc.)                                                                  |
+| 2026-01-24 | 1.3     | Product Team | Feature 6: Transcription en lecture seule (seule l'analyse est éditable), critères d'acceptation validés                                                                                       |
+| 2026-01-26 | 1.3     | Product Team | Feature 7: Ajout notification `owner_credit_request` pour les Resellers quand un Owner demande des crédits                                                                                     |

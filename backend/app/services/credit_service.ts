@@ -531,7 +531,9 @@ class CreditService {
               amount: -creditsToTransfer,
               balanceAfter: org.credits,
               type: CreditTransactionType.Usage,
-              description: this.t('initial_distribution_to_user', { name: user.fullName || user.email }),
+              description: this.t('initial_distribution_to_user', {
+                name: user.fullName || user.email,
+              }),
             },
             { client: trx }
           )
@@ -973,7 +975,9 @@ class CreditService {
             amount: creditsToRecover,
             balanceAfter: organization.credits,
             type: CreditTransactionType.Refund,
-            description: this.t('member_deletion_recovery_org_detail', { userId: userId.toString() }),
+            description: this.t('member_deletion_recovery_org_detail', {
+              userId: userId.toString(),
+            }),
           },
           { client: trx }
         )
@@ -1046,9 +1050,7 @@ class CreditService {
       const creditsToDistribute = targetAmount
 
       // Check if organization has enough credits
-      const actualDistribution = org.hasEnoughCredits(creditsToDistribute)
-        ? creditsToDistribute
-        : 0
+      const actualDistribution = org.hasEnoughCredits(creditsToDistribute) ? creditsToDistribute : 0
 
       // Deduct from organization if we're distributing
       if (actualDistribution > 0) {

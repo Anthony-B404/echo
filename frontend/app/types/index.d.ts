@@ -69,12 +69,50 @@ export interface Sale {
   amount: number;
 }
 
-export interface Notification {
+// Legacy notification interface (for reference)
+export interface LegacyNotification {
   id: number;
   unread?: boolean;
   sender: User;
   body: string;
   date: string;
+}
+
+// Notification types matching backend enum
+export type NotificationType =
+  | 'credit_request'
+  | 'owner_credit_request'
+  | 'low_credits'
+  | 'insufficient_refill'
+  | 'reseller_distribution'
+  | 'credits_received';
+
+// Notification data stored in JSON field
+export interface NotificationData {
+  organizationId?: number;
+  organizationName?: string;
+  requestId?: number;
+  requesterId?: number;
+  requesterName?: string;
+  amount?: number;
+  justification?: string;
+  balance?: number;
+  threshold?: number;
+  link?: string;
+}
+
+// Main notification interface matching backend model
+export interface Notification {
+  id: number;
+  userId: number;
+  organizationId: number;
+  type: NotificationType;
+  title: string;
+  message: string | null;
+  data: NotificationData | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
 }
 
 export type Period = "daily" | "weekly" | "monthly";

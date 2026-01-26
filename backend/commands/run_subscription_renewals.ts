@@ -85,8 +85,7 @@ export default class RunSubscriptionRenewals extends BaseCommand {
     this.logger.info('═══════════════════════════════════════════')
     this.logger.info('Summary')
     this.logger.info('═══════════════════════════════════════════')
-    const totalProcessed =
-      result.organizationRenewals.processed + result.userAutoRefills.processed
+    const totalProcessed = result.organizationRenewals.processed + result.userAutoRefills.processed
     const totalSuccessful =
       result.organizationRenewals.successful + result.userAutoRefills.successful
     this.logger.info(`Total processed: ${totalProcessed}`)

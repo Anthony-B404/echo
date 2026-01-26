@@ -17,7 +17,11 @@ export default class ResellerCreditRequestsController {
    * GET /api/reseller/credit-requests
    */
   async index({ request, response, reseller }: HttpContext) {
-    const { page = 1, limit = 20, status } = await request.validateUsing(creditRequestQueryValidator)
+    const {
+      page = 1,
+      limit = 20,
+      status,
+    } = await request.validateUsing(creditRequestQueryValidator)
 
     const result = await this.creditRequestService.getAllRequestsForReseller(
       reseller!.id,

@@ -7,6 +7,10 @@ const route = useRoute()
 const { user, logout } = useAuth()
 const colorMode = useColorMode()
 
+// Notifications
+const { isNotificationsSlideoverOpen } = useDashboard()
+const { unreadCount } = useNotifications()
+
 // Sidebar collapsed state (persisted in localStorage)
 const collapsed = useCookie<boolean>('reseller-sidebar-collapsed', {
   default: () => false
@@ -124,7 +128,25 @@ async function handleLogout () {
               DH-Echo
             </span>
           </div>
-          <UDashboardSidebarCollapse v-if="!isCollapsed" />
+          <!-- Expanded: Bell + Collapse button -->
+          <div v-if="!isCollapsed" class="flex items-center gap-1">
+            <UButton
+              icon="i-heroicons-bell"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="relative"
+              @click="isNotificationsSlideoverOpen = true"
+            >
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </UButton>
+            <UDashboardSidebarCollapse />
+          </div>
         </div>
       </template>
 
@@ -135,10 +157,25 @@ async function handleLogout () {
             :items="navigationItems"
             orientation="vertical"
           />
-          <UDashboardSidebarCollapse
-            v-if="isCollapsed"
-            class="mx-auto mt-auto mb-4"
-          />
+          <!-- Collapsed: Bell + Collapse button at bottom -->
+          <div v-if="isCollapsed" class="mx-auto mt-auto mb-4 flex flex-col items-center gap-2">
+            <UButton
+              icon="i-heroicons-bell"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="relative"
+              @click="isNotificationsSlideoverOpen = true"
+            >
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </UButton>
+            <UDashboardSidebarCollapse />
+          </div>
         </div>
       </template>
 
@@ -169,4 +206,7 @@ async function handleLogout () {
       </div>
     </UDashboardPanel>
   </UDashboardGroup>
+
+  <!-- Notifications Slideover -->
+  <NotificationsSlideover />
 </template>

@@ -71,6 +71,13 @@ node ace make:controller Name       # Generate controller
 node ace make:model Name            # Generate model
 node ace make:migration name        # Generate migration
 node ace generate:key               # Generate APP_KEY
+
+# Scheduled tasks (CRON)
+node ace gdpr:scheduler             # Process GDPR deletions and reminders
+node ace subscription:renew         # Process subscription renewals
+node ace cleanup:credit-requests    # Cleanup old processed credit requests (90 days)
+node ace cleanup:notifications      # Cleanup old read notifications (30 days)
+node ace check:auto-refill          # Check auto-refills due tomorrow, warn if insufficient
 ```
 
 ## Architecture Patterns
@@ -158,6 +165,102 @@ User (End user)                → Access: /dashboard/*
 
 **Reseller Methods**: `hasEnoughCredits(amount)`, `distributeCredits(amount, orgId, description, userId)`, `addCredits(amount, description, userId)`
 
+### Credit Requests System
+
+**Overview**: Members can request credits from their organization Owner. Owners can request credits from their Reseller.
+
+**Request Flow**:
+```
+Member → CreditRequest → Owner (approve/reject) → Credits distributed
+Owner  → CreditRequest → Reseller (approve/reject) → Credits distributed
+```
+
+**Backend Components**:
+- **Model**: `backend/app/models/credit_request.ts` - Request entity with status, amount, message
+- **Service**: `backend/app/services/credit_request_service.ts` - Creation, approval, rejection logic
+- **Controller**: `backend/app/controllers/credit_requests_controller.ts` - User-facing endpoints
+- **Reseller Controller**: `backend/app/controllers/reseller/reseller_credit_requests_controller.ts` - Reseller-scoped endpoints
+
+**Request Statuses**:
+| Status | Description |
+|--------|-------------|
+| `pending` | Awaiting response |
+| `approved` | Approved and credits distributed |
+| `rejected` | Rejected with optional message |
+
+**API Endpoints (Users)**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/credit-requests` | List my requests |
+| GET | `/credit-requests/pending` | Pending requests for Owner |
+| POST | `/credit-requests` | Create request (to Owner) |
+| POST | `/credit-requests/to-reseller` | Create request (to Reseller) |
+| POST | `/credit-requests/:id/approve` | Owner approves request |
+| POST | `/credit-requests/:id/reject` | Owner rejects request |
+
+**API Endpoints (Reseller)**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/reseller/credit-requests` | List all requests |
+| GET | `/reseller/credit-requests/pending` | Pending requests from Owners |
+| POST | `/reseller/credit-requests/:id/approve` | Approve request |
+| POST | `/reseller/credit-requests/:id/reject` | Reject request |
+
+**CRON Cleanup**: `node ace cleanup:credit-requests` - Removes processed requests > 90 days (weekly on Sunday)
+
+### Notifications System (In-App)
+
+**Overview**: Persistent in-app notification system with real-time polling (60s) for credit-related events.
+
+**Notification Types**:
+| Type | Recipient | Trigger |
+|------|-----------|---------|
+| `credit_request` | Organization Owner | Member requests credits |
+| `owner_credit_request` | Reseller Admins | Owner requests credits from reseller |
+| `low_credits` | Organization Owner | Organization pool < 100 credits (24h deduplication) |
+| `insufficient_refill` | Organization Owner | Auto-refill due tomorrow but insufficient credits |
+| `reseller_distribution` | Organization Owner | Reseller distributes credits to organization |
+| `credits_received` | Member | Owner distributes credits to member |
+
+**Backend Components**:
+- **Model**: `backend/app/models/notification.ts` - Notification entity with type, title, message, data
+- **Service**: `backend/app/services/notification_service.ts` - Creation, retrieval, cleanup methods
+- **Controller**: `backend/app/controllers/notifications_controller.ts` - API endpoints for users
+- **Reseller Controller**: `backend/app/controllers/reseller/reseller_notifications_controller.ts` - Reseller-scoped endpoints
+- **Policy**: `backend/app/policies/notification_policy.ts` - Authorization for marking as read
+
+**API Endpoints**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/notifications` | Paginated list |
+| GET | `/notifications/unread-count` | Badge counter |
+| POST | `/notifications/:id/read` | Mark single as read |
+| POST | `/notifications/read-all` | Mark all as read |
+
+**Frontend Components**:
+- **Composable**: `frontend/app/composables/useNotifications.ts` - Shared state, polling, actions
+- **Slideover**: `frontend/app/components/NotificationsSlideover.vue` - Notification list UI
+- **Bell Icon**: In `default.vue` and `reseller.vue` layouts with unread badge
+
+**CRON Jobs** (in `docker/scheduler/crontab`):
+| Schedule | Command | Description |
+|----------|---------|-------------|
+| Daily 3:00 AM | `node ace cleanup:notifications` | Delete read notifications > 30 days |
+| Daily 6:00 PM | `node ace check:auto-refill` | Warn owners 24h before insufficient auto-refill |
+
+**Frontend Usage**:
+```typescript
+const {
+  notifications,    // Notification list
+  unreadCount,      // Badge counter
+  markAsRead,       // Mark single notification read
+  markAllAsRead,    // Mark all notifications read
+  refresh,          // Manual refresh
+  getNotificationIcon,   // Type → icon mapping
+  getNotificationLink,   // Type → navigation link
+} = useNotifications()
+```
+
 ### Role-Based Access Control (RBAC)
 
 **System-Level Access** (based on `user.roleType`):
@@ -212,6 +315,7 @@ canManageMembers       // Owner + Administrator
   - `messages.json`: Application messages (auth, errors, success messages)
   - `emails.json`: Email content and subjects
   - `validation.json`: VineJS validation error messages
+  - `notifications.json`: In-app notification titles and messages
 - **Usage in Controllers**: Access via `i18n` from HttpContext: `i18n.t('messages.auth.invalid_credentials')`
 - **Usage in Templates**: Pass `i18n` to Edge templates and use: `{{ i18n.t('emails.verification.subject') }}`
 - **Validation Integration**: VineJS automatically uses i18n messages via `start/validator.ts`
@@ -256,13 +360,13 @@ const data = await authenticatedFetch('/protected-endpoint')
 ### Backend Architecture (AdonisJS)
 
 - **Controllers**: Thin controllers in `app/controllers/`:
-  - Core: `UsersController`, `OrganizationsController`, `InvitationsController`, `CreditsController`, `AudioController`
+  - Core: `UsersController`, `OrganizationsController`, `InvitationsController`, `CreditsController`, `CreditRequestsController`, `AudioController`, `NotificationsController`
   - Admin: `app/controllers/admin/` - `ResellersController`, `ResellerCreditsController`, `AdminStatsController`
-  - Reseller: `app/controllers/reseller/` - `ResellerProfileController`, `ResellerCreditsController`, `ResellerOrganizationsController`, `ResellerUsersController`
+  - Reseller: `app/controllers/reseller/` - `ResellerProfileController`, `ResellerCreditsController`, `ResellerOrganizationsController`, `ResellerUsersController`, `ResellerCreditRequestsController`, `ResellerNotificationsController`
 - **Validators**: VineJS schemas in `app/validators/` - always validate user input
-- **Models**: Lucid models in `app/models/` (User, Organization, Reseller, ResellerTransaction, CreditTransaction, UserCredit, UserCreditTransaction, Audio)
-- **Services**: Business logic in `app/services/` (CreditService for credit mode management and distribution)
-- **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy, MemberPolicy, CreditPolicy)
+- **Models**: Lucid models in `app/models/` (User, Organization, Reseller, ResellerTransaction, CreditTransaction, UserCredit, UserCreditTransaction, CreditRequest, Notification, Audio)
+- **Services**: Business logic in `app/services/` (CreditService for credit mode management and distribution, CreditRequestService for credit requests, NotificationService for in-app notifications)
+- **Policies**: Bouncer policies in `app/policies/` for authorization logic (OrganizationPolicy, InvitationPolicy, MemberPolicy, CreditPolicy, NotificationPolicy)
 - **Middleware**: Custom middleware in `app/middleware/`:
   - `auth` - Token validation
   - `superAdmin` - Super Admin access check
@@ -285,6 +389,8 @@ const data = await authenticatedFetch('/protected-endpoint')
 - **credit_transactions**: Credit usage history (`userId`, `organizationId`, `amount`, `balanceAfter`, `type`, `audioId`)
 - **user_credits**: Per-user credit balances for individual mode (`userId`, `organizationId`, `balance`, `creditCap`, `autoRefillEnabled`, `autoRefillAmount`, `autoRefillDay`, `lastRefillAt`)
 - **user_credit_transactions**: User-level credit transaction history (`userId`, `organizationId`, `performedByUserId`, `amount`, `balanceAfter`, `type`, `audioId`)
+- **notifications**: In-app notifications (`userId`, `organizationId`, `type`, `title`, `message`, `data` (JSON), `isRead`, `readAt`)
+- **credit_requests**: Credit requests (`requesterId`, `organizationId`, `targetType` ('owner'|'reseller'), `amount`, `message`, `status`, `processedById`, `processedAt`, `responseMessage`)
 - **audios**: Audio files with transcription and analysis data
 - **access_tokens**: API authentication tokens managed by AdonisJS Auth
 
@@ -303,6 +409,11 @@ const data = await authenticatedFetch('/protected-endpoint')
 - UserCredit → UserCreditTransactions (has many)
 - Invitation → Organization (many-to-one)
 - Audio → Organization (belongs to, multi-tenant)
+- Notification → User (belongs to)
+- Notification → Organization (belongs to, multi-tenant)
+- CreditRequest → User (requester, belongs to)
+- CreditRequest → Organization (belongs to, multi-tenant)
+- CreditRequest → User (processedBy, belongs to)
 - Access Token → User (tokenable polymorphic)
 
 ### User Roles

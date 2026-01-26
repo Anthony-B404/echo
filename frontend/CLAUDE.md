@@ -28,7 +28,9 @@ frontend/
 │   │   ├── useSettingsPermissions.ts
 │   │   ├── useResellerProfile.ts      # Reseller profile data
 │   │   ├── useResellerOrganizations.ts # Reseller org management
-│   │   └── useResellers.ts            # Admin reseller management
+│   │   ├── useResellers.ts            # Admin reseller management
+│   │   ├── useNotifications.ts        # In-app notifications (shared)
+│   │   └── useDashboard.ts            # Dashboard state (slideover toggles)
 │   ├── layouts/           # Layout components
 │   │   ├── default.vue
 │   │   ├── auth.vue
@@ -203,6 +205,56 @@ const { organizations, createOrganization, distributeCredits } = useResellerOrga
 const { resellers, createReseller, addCredits } = useResellers()
 ```
 
+### Notifications Composables
+
+```typescript
+// In-app notifications (shared composable - state persists across components)
+const {
+  notifications,          // Notification list
+  unreadCount,            // Badge counter (readonly)
+  isLoading,              // Loading state
+  hasMore,                // Pagination: more available
+  total,                  // Total notifications count
+  isPolling,              // Polling active state
+
+  // Actions
+  fetchNotifications,     // Fetch paginated list
+  fetchUnreadCount,       // Refresh badge counter
+  loadMore,               // Load next page
+  markAsRead,             // Mark single as read
+  markAllAsRead,          // Mark all as read
+  refresh,                // Refresh all data
+
+  // Helpers
+  getNotificationIcon,    // Type → icon mapping
+  getNotificationColor,   // Type → color class
+  getNotificationLink,    // Type → navigation link
+
+  // Polling control
+  pausePolling,           // Pause background polling
+  resumePolling,          // Resume background polling
+} = useNotifications()
+
+// Dashboard state (slideover controls)
+const { isNotificationsSlideoverOpen } = useDashboard()
+```
+
+**Notification Types**:
+| Type | Icon | Link |
+|------|------|------|
+| `credit_request` | `i-heroicons-banknotes` | `/dashboard/credits?tab=pendingRequests` |
+| `owner_credit_request` | `i-heroicons-building-office` | `/reseller/credits?tab=requests` |
+| `low_credits` | `i-heroicons-exclamation-triangle` | `/dashboard/credits` |
+| `insufficient_refill` | `i-heroicons-arrow-path` | `/dashboard/credits` |
+| `reseller_distribution` | `i-heroicons-gift` | `/dashboard/credits` |
+| `credits_received` | `i-heroicons-plus-circle` | `/dashboard/credits?tab=myRequests` |
+
+**Polling**: Automatically polls every 60 seconds when user is authenticated. Pauses on logout.
+
+**Key Components**:
+- `NotificationsSlideover.vue` - Displays notification list in a slideover panel
+- Bell icon in `default.vue` and `reseller.vue` layouts with unread badge
+
 ### Page Access Matrix
 
 **Super Admin Pages** (`/admin/*`):
@@ -362,6 +414,7 @@ export const useExampleStore = defineStore('example', {
 
 - **`useOrganizationStore`**: Current organization context, user role in org
 - **`useCreditsStore`**: Credit balance, transaction history
+- **`useCreditRequestsStore`**: Credit requests (my requests, pending requests for owner)
 
 ## Validation with Zod
 

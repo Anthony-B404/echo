@@ -382,7 +382,13 @@
   },
   "components": {
     "notifications": {
-      "title": "Notifications"
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "empty": "No notifications",
+      "loadMore": "Load more",
+      "errorTitle": "Loading error",
+      "errorDescription": "Unable to load notifications",
+      "retry": "Retry"
     },
     "teams": {
       "loading": "Loading...",

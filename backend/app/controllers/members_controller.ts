@@ -253,11 +253,7 @@ export default class MembersController {
       // Clean up member credits before removal:
       // - Recover any remaining credits back to the organization pool
       // - Delete the UserCredit record (including auto-refill configuration)
-      await creditService.cleanupMemberCredits(
-        targetUser.id,
-        organization.id,
-        authUser.id
-      )
+      await creditService.cleanupMemberCredits(targetUser.id, organization.id, authUser.id)
 
       // Remove user from the organization (detach from pivot)
       await organization.related('users').detach([targetUser.id])
