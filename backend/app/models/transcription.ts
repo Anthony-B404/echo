@@ -3,7 +3,6 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Audio from './audio.js'
 import Document from './document.js'
-import TranscriptionVersion from './transcription_version.js'
 import User from './user.js'
 
 /**
@@ -72,9 +71,6 @@ export default class Transcription extends BaseModel {
 
   @hasMany(() => Document)
   declare documents: HasMany<typeof Document>
-
-  @hasMany(() => TranscriptionVersion)
-  declare versions: HasMany<typeof TranscriptionVersion>
 
   @belongsTo(() => User, {
     foreignKey: 'lastEditedByUserId',
