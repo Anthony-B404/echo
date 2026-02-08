@@ -19,7 +19,7 @@ RUN apk add --no-cache curl \
 # Copy crontab
 COPY crontab /etc/crontab
 
-USER adonisjs
-
 # Run supercronic with the crontab
+# Note: USER is NOT set here because the inherited entrypoint.sh
+# runs as root (chown storage dirs) then drops to adonisjs via su-exec
 CMD ["supercronic", "/etc/crontab"]
