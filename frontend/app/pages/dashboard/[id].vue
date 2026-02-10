@@ -56,7 +56,7 @@ const isProcessing = computed(
 const isCompleted = computed(() => audio.value?.status === AudioStatus.Completed)
 const isFailed = computed(() => audio.value?.status === AudioStatus.Failed)
 
-const activeTab = ref<'transcription' | 'analysis'>('transcription')
+const activeTab = ref<'transcription' | 'analysis' | 'questions'>('transcription')
 const deleteModalOpen = ref(false)
 const shareModalOpen = ref(false)
 const audioFileUrl = ref<string | null>(null)
@@ -422,6 +422,10 @@ const tabItems = computed(() => [
   {
     label: t('pages.dashboard.workshop.detail.tabs.analysis'),
     value: 'analysis'
+  },
+  {
+    label: t('pages.dashboard.workshop.detail.tabs.questions'),
+    value: 'questions'
   }
 ])
 </script>
@@ -517,7 +521,7 @@ const tabItems = computed(() => [
       </WorkshopEmptyState>
 
       <!-- Audio detail -->
-      <div v-else class="space-y-6 max-w-4xl">
+      <div v-else class="space-y-6">
         <!-- Audio info card -->
         <UPageCard variant="subtle">
           <div class="flex items-start gap-4 mb-4">
@@ -579,7 +583,7 @@ const tabItems = computed(() => [
           <div class="flex items-center justify-between mb-4">
             <UTabs v-model="activeTab" :items="tabItems" :disabled="isEditing" />
 
-            <div class="flex items-center gap-2">
+            <div v-if="activeTab !== 'questions'" class="flex items-center gap-2">
               <!-- Edit button (only on analysis tab, transcription is read-only) -->
               <UButton
                 v-if="!isEditingAnalysis && activeTab === 'analysis'"
@@ -590,6 +594,14 @@ const tabItems = computed(() => [
                 :label="t('common.buttons.edit')"
                 :disabled="!audio.transcription?.analysis"
                 @click="startEditingAnalysis"
+              />
+
+              <!-- TTS player (only on analysis tab, not editing) -->
+              <WorkshopAnalysisTtsPlayer
+                v-if="!isEditing && activeTab === 'analysis'"
+                :key="`tts-${audio.transcription?.analysisVersion}`"
+                :audio-id="audio.id"
+                :disabled="!audio.transcription?.analysis"
               />
 
               <!-- History button -->
@@ -710,6 +722,11 @@ const tabItems = computed(() => [
                 <span>v{{ audio.transcription.analysisVersion }}</span>
               </div>
             </template>
+          </div>
+
+          <!-- Questions chat -->
+          <div v-show="activeTab === 'questions'">
+            <WorkshopTranscriptChat :audio-id="audio.id" />
           </div>
         </UPageCard>
 

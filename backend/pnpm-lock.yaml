@@ -39,8 +39,8 @@ importers:
         specifier: ^9.2.2
         version: 9.2.2(@adonisjs/core@6.19.1(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.1.0)(edge.js@6.3.0))(@aws-sdk/client-ses@3.926.0)(@types/luxon@3.7.1)(@types/node@24.10.1)(dayjs@1.11.19)(edge.js@6.3.0)(luxon@3.7.2)
       '@mistralai/mistralai':
-        specifier: ^1.11.0
-        version: 1.11.0
+        specifier: ^1.14.0
+        version: 1.14.0
       '@vinejs/vine':
         specifier: ^4.1.0
         version: 4.1.0
@@ -711,8 +711,8 @@ packages:
     resolution: {integrity: sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA==}
     engines: {node: '>=8'}
 
-  '@mistralai/mistralai@1.11.0':
-    resolution: {integrity: sha512-6/BVj2mcaggYbpMzNSxtqtM2Tv/Jb5845XFd2CMYFO+O5VBkX70iLjtkBBTI4JFhh1l9vTCIMYXBVOjLoBVHGQ==}
+  '@mistralai/mistralai@1.14.0':
+    resolution: {integrity: sha512-6zaj2f2LCd37cRpBvCgctkDbXtYBlAC85p+u4uU/726zjtsI+sdVH34qRzkm9iE3tRb8BoaiI0/P7TD+uMvLLQ==}
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3':
     resolution: {integrity: sha512-QZHtlVgbAdy2zAqNA9Gu1UpIuI8Xvsd1v8ic6B2pZmeFnFcMWiPLfWXh7TVw4eGEZ/C9TH281KwhVoeQUKbyjw==}
@@ -3788,6 +3788,18 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+  ws@8.19.0:
+    resolution: {integrity: sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xml-js@1.6.11:
     resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
     hasBin: true
@@ -4774,10 +4786,14 @@ snapshots:
 
   '@lukeed/ms@2.0.2': {}
 
-  '@mistralai/mistralai@1.11.0':
+  '@mistralai/mistralai@1.14.0':
     dependencies:
+      ws: 8.19.0
       zod: 3.25.76
       zod-to-json-schema: 3.25.0(zod@3.25.76)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3':
     optional: true
@@ -8112,6 +8128,8 @@ snapshots:
       strip-ansi: 7.1.2
 
   wrappy@1.0.2: {}
+
+  ws@8.19.0: {}
 
   xml-js@1.6.11:
     dependencies:
