@@ -164,7 +164,11 @@
     "access_denied": "You do not have access to this audio",
     "created": "Audio created successfully",
     "file_not_found": "Audio file not found in storage",
-    "insufficient_credits_details": "Insufficient credits. Required: {creditsNeeded}, Available: {creditsAvailable}. Please purchase more credits to continue."
+    "insufficient_credits_details": "Insufficient credits. Required: {creditsNeeded}, Available: {creditsAvailable}. Please purchase more credits to continue.",
+    "chat_no_transcription": "No transcription available for this audio. Chat requires a completed transcription.",
+    "chat_error": "An error occurred while processing your question",
+    "tts_no_analysis": "No analysis available for text-to-speech",
+    "tts_generation_failed": "Error generating text-to-speech audio"
   },
   "transcription": {
     "not_found": "Transcription not found",

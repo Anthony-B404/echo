@@ -713,10 +713,6 @@
           "transcriptionCopied": "Transcription copied",
           "analysisCopied": "Analysis copied",
           "playerPlaceholder": "Audio player will be available soon",
-          "tabs": {
-            "transcription": "Transcription",
-            "analysis": "Analysis"
-          },
           "language": "Language",
           "confidence": "Confidence",
           "analysisComingSoon": "Analysis coming soon",
@@ -735,7 +731,27 @@
           "editConflict": "Edit conflict detected",
           "editError": "Error saving changes",
           "versionRestored": "Version restored successfully",
-          "restoreError": "Error restoring version"
+          "restoreError": "Error restoring version",
+          "tabs": {
+            "transcription": "Transcription",
+            "analysis": "Analysis",
+            "questions": "Questions"
+          },
+          "tts": {
+            "button": "Listen to analysis",
+            "error": "Error generating audio"
+          },
+          "chat": {
+            "emptyState": "Ask questions about the transcription content. The AI will answer based only on what was said.",
+            "placeholder": "Ask a question about the transcription...",
+            "clear": "Clear conversation",
+            "error": "An error occurred. Please try again.",
+            "suggestions": {
+              "summary": "Summarize this",
+              "keyPoints": "Key points and actions?",
+              "participants": "Who are the participants?"
+            }
+          }
         }
       },
       "analyze": {

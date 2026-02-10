@@ -274,6 +274,7 @@ jobs:
             # External APIs
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
             MISTRAL_API_KEY=${{ secrets.MISTRAL_API_KEY }}
+            INWORLD_API_KEY=${{ secrets.INWORLD_API_KEY }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}

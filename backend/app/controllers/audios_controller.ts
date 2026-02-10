@@ -8,7 +8,10 @@ import {
   audioBatchDeleteValidator,
   audioUpdateValidator,
   audioExportValidator,
+  audioChatValidator,
 } from '#validators/audio'
+import MistralService from '#services/mistral_service'
+import TtsService from '#services/tts_service'
 
 export default class AudiosController {
   /**
@@ -342,6 +345,124 @@ export default class AudiosController {
         message:
           error instanceof Error ? error.message : i18n.t('messages.export.generation_failed'),
       })
+    }
+  }
+
+  /**
+   * Chat with the audio transcription using AI.
+   * Supports multi-turn conversation based on the transcript content.
+   *
+   * POST /api/audios/:id/chat
+   */
+  async chat({ params, request, response, bouncer, i18n }: HttpContext) {
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
+
+    if (!audio) {
+      return response.notFound({
+        message: i18n.t('messages.audio.not_found'),
+      })
+    }
+
+    // Check authorization
+    if (await bouncer.with(AudioPolicy).denies('viewAudio', audio)) {
+      return response.forbidden({
+        message: i18n.t('messages.audio.access_denied'),
+      })
+    }
+
+    // Load transcription
+    await audio.load('transcription')
+
+    if (!audio.transcription?.rawText) {
+      return response.badRequest({
+        message: i18n.t('messages.audio.chat_no_transcription'),
+      })
+    }
+
+    // Validate request body
+    const { messages } = await request.validateUsing(audioChatValidator)
+
+    try {
+      const mistralService = new MistralService()
+      const reply = await mistralService.chat(
+        audio.transcription.rawText,
+        messages,
+        audio.transcription.timestamps || []
+      )
+
+      return response.ok({ reply })
+    } catch (error) {
+      console.error('Chat processing failed:', error)
+      return response.internalServerError({
+        message: i18n.t('messages.audio.chat_error'),
+      })
+    }
+  }
+
+  /**
+   * Generate TTS audio from the analysis text.
+   *
+   * GET /api/audios/:id/tts
+   */
+  async tts({ request, params, response, bouncer, i18n }: HttpContext) {
+    // Validate ID parameter
+    const id = Number(params.id)
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.invalid_id'),
+      })
+    }
+
+    const audio = await Audio.find(id)
+
+    if (!audio) {
+      return response.notFound({
+        message: i18n.t('messages.audio.not_found'),
+      })
+    }
+
+    // Check authorization
+    if (await bouncer.with(AudioPolicy).denies('viewAudio', audio)) {
+      return response.forbidden({
+        message: i18n.t('messages.audio.access_denied'),
+      })
+    }
+
+    // Load transcription
+    await audio.load('transcription')
+
+    if (!audio.transcription?.analysis) {
+      return response.badRequest({
+        message: i18n.t('messages.audio.tts_no_analysis'),
+      })
+    }
+
+    // Stream MP3 directly to the client as it arrives from Inworld
+    const origin = request.header('origin')
+    const nodeRes = response.response
+    nodeRes.writeHead(200, {
+      'Content-Type': 'audio/mpeg',
+      'Transfer-Encoding': 'chunked',
+      'Cache-Control': 'no-cache',
+      ...(origin ? { 'Access-Control-Allow-Origin': origin } : {}),
+    })
+
+    try {
+      const ttsService = new TtsService()
+      await ttsService.streamSpeech(audio.transcription.analysis, nodeRes)
+      nodeRes.end()
+    } catch (error) {
+      console.error('TTS generation failed:', error)
+      // If streaming already started, just close the connection
+      nodeRes.end()
     }
   }
 }

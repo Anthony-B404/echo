@@ -61,6 +61,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   MISTRAL_API_KEY: Env.schema.string(),
+  INWORLD_API_KEY: Env.schema.string(),
 
   /*
   |----------------------------------------------------------

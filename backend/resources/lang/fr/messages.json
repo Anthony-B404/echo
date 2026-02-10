@@ -164,7 +164,11 @@
     "access_denied": "Vous n'avez pas accès à cet audio",
     "created": "Audio créé avec succès",
     "file_not_found": "Fichier audio introuvable dans le stockage",
-    "insufficient_credits_details": "Crédits insuffisants. Requis : {creditsNeeded}, Disponible : {creditsAvailable}. Veuillez recharger votre compte pour continuer."
+    "insufficient_credits_details": "Crédits insuffisants. Requis : {creditsNeeded}, Disponible : {creditsAvailable}. Veuillez recharger votre compte pour continuer.",
+    "chat_no_transcription": "Aucune transcription disponible pour cet audio. Le chat nécessite une transcription complétée.",
+    "chat_error": "Une erreur est survenue lors du traitement de votre question",
+    "tts_no_analysis": "Aucune analyse disponible pour la synthèse vocale",
+    "tts_generation_failed": "Erreur lors de la génération de la synthèse vocale"
   },
   "transcription": {
     "not_found": "Transcription introuvable",

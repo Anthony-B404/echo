@@ -335,11 +335,24 @@ async function processTranscriptionJob(
       }
     }, 500)
 
-    let analysis
+    let analysisResult
     try {
-      analysis = await mistralService.analyze(transcriptionResult.text, prompt)
+      analysisResult = await mistralService.analyze(
+        transcriptionResult.text,
+        prompt,
+        transcriptionResult.segments
+      )
     } finally {
       clearInterval(analysisInterval)
+    }
+
+    // Apply speaker name mapping to segments
+    if (Object.keys(analysisResult.speakers).length > 0) {
+      for (const seg of transcriptionResult.segments) {
+        if (seg.speaker && analysisResult.speakers[seg.speaker]) {
+          seg.speaker = analysisResult.speakers[seg.speaker]
+        }
+      }
     }
 
     await job.updateProgress(92)
@@ -351,7 +364,7 @@ async function processTranscriptionJob(
         rawText: transcriptionResult.text,
         timestamps: transcriptionResult.segments,
         language: transcriptionResult.language || 'fr',
-        analysis: analysis,
+        analysis: analysisResult.analysis,
       })
 
       // Create initial version entries (v1) for version history
@@ -384,7 +397,7 @@ async function processTranscriptionJob(
 
     return {
       transcription: transcriptionResult.text,
-      analysis,
+      analysis: analysisResult.analysis,
     }
   } catch (error) {
     // Update audio status to failed and clear job ID

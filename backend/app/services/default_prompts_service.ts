@@ -13,16 +13,16 @@ const DEFAULT_CATEGORIES: Array<{
   sector: BusinessSector | null
   prompts: Array<{ title: string; content: string }>
 }> = [
-  {
-    name: 'Ressources humaines',
-    description: "Prompts pour l'analyse RH : recrutement, évaluation et gestion des talents",
-    color: '#6366F1', // indigo
-    icon: 'i-heroicons-user-group',
-    sector: 'hr',
-    prompts: [
-      {
-        title: "Analyse d'entretien de recrutement",
-        content: `Tu es un recruteur senior expérimenté avec 15 ans en recrutement tech et cadres. À partir de la transcription complète de cet entretien d'embauche pour le poste de [intitulé exact du poste], produis un compte-rendu structuré et objectif au format suivant :
+    {
+      name: 'Ressources humaines',
+      description: "Prompts pour l'analyse RH : recrutement, évaluation et gestion des talents",
+      color: '#6366F1', // indigo
+      icon: 'i-heroicons-user-group',
+      sector: 'hr',
+      prompts: [
+        {
+          title: "Analyse d'entretien de recrutement",
+          content: `Tu es un recruteur senior expérimenté avec 15 ans en recrutement tech et cadres. À partir de la transcription complète de cet entretien d'embauche pour le poste de [intitulé exact du poste], produis un compte-rendu structuré et objectif au format suivant :
 
 1. Synthèse globale (3-4 phrases max) : adéquation générale du candidat avec le poste
 2. Compétences techniques / hard skills démontrées (liste à puces avec niveau estimé : Faible / Moyen / Bon / Excellent + une preuve tirée de l'entretien)
@@ -34,10 +34,10 @@ const DEFAULT_CATEGORIES: Array<{
 8. Recommandation finale : À retenir / À retenir avec réserves / Ne pas retenir
 
 Soit factuel, cite les passages clés de la transcription entre guillemets quand c'est pertinent, et reste neutre et professionnel.`,
-      },
-      {
-        title: "Entretien annuel d'évaluation",
-        content: `Tu es un DRH expert en gestion de la performance et entretiens annuels. Analyse cette transcription d'entretien annuel d'évaluation avec [prénom ou "le collaborateur"] en poste de [poste] depuis [X] années.
+        },
+        {
+          title: "Entretien annuel d'évaluation",
+          content: `Tu es un DRH expert en gestion de la performance et entretiens annuels. Analyse cette transcription d'entretien annuel d'évaluation avec [prénom ou "le collaborateur"] en poste de [poste] depuis [X] années.
 
 Structure ton compte-rendu exactement comme ceci :
 
@@ -52,10 +52,10 @@ Structure ton compte-rendu exactement comme ceci :
 - 3 actions prioritaires recommandées pour le collaborateur
 
 Ton objectif : produire un document clair, actionnable et confidentiel pour le dossier RH et le suivi.`,
-      },
-      {
-        title: "Analyse d'entretien de départ",
-        content: `Tu es un spécialiste RH en rétention et gestion des talents. Voici la transcription complète d'un exit interview avec [prénom ou "le collaborateur"] qui quitte l'entreprise après [X] années en tant que [poste].
+        },
+        {
+          title: "Analyse d'entretien de départ",
+          content: `Tu es un spécialiste RH en rétention et gestion des talents. Voici la transcription complète d'un exit interview avec [prénom ou "le collaborateur"] qui quitte l'entreprise après [X] années en tant que [poste].
 
 Génère un rapport d'analyse structuré et percutant au format suivant :
 
@@ -69,19 +69,19 @@ Génère un rapport d'analyse structuré et percutant au format suivant :
 8. Actions RH / management recommandées à court terme (3 max)
 
 Sois direct, factuel, bienveillant mais sans édulcorer. Utilise des verbatims entre guillemets pour les éléments les plus marquants.`,
-      },
-    ],
-  },
-  {
-    name: 'Vente et Commerce',
-    description: "Prompts pour l'analyse commerciale : prospection, démos et négociations",
-    color: '#10B981', // green
-    icon: 'i-heroicons-currency-euro',
-    sector: 'sales',
-    prompts: [
-      {
-        title: "Analyse d'appel de vente",
-        content: `Tu es un Head of Sales senior avec 12 ans d'expérience en B2B et solutions complexes. Analyse cette transcription complète d'un appel de vente / discovery call avec un prospect [nom ou "le prospect"] pour [nom du produit/service].
+        },
+      ],
+    },
+    {
+      name: 'Vente et Commerce',
+      description: "Prompts pour l'analyse commerciale : prospection, démos et négociations",
+      color: '#10B981', // green
+      icon: 'i-heroicons-currency-euro',
+      sector: 'sales',
+      prompts: [
+        {
+          title: "Analyse d'appel de vente",
+          content: `Tu es un Head of Sales senior avec 12 ans d'expérience en B2B et solutions complexes. Analyse cette transcription complète d'un appel de vente / discovery call avec un prospect [nom ou "le prospect"] pour [nom du produit/service].
 
 Produis un compte-rendu ultra-actionnable au format suivant :
 
@@ -96,10 +96,10 @@ Produis un compte-rendu ultra-actionnable au format suivant :
 9. Recommandation stratégique : Pousser fort / Nourrir / Disqualifier poliment
 
 Sois direct, factuel, cite les passages clés entre guillemets, et adopte un ton business orienté résultats.`,
-      },
-      {
-        title: 'Analyse de démo produit',
-        content: `Tu es un expert en sales enablement et en technique closing. Voici la transcription d'une démo produit / présentation commerciale faite à [nom prospect / entreprise] pour [nom produit].
+        },
+        {
+          title: 'Analyse de démo produit',
+          content: `Tu es un expert en sales enablement et en technique closing. Voici la transcription d'une démo produit / présentation commerciale faite à [nom prospect / entreprise] pour [nom produit].
 
 Génère un rapport structuré et percutant exactement comme suit :
 
@@ -114,10 +114,10 @@ Génère un rapport structuré et percutant exactement comme suit :
 - Score "Demo Momentum" sur 10
 
 Objectif : permettre au commercial de rebondir ultra-efficacement sur ce qui a marché et ce qui a coincé.`,
-      },
-      {
-        title: 'Analyse de négociation / closing',
-        content: `Tu es un closer expérimenté spécialisé en négociations B2B à fort enjeu. Analyse cette transcription de call de closing / négociation avec [nom prospect] pour finaliser le deal de [montant approx. / scope].
+        },
+        {
+          title: 'Analyse de négociation / closing',
+          content: `Tu es un closer expérimenté spécialisé en négociations B2B à fort enjeu. Analyse cette transcription de call de closing / négociation avec [nom prospect] pour finaliser le deal de [montant approx. / scope].
 
 Structure ton analyse comme ceci :
 
@@ -132,19 +132,60 @@ Structure ton analyse comme ceci :
 9. Leçons apprises pour les prochains deals similaires
 
 Sois incisif, stratégique et orienté cash : l'objectif est de maximiser le win-rate et le deal value.`,
-      },
-    ],
-  },
-  {
-    name: 'Droit & affaires juridiques',
-    description: "Prompts pour l'analyse juridique : consultations, dépositions et négociations",
-    color: '#8B5CF6', // violet
-    icon: 'i-heroicons-scale',
-    sector: 'legal',
-    prompts: [
-      {
-        title: 'Analyse de consultation client',
-        content: `Tu es un avocat senior spécialisé en droit des affaires avec 18 ans d'expérience. Analyse cette transcription complète d'une consultation client (premier RDV ou point d'étape) avec [nom du client ou "le client"] concernant [brève description du dossier : ex. création société, litige commercial, contrat...].
+        },
+        {
+          title: 'Probabilité de Closing (Expert)',
+          content: `# RÔLE
+Tu es un Directeur Commercial d'élite avec 20 ans d'expérience en vente B2B High Ticket (logiciels, conseil, services). Tu es expert en méthodologies de vente (MEDDIC, SPIN Selling, Challenger Sale).
+
+# TÂCHE
+Ton objectif est d'analyser la transcription de réunion fournie ci-dessous pour déterminer la probabilité réelle que ce prospect signe (Closing). Ne sois pas complaisant. Sois critique, factuel et analytique.
+
+# INSTRUCTIONS D'ANALYSE
+Analyse l'échange en te concentrant sur ces 4 piliers :
+1. DOULEUR (PAIN) : Le prospect a-t-il clairement exprimé un problème urgent ou coûteux ?
+2. POUVOIR (AUTHORITY) : Le prospect est-il le décideur final ou doit-il en parler à son N+1 ?
+3. BUDGET & TIMING : A-t-on parlé d'argent ou de date de mise en place ?
+4. OBJECTIONS CACHÉES : Détecte les non-dits, les hésitations ou les réponses polies qui cachent un "non".
+
+# FORMAT DE SORTIE (Strictement en Markdown)
+
+## 🎯 Score de Closing : [X]/100
+(Donne une note réaliste. Si c'est un premier RDV sans budget évoqué, ne dépasse jamais 60/100).
+
+## 🌡️ Analyse du Sentiment & Engagement
+* **Atmosphère globale :** (ex: Curieuse, Sceptique, Conquise, Pressée...)
+* **Niveau d'intérêt du prospect :** (Faible / Moyen / Fort) - Justifie avec une citation du texte.
+
+## 🚩 Drapeaux Rouges (Risques)
+* (Liste ici les hésitations, les moments où le prospect a reculé, ou les concurrents mentionnés).
+* (Exemple : "Le prospect a dit 'Je dois voir avec ma direction', ce qui indique qu'il n'est pas décideur unique").
+
+## 🟢 Feux Verts (Signaux d'achat)
+* (Liste les moments où le prospect se projette).
+* (Exemple : Questions sur l'implémentation, demande de prix, utilisation du futur "quand on aura l'outil").
+
+## 💡 Recommandation Stratégique (Action suivante)
+Donne 3 conseils concrets au commercial pour la prochaine étape afin de sécuriser le deal.
+1.
+2.
+3.
+
+## 📝 Résumé Exécutif (3 lignes max)
+Synthèse ultra-courte de la réunion pour le CRM.`,
+        },
+      ],
+    },
+    {
+      name: 'Droit & affaires juridiques',
+      description: "Prompts pour l'analyse juridique : consultations, dépositions et négociations",
+      color: '#8B5CF6', // violet
+      icon: 'i-heroicons-scale',
+      sector: 'legal',
+      prompts: [
+        {
+          title: 'Analyse de consultation client',
+          content: `Tu es un avocat senior spécialisé en droit des affaires avec 18 ans d'expérience. Analyse cette transcription complète d'une consultation client (premier RDV ou point d'étape) avec [nom du client ou "le client"] concernant [brève description du dossier : ex. création société, litige commercial, contrat...].
 
 Produis un compte-rendu juridique structuré et professionnel au format suivant :
 
@@ -159,10 +200,10 @@ Produis un compte-rendu juridique structuré et professionnel au format suivant 
 9. Recommandation globale : Accepter le dossier / Accepter avec conditions / Refuser poliment
 
 Sois précis, cite les passages clés entre guillemets, reste objectif et neutre, et adopte un ton formel et confidentiel.`,
-      },
-      {
-        title: 'Analyse de déposition / audition',
-        content: `Tu es un avocat plaideur expert en contentieux civil et commercial. Voici la transcription complète d'une déposition / audition [préciser si possible : témoin, partie adverse, expert...] dans le cadre du dossier [référence ou description brève].
+        },
+        {
+          title: 'Analyse de déposition / audition',
+          content: `Tu es un avocat plaideur expert en contentieux civil et commercial. Voici la transcription complète d'une déposition / audition [préciser si possible : témoin, partie adverse, expert...] dans le cadre du dossier [référence ou description brève].
 
 Génère un rapport d'analyse deposition structuré exactement comme suit :
 
@@ -177,10 +218,10 @@ Génère un rapport d'analyse deposition structuré exactement comme suit :
 - Recommandation stratégique : Utiliser pour appuyer notre thèse / Minimiser / Attaquer la crédibilité
 
 Objectif : fournir un outil rapide pour préparer la suite du contentieux ou la négociation.`,
-      },
-      {
-        title: 'Analyse de négociation / règlement amiable',
-        content: `Tu es un avocat négociateur spécialisé en résolution amiable et transactions. Analyse cette transcription d'une réunion de négociation / point d'étape règlement amiable avec [adverse ou "la partie adverse"] dans le dossier [description].
+        },
+        {
+          title: 'Analyse de négociation / règlement amiable',
+          content: `Tu es un avocat négociateur spécialisé en résolution amiable et transactions. Analyse cette transcription d'une réunion de négociation / point d'étape règlement amiable avec [adverse ou "la partie adverse"] dans le dossier [description].
 
 Structure ton rapport comme ceci :
 
@@ -195,19 +236,19 @@ Structure ton rapport comme ceci :
 9. Leçons pour les prochaines négociations similaires
 
 Sois incisif, stratégique et orienté résultat : maximiser la valeur du deal tout en minimisant les risques.`,
-      },
-    ],
-  },
-  {
-    name: 'Finance & Comptabilité',
-    description: "Prompts pour l'analyse financière : patrimoine, budget et investissements",
-    color: '#F59E0B', // amber
-    icon: 'i-heroicons-banknotes',
-    sector: 'finance',
-    prompts: [
-      {
-        title: 'Analyse de consultation patrimoniale',
-        content: `Tu es un expert-comptable et conseiller en gestion de patrimoine senior avec 20 ans d'expérience. Analyse cette transcription complète d'une consultation / entretien client avec [nom du client ou "le client"] concernant [ex. : bilan patrimonial, optimisation fiscale, investissement, succession...].
+        },
+      ],
+    },
+    {
+      name: 'Finance & Comptabilité',
+      description: "Prompts pour l'analyse financière : patrimoine, budget et investissements",
+      color: '#F59E0B', // amber
+      icon: 'i-heroicons-banknotes',
+      sector: 'finance',
+      prompts: [
+        {
+          title: 'Analyse de consultation patrimoniale',
+          content: `Tu es un expert-comptable et conseiller en gestion de patrimoine senior avec 20 ans d'expérience. Analyse cette transcription complète d'une consultation / entretien client avec [nom du client ou "le client"] concernant [ex. : bilan patrimonial, optimisation fiscale, investissement, succession...].
 
 Produis un compte-rendu financier structuré et professionnel au format suivant :
 
@@ -222,10 +263,10 @@ Produis un compte-rendu financier structuré et professionnel au format suivant 
 9. Recommandation globale : Mission à lancer / Suivi léger / Pas d'action immédiate
 
 Soit factuel, cite les chiffres et passages clés entre guillemets, reste neutre et conforme aux règles déontologiques.`,
-      },
-      {
-        title: 'Analyse de revue budgétaire',
-        content: `Tu es un Directeur Administratif et Financier (DAF) expert en pilotage budgétaire et contrôle de gestion. Voici la transcription d'un point budgétaire / revue mensuelle/trimestrielle avec [nom du manager ou "l'équipe"] pour [entité/projet : ex. département commercial, filiale...].
+        },
+        {
+          title: 'Analyse de revue budgétaire',
+          content: `Tu es un Directeur Administratif et Financier (DAF) expert en pilotage budgétaire et contrôle de gestion. Voici la transcription d'un point budgétaire / revue mensuelle/trimestrielle avec [nom du manager ou "l'équipe"] pour [entité/projet : ex. département commercial, filiale...].
 
 Génère un rapport d'analyse budgétaire structuré exactement comme suit :
 
@@ -239,10 +280,10 @@ Génère un rapport d'analyse budgétaire structuré exactement comme suit :
 - Score de maîtrise budgétaire sur 10 (avec justification)
 
 Objectif : fournir un outil rapide pour le DAF ou le contrôleur de gestion afin de piloter efficacement.`,
-      },
-      {
-        title: "Analyse d'entretien d'investissement",
-        content: `Tu es un conseiller en investissements financiers certifié AMF, expert en allocation d'actifs. Analyse cette transcription d'un entretien / point portefeuille avec [nom du client] concernant son portefeuille [type : actions, obligations, immobilier, crypto...].
+        },
+        {
+          title: "Analyse d'entretien d'investissement",
+          content: `Tu es un conseiller en investissements financiers certifié AMF, expert en allocation d'actifs. Analyse cette transcription d'un entretien / point portefeuille avec [nom du client] concernant son portefeuille [type : actions, obligations, immobilier, crypto...].
 
 Structure ton rapport comme ceci :
 
@@ -257,19 +298,19 @@ Structure ton rapport comme ceci :
 9. Prochaines étapes (simulation, proposition écrite, RDV de suivi)
 
 Sois prudent, cite les éléments clés, et adopte un ton professionnel orienté long terme et prudence.`,
-      },
-    ],
-  },
-  {
-    name: 'Psychologie et Thérapie',
-    description: "Prompts pour l'analyse clinique : séances de thérapie et suivi patient",
-    color: '#EC4899', // pink
-    icon: 'i-heroicons-heart',
-    sector: 'psychology',
-    prompts: [
-      {
-        title: 'Note de session standard',
-        content: `Tu es un psychologue clinicien senior avec 15 ans d'expérience en thérapie individuelle (approches intégratives : TCC, psychodynamique, humaniste). Analyse cette transcription complète d'une séance de thérapie avec [prénom du patient ou "le patient"] – séance numéro [X] sur [thématique principale si connue, ex. anxiété, trauma, estime de soi].
+        },
+      ],
+    },
+    {
+      name: 'Psychologie et Thérapie',
+      description: "Prompts pour l'analyse clinique : séances de thérapie et suivi patient",
+      color: '#EC4899', // pink
+      icon: 'i-heroicons-heart',
+      sector: 'psychology',
+      prompts: [
+        {
+          title: 'Note de session standard',
+          content: `Tu es un psychologue clinicien senior avec 15 ans d'expérience en thérapie individuelle (approches intégratives : TCC, psychodynamique, humaniste). Analyse cette transcription complète d'une séance de thérapie avec [prénom du patient ou "le patient"] – séance numéro [X] sur [thématique principale si connue, ex. anxiété, trauma, estime de soi].
 
 Produis un compte-rendu clinique structuré et professionnel au format suivant (style DAP : Data / Assessment / Plan) :
 
@@ -282,10 +323,10 @@ Produis un compte-rendu clinique structuré et professionnel au format suivant (
 7. Note globale de la séance sur 10 (engagement du patient + alliance thérapeutique perçue, avec justification courte)
 
 Soit factuel, objectif, bienveillant, évite tout jugement moral. Respecte strictement la confidentialité et n'ajoute aucune interprétation non soutenue par la transcription.`,
-      },
-      {
-        title: 'Focus émotions et patterns',
-        content: `Tu es un thérapeute expert en suivi émotionnel et repérage de schémas. À partir de cette transcription de séance avec [prénom], produis un résumé focalisé sur l'évolution émotionnelle et les dynamiques internes.
+        },
+        {
+          title: 'Focus émotions et patterns',
+          content: `Tu es un thérapeute expert en suivi émotionnel et repérage de schémas. À partir de cette transcription de séance avec [prénom], produis un résumé focalisé sur l'évolution émotionnelle et les dynamiques internes.
 
 Structure exacte :
 
@@ -298,10 +339,10 @@ Structure exacte :
 - Niveau de risque suicidaire / auto-destructeur perçu (aucun / faible / à surveiller / élevé – justification)
 
 Ton objectif : aider le thérapeute à suivre finement l'évolution sans réécrire toute la séance.`,
-      },
-      {
-        title: 'Analyse de première séance / anamnèse',
-        content: `Tu es un psychologue clinicien spécialisé dans l'accueil et l'évaluation initiale. Analyse cette transcription de première séance (anamnèse) avec [prénom].
+        },
+        {
+          title: 'Analyse de première séance / anamnèse',
+          content: `Tu es un psychologue clinicien spécialisé dans l'accueil et l'évaluation initiale. Analyse cette transcription de première séance (anamnèse) avec [prénom].
 
 Génère un rapport d'évaluation initiale structuré comme suit :
 
@@ -316,19 +357,19 @@ Génère un rapport d'évaluation initiale structuré comme suit :
 9. Impression clinique globale (alliance naissante : bonne/moyenne/difficile)
 
 Reste prudent, factuel et déontologique : pas de diagnostic ferme en première séance.`,
-      },
-    ],
-  },
-  {
-    name: 'Général',
-    description: 'Prompts polyvalents pour tout type de conversation ou réunion',
-    color: '#3B82F6', // blue
-    icon: 'i-heroicons-document-text',
-    sector: null,
-    prompts: [
-      {
-        title: "Résumé général d'entretien (avancé)",
-        content: `Tu es un assistant professionnel expert en synthèse de conversations. À partir de cette transcription complète d'un entretien / meeting / appel avec [prénom ou "la personne" ou "les participants"], produis un compte-rendu clair, concis et actionnable au format suivant :
+        },
+      ],
+    },
+    {
+      name: 'Général',
+      description: 'Prompts polyvalents pour tout type de conversation ou réunion',
+      color: '#3B82F6', // blue
+      icon: 'i-heroicons-document-text',
+      sector: null,
+      prompts: [
+        {
+          title: "Résumé général d'entretien (avancé)",
+          content: `Tu es un assistant professionnel expert en synthèse de conversations. À partir de cette transcription complète d'un entretien / meeting / appel avec [prénom ou "la personne" ou "les participants"], produis un compte-rendu clair, concis et actionnable au format suivant :
 
 1. Synthèse globale (3-5 phrases max) : objectif de l'entretien, points principaux discutés, ton général et issue/outcome perçu
 2. Chronologie des sujets abordés (liste à puces chronologique : thème + éléments clés évoqués, avec citations verbatim entre guillemets pour les phrases les plus importantes)
@@ -340,14 +381,14 @@ Reste prudent, factuel et déontologique : pas de diagnostic ferme en première 
 8. Note globale de productivité de l'entretien sur 10 (avec justification courte : efficacité, clarté, avancement)
 
 Soit factuel, objectif, professionnel et concis. Utilise un ton neutre et bienveillant. Cite les éléments clés entre guillemets quand ils apportent de la valeur.`,
-      },
-      {
-        title: 'Résumé Exécutif (simple)',
-        content: `Fais un résumé exécutif de cette conversation en 3-5 points clés. Mets en avant les décisions prises et les actions à suivre.`,
-      },
-    ],
-  },
-]
+        },
+        {
+          title: 'Résumé Exécutif (simple)',
+          content: `Fais un résumé exécutif de cette conversation en 3-5 points clés. Mets en avant les décisions prises et les actions à suivre.`,
+        },
+      ],
+    },
+  ]
 
 /**
  * Service to seed default prompts for an organization

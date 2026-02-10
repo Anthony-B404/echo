@@ -69,6 +69,23 @@ export const audioUpdateValidator = vine.compile(
 )
 
 /**
+ * Validator for audio chat request (multi-turn conversation with transcript)
+ */
+export const audioChatValidator = vine.compile(
+  vine.object({
+    messages: vine
+      .array(
+        vine.object({
+          role: vine.enum(['user', 'assistant']),
+          content: vine.string().minLength(1).maxLength(5000),
+        })
+      )
+      .minLength(1)
+      .maxLength(50),
+  })
+)
+
+/**
  * Export format options
  */
 export type ExportFormat = 'pdf' | 'docx' | 'txt' | 'md'
