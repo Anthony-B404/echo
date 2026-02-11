@@ -18,6 +18,20 @@ const { t } = useI18n()
 
 const promptsStore = usePromptsStore()
 
+const actionItems = computed(() => [
+  [{
+    label: t('common.buttons.edit'),
+    icon: 'i-lucide-pencil',
+    onSelect: () => emit('edit', props.prompt)
+  }],
+  [{
+    label: t('common.buttons.delete'),
+    icon: 'i-lucide-trash-2',
+    color: 'error' as const,
+    onSelect: () => emit('delete', props.prompt)
+  }]
+])
+
 const category = computed(() => {
   if (!props.prompt.categoryId) { return null }
   return promptsStore.getCategory(props.prompt.categoryId)
@@ -50,7 +64,7 @@ function getContentPreview (content: string, maxLength: number = 100): string {
 
 <template>
   <div
-    class="group flex h-48 cursor-pointer flex-col rounded-lg border border-gray-200 bg-white/50 p-4 backdrop-blur-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-slate-900/50 dark:hover:border-gray-500 dark:hover:bg-slate-800/70"
+    class="group flex min-h-48 cursor-pointer flex-col rounded-lg border border-gray-200 bg-white/50 p-4 backdrop-blur-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-slate-900/50 dark:hover:border-gray-500 dark:hover:bg-slate-800/70"
     :class="{ 'ring-primary-500 ring-2': selected }"
     @click="handleSelect"
   >
@@ -79,7 +93,7 @@ function getContentPreview (content: string, maxLength: number = 100): string {
         icon="i-lucide-star"
         color="neutral"
         variant="ghost"
-        size="xs"
+        size="sm"
         :class="
           prompt.isFavorite ? 'text-yellow-500 hover:text-yellow-600' : ''
         "
@@ -89,7 +103,7 @@ function getContentPreview (content: string, maxLength: number = 100): string {
 
     <!-- Content preview -->
     <p
-      class="mb-3 line-clamp-3 flex-1 text-xs text-gray-600 dark:text-gray-300"
+      class="mb-3 line-clamp-3 flex-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300"
     >
       {{ getContentPreview(prompt.content, 120) }}
     </p>
@@ -98,7 +112,7 @@ function getContentPreview (content: string, maxLength: number = 100): string {
     <div class="flex min-h-[1.5rem] items-center justify-between">
       <div class="flex items-center gap-2 text-xs text-gray-400">
         <span v-if="prompt.usageCount > 0" class="flex items-center gap-1">
-          <UIcon name="i-lucide-bar-chart-2" class="h-3 w-3" />
+          <UIcon name="i-lucide-bar-chart-2" class="h-3.5 w-3.5" />
           {{ prompt.usageCount }}
         </span>
         <span
@@ -115,25 +129,16 @@ function getContentPreview (content: string, maxLength: number = 100): string {
         </span>
       </div>
 
-      <!-- Actions (visible on hover) -->
-      <div
-        class="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100"
-      >
+      <!-- Actions menu -->
+      <UDropdownMenu :items="actionItems">
         <UButton
-          icon="i-lucide-pencil"
+          icon="i-lucide-ellipsis"
           color="neutral"
           variant="ghost"
-          size="xs"
-          @click="handleEdit"
+          size="sm"
+          @click.stop
         />
-        <UButton
-          icon="i-lucide-trash-2"
-          color="error"
-          variant="ghost"
-          size="xs"
-          @click="handleDelete"
-        />
-      </div>
+      </UDropdownMenu>
     </div>
   </div>
 </template>

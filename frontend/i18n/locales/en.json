@@ -314,6 +314,7 @@
       "edit": "Edit",
       "deactivate": "Deactivate",
       "actions": "Actions",
+      "share": "Share",
       "logout": "Log out"
     },
     "error": "Error",
@@ -388,7 +389,9 @@
       "loadMore": "Load more",
       "errorTitle": "Loading error",
       "errorDescription": "Unable to load notifications",
-      "retry": "Retry"
+      "retry": "Retry",
+      "ariaLabel": "Notifications",
+      "ariaLabelWithCount": "Notifications - {count} unread"
     },
     "teams": {
       "loading": "Loading...",
@@ -819,6 +822,7 @@
         "backToWorkshop": "Back to workshop",
         "empty": "No audio found",
         "emptyDescription": "Upload or record an audio file to get started.",
+        "goToWorkshop": "Go to Workshop",
         "selected": "{count} selected",
         "deleteSelected": "Delete selected",
         "showing": "{count} of {total} audios",

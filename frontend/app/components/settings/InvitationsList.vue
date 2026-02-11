@@ -66,7 +66,7 @@ const handleDelete = (id: number) => {
             <p class="text-highlighted truncate font-medium">
               {{ invitation.email }}
             </p>
-            <div class="text-muted flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <div class="text-muted flex flex-wrap gap-x-3 gap-y-1 text-xs">
               <span>{{ getRoleLabel(invitation.role) }}</span>
               <span>
                 {{ t("components.settings.invitations.sentOn") }}:
@@ -81,14 +81,31 @@ const handleDelete = (id: number) => {
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
+        <UButton
+          icon="i-lucide-send"
+          color="neutral"
+          variant="outline"
+          size="sm"
+          class="sm:hidden"
+          @click="handleResend(invitation.id)"
+        />
         <UButton
           :label="t('components.settings.invitations.resend')"
           icon="i-lucide-send"
           color="neutral"
           variant="outline"
           size="sm"
+          class="hidden sm:inline-flex"
           @click="handleResend(invitation.id)"
+        />
+        <UButton
+          icon="i-lucide-trash-2"
+          color="error"
+          variant="outline"
+          size="sm"
+          class="sm:hidden"
+          @click="handleDelete(invitation.id)"
         />
         <UButton
           :label="t('components.settings.invitations.delete')"
@@ -96,6 +113,7 @@ const handleDelete = (id: number) => {
           color="error"
           variant="outline"
           size="sm"
+          class="hidden sm:inline-flex"
           @click="handleDelete(invitation.id)"
         />
       </div>

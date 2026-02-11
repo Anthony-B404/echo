@@ -26,6 +26,27 @@ const editedTitle = ref('')
 const titleInputRef = ref<HTMLInputElement | null>(null)
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
+
+// Mobile card action items
+function getCardActionItems (audio: Audio) {
+  return [
+    [{
+      label: t('pages.dashboard.library.clickToRename'),
+      icon: 'i-lucide-pencil',
+      onSelect: () => {
+        editingAudioId.value = audio.id
+        editedTitle.value = audio.title || audio.fileName
+      }
+    }],
+    [{
+      label: t('common.buttons.delete'),
+      icon: 'i-lucide-trash-2',
+      color: 'error' as const,
+      onSelect: () => emit('delete', audio)
+    }]
+  ]
+}
 
 // Table columns definition (Nuxt UI 4 uses TanStack Table format)
 const columns = computed(() => [
@@ -46,27 +67,27 @@ const columns = computed(() => [
     accessorKey: 'duration',
     header: t('pages.dashboard.library.columns.duration'),
     enableSorting: true,
-    meta: { class: { th: 'w-24', td: 'w-24' } }
+    meta: { class: { th: 'hidden sm:table-cell w-24', td: 'hidden sm:table-cell w-24' } }
   },
   {
     id: 'status',
     accessorKey: 'status',
     header: t('pages.dashboard.library.columns.status'),
     enableSorting: true,
-    meta: { class: { th: 'w-32', td: 'w-32' } }
+    meta: { class: { th: 'hidden md:table-cell w-32', td: 'hidden md:table-cell w-32' } }
   },
   {
     id: 'createdAt',
     accessorKey: 'createdAt',
     header: t('pages.dashboard.library.columns.date'),
     enableSorting: true,
-    meta: { class: { th: 'w-40', td: 'w-40' } }
+    meta: { class: { th: 'hidden sm:table-cell w-40', td: 'hidden sm:table-cell w-40' } }
   },
   {
     id: 'actions',
     accessorKey: 'actions',
     header: '',
-    meta: { class: { th: 'w-16', td: 'w-16' } }
+    meta: { class: { th: 'w-12 sm:w-16', td: 'w-12 sm:w-16' } }
   }
 ])
 
@@ -185,31 +206,99 @@ function handleTitleKeydown (event: KeyboardEvent, audio: Audio) {
     </div>
 
     <!-- Empty state -->
-    <div
+    <UEmpty
       v-else-if="audios.length === 0"
-      class="flex flex-col items-center justify-center py-12 text-center"
-    >
-      <UIcon name="i-lucide-music" class="h-12 w-12 text-gray-400 mb-4" />
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-        {{ t('pages.dashboard.library.empty') }}
-      </h3>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ t('pages.dashboard.library.emptyDescription') }}
-      </p>
-    </div>
+      :title="t('pages.dashboard.library.empty')"
+      :description="t('pages.dashboard.library.emptyDescription')"
+      icon="i-lucide-music"
+      :actions="[{ label: t('pages.dashboard.library.goToWorkshop'), to: localePath('/dashboard'), color: 'primary' as const }]"
+    />
 
-    <!-- Table -->
-    <UTable
-      v-else
-      :columns="columns"
-      :data="audios"
-      :loading="loading"
-      class="w-full"
-      :ui="{
-        tr: 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
-      }"
-      @select="(_e, row) => emit('select', row.original)"
-    >
+    <template v-else>
+      <!-- Mobile: Card list -->
+      <div class="sm:hidden space-y-2">
+        <!-- Select all -->
+        <div class="flex items-center gap-2 px-1">
+          <UCheckbox
+            :model-value="allSelected"
+            :indeterminate="someSelected"
+            @update:model-value="toggleAll"
+          />
+          <span class="text-sm text-muted">
+            {{ t('pages.dashboard.library.columns.title') }}
+          </span>
+        </div>
+
+        <div
+          v-for="audio in audios"
+          :key="audio.id"
+          class="flex items-center gap-3 p-3 rounded-lg border border-default cursor-pointer transition-colors hover:bg-elevated/50"
+          :class="{ 'border-primary bg-primary/5': selectedIds.includes(audio.id) }"
+          @click="emit('select', audio)"
+        >
+          <UCheckbox
+            :model-value="selectedIds.includes(audio.id)"
+            @update:model-value="toggleItem(audio.id)"
+            @click.stop
+          />
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30"
+          >
+            <UIcon
+              :name="audio.status === AudioStatus.Processing ? 'i-lucide-loader-2' : 'i-lucide-music'"
+              :class="[
+                'h-5 w-5 text-primary-600 dark:text-primary-400',
+                audio.status === AudioStatus.Processing ? 'animate-spin' : ''
+              ]"
+            />
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-highlighted truncate">
+              {{ audio.title || audio.fileName }}
+            </p>
+            <div class="flex items-center gap-2 mt-1">
+              <UBadge
+                :color="statusConfig[audio.status as AudioStatus]?.color || 'neutral'"
+                variant="subtle"
+                size="sm"
+              >
+                <UIcon
+                  :name="statusConfig[audio.status as AudioStatus]?.icon || 'i-lucide-circle'"
+                  :class="[
+                    'h-3.5 w-3.5 mr-0.5',
+                    audio.status === AudioStatus.Processing ? 'animate-spin' : ''
+                  ]"
+                />
+                {{ t(`components.workshop.status.${audio.status}`) }}
+              </UBadge>
+              <span class="text-xs text-dimmed">
+                {{ formatDuration(audio.duration) }} · {{ formatDate(audio.createdAt) }}
+              </span>
+            </div>
+          </div>
+          <UDropdownMenu :items="getCardActionItems(audio)">
+            <UButton
+              icon="i-lucide-ellipsis-vertical"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              @click.stop
+            />
+          </UDropdownMenu>
+        </div>
+      </div>
+
+      <!-- Desktop: Table -->
+      <UTable
+        class="hidden sm:block w-full"
+        :columns="columns"
+        :data="audios"
+        :loading="loading"
+        :ui="{
+          tr: 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
+        }"
+        @select="(_e, row) => emit('select', row.original)"
+      >
       <!-- Header checkbox -->
       <template #select-header>
         <UCheckbox
@@ -250,7 +339,7 @@ function handleTitleKeydown (event: KeyboardEvent, audio: Audio) {
 
       <template #title-cell="{ row }">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
             <UIcon
               :name="row.original.status === AudioStatus.Processing ? 'i-lucide-loader-2' : 'i-lucide-music'"
               :class="[
@@ -260,31 +349,50 @@ function handleTitleKeydown (event: KeyboardEvent, audio: Audio) {
             />
           </div>
 
-          <!-- Inline editing input -->
-          <UInput
-            v-if="editingAudioId === row.original.id"
-            ref="titleInputRef"
-            v-model="editedTitle"
-            size="sm"
-            class="flex-1 max-w-xs"
-            @keydown="(e: KeyboardEvent) => handleTitleKeydown(e, row.original)"
-            @blur="saveTitle(row.original)"
-            @click.stop
-          />
-
-          <!-- Display title (clickable to edit) -->
-          <button
-            v-else
-            class="font-medium text-gray-900 dark:text-white truncate max-w-xs hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-left flex items-center gap-1 group"
-            :title="t('pages.dashboard.library.clickToRename')"
-            @click="(e) => startEditingTitle(row.original, e)"
-          >
-            <span class="truncate">{{ getDisplayTitle(row.original) }}</span>
-            <UIcon
-              name="i-lucide-pencil"
-              class="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+          <div class="min-w-0 flex-1">
+            <!-- Inline editing input -->
+            <UInput
+              v-if="editingAudioId === row.original.id"
+              ref="titleInputRef"
+              v-model="editedTitle"
+              size="sm"
+              class="w-full"
+              @keydown="(e: KeyboardEvent) => handleTitleKeydown(e, row.original)"
+              @blur="saveTitle(row.original)"
+              @click.stop
             />
-          </button>
+
+            <!-- Display title (clickable to edit) -->
+            <button
+              v-else
+              class="font-medium text-gray-900 dark:text-white truncate max-w-full hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-left flex items-center gap-1"
+              :title="t('pages.dashboard.library.clickToRename')"
+              @click="(e) => startEditingTitle(row.original, e)"
+            >
+              <span class="truncate">{{ getDisplayTitle(row.original) }}</span>
+            </button>
+
+            <!-- Condensed info on mobile (hidden columns) -->
+            <div class="flex items-center gap-2 mt-1 sm:hidden">
+              <UBadge
+                :color="statusConfig[row.original.status as AudioStatus]?.color || 'neutral'"
+                variant="subtle"
+                size="xs"
+              >
+                <UIcon
+                  :name="statusConfig[row.original.status as AudioStatus]?.icon || 'i-lucide-circle'"
+                  :class="[
+                    'h-3 w-3 mr-0.5',
+                    row.original.status === AudioStatus.Processing ? 'animate-spin' : ''
+                  ]"
+                />
+                {{ t(`components.workshop.status.${row.original.status}`) }}
+              </UBadge>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ formatDate(row.original.createdAt) }}
+              </span>
+            </div>
+          </div>
         </div>
       </template>
 
@@ -368,10 +476,11 @@ function handleTitleKeydown (event: KeyboardEvent, audio: Audio) {
           icon="i-lucide-trash-2"
           color="error"
           variant="ghost"
-          size="xs"
+          size="sm"
           @click.stop="emit('delete', row.original)"
         />
       </template>
-    </UTable>
+      </UTable>
+    </template>
   </div>
 </template>

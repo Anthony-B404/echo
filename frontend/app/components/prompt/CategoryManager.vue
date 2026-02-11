@@ -172,7 +172,7 @@ function handleClose () {
           </div>
         </div>
 
-        <UDivider />
+        <USeparator />
 
         <!-- Create/Edit form -->
         <div v-if="isCreating || editingCategory" class="space-y-3">

@@ -216,7 +216,7 @@ const fullName = computed(() => {
           v-model="profile.email"
           type="email"
           autocomplete="off"
-          class="min-w-[225px]"
+          class="min-w-0 w-full sm:min-w-[225px]"
         />
       </UFormField>
       <USeparator />

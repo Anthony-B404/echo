@@ -3,7 +3,6 @@ import type { NavigationMenuItem, DropdownMenuItem } from '@nuxt/ui'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const toast = useToast()
 const { canAccessOrganization, canManageMembers } = useSettingsPermissions()
 const creditsStore = useCreditsStore()
 const { credits } = storeToRefs(creditsStore)
@@ -98,9 +97,9 @@ const settingsItems = computed(() => {
   }
 
   items.push({
-    label: t('pages.dashboard.settings.navigation.security'),
-    to: localePath('/dashboard/settings/security'),
-    icon: 'i-lucide-shield',
+    label: t('pages.dashboard.settings.navigation.privacy'),
+    to: localePath('/dashboard/settings/privacy'),
+    icon: 'i-lucide-shield-check',
     onSelect: () => {
       open.value = false
     }
@@ -109,48 +108,17 @@ const settingsItems = computed(() => {
   return [items]
 })
 
-onMounted(async () => {
-  const cookie = useCookie('cookie-consent')
-  if (cookie.value === 'accepted' || cookie.value === 'declined') {
-    return
-  }
-
-  toast.add({
-    title: t('layouts.default.cookies.title'),
-    duration: 0,
-    close: false,
-    actions: [
-      {
-        label: t('layouts.default.cookies.accept'),
-        color: 'neutral',
-        variant: 'outline',
-        onClick: () => {
-          cookie.value = 'accepted'
-        }
-      },
-      {
-        label: t('layouts.default.cookies.optOut'),
-        color: 'neutral',
-        variant: 'ghost',
-        onClick: () => {
-          cookie.value = 'declined'
-        }
-      },
-      {
-        label: t('layouts.default.cookies.learnMore'),
-        color: 'neutral',
-        variant: 'link',
-        to: localePath('/cookies-policy')
-      }
-    ]
-  })
-})
+const notificationAriaLabel = computed(() =>
+  unreadCount.value > 0
+    ? t('components.notifications.ariaLabelWithCount', { count: unreadCount.value })
+    : t('components.notifications.ariaLabel')
+)
 </script>
 
 <template>
   <div class="relative flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden">
-    <!-- Background Blobs -->
-    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <!-- Background Blobs (hidden on mobile for GPU performance) -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden hidden sm:block">
       <!-- Top Left Blob -->
       <div
         class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-20 blur-3xl bg-gradient-to-br from-indigo-400 to-blue-500 animate-pulse"
@@ -191,10 +159,11 @@ onMounted(async () => {
           <div class="hidden md:flex items-center gap-3">
             <!-- Notifications Bell -->
             <UButton
-              icon="i-heroicons-bell"
+              icon="i-lucide-bell"
               color="neutral"
               variant="ghost"
               class="relative"
+              :aria-label="notificationAriaLabel"
               @click="isNotificationsSlideoverOpen = true"
             >
               <span
@@ -223,7 +192,7 @@ onMounted(async () => {
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 w-full max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-1">
+    <main class="relative z-10 w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex-1">
       <slot />
     </main>
 
@@ -233,9 +202,10 @@ onMounted(async () => {
     <!-- Global Components -->
     <ContactSupportModal v-model:open="contactModalOpen" />
     <NotificationsSlideover />
+    <CookieBanner />
 
     <!-- Mobile Slideover -->
-    <USlideover v-model:open="open" title="Menu">
+    <USlideover v-model:open="open" title="Menu" description=" ">
       <template #body>
         <div class="flex flex-col gap-4 h-full">
           <NuxtLink v-if="hasSingleOrganization" :to="localePath('/dashboard')" class="group flex items-center gap-2 px-2">
@@ -268,13 +238,24 @@ onMounted(async () => {
 
           <USeparator />
 
+          <!-- Mobile Credits Badge -->
+          <NuxtLink
+            :to="localePath('/dashboard/credits')"
+            class="flex items-center gap-3 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            @click="open = false"
+          >
+            <UIcon name="i-lucide-coins" class="w-5 h-5 text-indigo-500" />
+            <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">{{ credits }} {{ t('pages.dashboard.credits.creditsUnit') }}</span>
+          </NuxtLink>
+
           <!-- Mobile Notifications Button -->
           <button
             class="flex items-center gap-3 px-2 py-2 w-full text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            :aria-label="notificationAriaLabel"
             @click="open = false; isNotificationsSlideoverOpen = true"
           >
             <div class="relative">
-              <UIcon name="i-heroicons-bell" class="w-5 h-5 text-gray-500" />
+              <UIcon name="i-lucide-bell" class="w-5 h-5 text-gray-500" />
               <span
                 v-if="unreadCount > 0"
                 class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"

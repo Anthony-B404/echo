@@ -283,7 +283,7 @@ const organizationName = computed(() => {
           v-model="organization.email"
           type="email"
           autocomplete="off"
-          class="min-w-[225px]"
+          class="min-w-0 w-full sm:min-w-[225px]"
         />
       </UFormField>
       <USeparator />
@@ -331,7 +331,7 @@ const organizationName = computed(() => {
           multiple
           value-key="value"
           :placeholder="t('pages.dashboard.settings.organization.businessSectorsPlaceholder')"
-          class="w-full max-w-md"
+          class="w-full max-w-full sm:max-w-md"
         />
       </UFormField>
     </UPageCard>

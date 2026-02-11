@@ -322,6 +322,7 @@
       "edit": "Modifier",
       "deactivate": "Désactiver",
       "actions": "Actions",
+      "share": "Partager",
       "logout": "Se déconnecter"
     },
     "error": "Erreur",
@@ -393,7 +394,9 @@
       "loadMore": "Charger plus",
       "errorTitle": "Erreur de chargement",
       "errorDescription": "Impossible de charger les notifications",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "ariaLabel": "Notifications",
+      "ariaLabelWithCount": "Notifications - {count} non lue(s)"
     },
     "teams": {
       "loading": "Chargement...",
@@ -824,6 +827,7 @@
         "backToWorkshop": "Retour à l'atelier",
         "empty": "Aucun audio trouvé",
         "emptyDescription": "Importez ou enregistrez un fichier audio pour commencer.",
+        "goToWorkshop": "Aller à l'atelier",
         "selected": "{count} sélectionné(s)",
         "deleteSelected": "Supprimer la sélection",
         "showing": "{count} sur {total} audios",

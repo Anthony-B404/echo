@@ -54,27 +54,37 @@ async function handleMarkAllAsRead() {
   <USlideover
     v-model:open="isNotificationsSlideoverOpen"
     :title="t('components.notifications.title')"
+    description=" "
   >
     <template #header>
       <div class="flex items-center justify-between w-full">
         <h2 class="text-lg font-semibold">
           {{ t('components.notifications.title') }}
         </h2>
-        <UButton
-          v-if="unreadCount > 0"
-          variant="ghost"
-          size="sm"
-          @click="handleMarkAllAsRead"
-        >
-          {{ t('components.notifications.markAllRead') }}
-        </UButton>
+        <div class="flex items-center gap-2">
+          <UButton
+            v-if="unreadCount > 0"
+            variant="ghost"
+            size="sm"
+            @click="handleMarkAllAsRead"
+          >
+            {{ t('components.notifications.markAllRead') }}
+          </UButton>
+          <UButton
+            icon="i-lucide-x"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            @click="isNotificationsSlideoverOpen = false"
+          />
+        </div>
       </div>
     </template>
 
     <template #body>
       <!-- Loading state -->
       <div v-if="isLoading && notifications.length === 0" class="flex items-center justify-center py-8">
-        <UIcon name="i-heroicons-arrow-path" class="h-6 w-6 animate-spin text-gray-400" />
+        <UIcon name="i-lucide-loader-2" class="h-6 w-6 animate-spin text-gray-400" />
       </div>
 
       <!-- Error state -->
@@ -86,12 +96,12 @@ async function handleMarkAllAsRead() {
           :title="t('components.notifications.errorTitle')"
           :description="error || t('components.notifications.errorDescription')"
           color="error"
-          icon="i-heroicons-exclamation-triangle"
+          icon="i-lucide-triangle-alert"
         />
         <UButton
           class="mt-4"
           variant="soft"
-          icon="i-heroicons-arrow-path"
+          icon="i-lucide-refresh-cw"
           @click="refresh"
         >
           {{ t('components.notifications.retry') }}
@@ -103,7 +113,7 @@ async function handleMarkAllAsRead() {
         v-else-if="notifications.length === 0"
         class="flex flex-col items-center justify-center py-12 text-center"
       >
-        <UIcon name="i-heroicons-bell-slash" class="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+        <UIcon name="i-lucide-bell-off" class="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
         <p class="text-muted text-sm">
           {{ t('components.notifications.empty') }}
         </p>
@@ -115,7 +125,7 @@ async function handleMarkAllAsRead() {
           <button
             v-for="notification in notifications"
             :key="notification.id"
-            class="hover:bg-elevated/50 relative -mx-3 flex w-full items-start gap-3 rounded-md px-3 py-3 text-left first:-mt-3 transition-colors"
+            class="hover:bg-elevated/50 relative -mx-2 flex w-full items-start gap-3 rounded-md px-2 py-3 text-left first:-mt-3 transition-colors"
             :class="{ 'bg-primary-50/50 dark:bg-primary-900/10': !notification.isRead }"
             @click="handleNotificationClick(notification)"
           >
@@ -159,7 +169,7 @@ async function handleMarkAllAsRead() {
         <div v-if="hasMore" class="mt-4 flex justify-center">
           <UButton
             variant="ghost"
-            size="sm"
+            size="md"
             :loading="isLoading"
             @click="loadMore"
           >

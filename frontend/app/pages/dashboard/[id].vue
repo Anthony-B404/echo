@@ -413,6 +413,44 @@ onUnmounted(() => {
   }
 })
 
+// Header action items for mobile dropdown
+const headerActions = computed(() => [
+  [{
+    label: t('common.buttons.share'),
+    icon: 'i-lucide-share-2',
+    onSelect: () => { shareModalOpen.value = true }
+  }],
+  [{
+    label: t('common.buttons.delete'),
+    icon: 'i-lucide-trash-2',
+    color: 'error' as const,
+    onSelect: () => { deleteModalOpen.value = true }
+  }]
+])
+
+// Tab action items for mobile dropdown
+const tabActions = computed(() => {
+  const items: { label: string; icon: string; onSelect: () => void }[][] = []
+
+  if (!isEditingAnalysis.value && activeTab.value === 'analysis') {
+    items.push([{
+      label: t('common.buttons.edit'),
+      icon: 'i-lucide-pencil',
+      onSelect: () => startEditingAnalysis()
+    }])
+  }
+
+  items.push([
+    {
+      label: t('pages.dashboard.workshop.detail.viewHistory'),
+      icon: 'i-lucide-history',
+      onSelect: () => openHistory(activeTab.value === 'transcription' ? 'raw_text' : 'analysis')
+    }
+  ])
+
+  return items
+})
+
 // Tab items
 const tabItems = computed(() => [
   {
@@ -433,7 +471,7 @@ const tabItems = computed(() => [
 <template>
   <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-default">
+    <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-default">
       <div class="flex items-center gap-3 flex-1 min-w-0">
         <UButton
           icon="i-lucide-arrow-left"
@@ -467,7 +505,7 @@ const tabItems = computed(() => [
         <!-- Display title (clickable to edit) -->
         <button
           v-else
-          class="text-lg font-semibold text-highlighted truncate hover:text-primary transition-colors cursor-pointer text-left flex items-center gap-2 group"
+          class="text-lg font-semibold text-highlighted truncate hover:text-primary transition-colors cursor-pointer text-left flex items-center gap-2"
           :title="t('pages.dashboard.workshop.detail.clickToEdit')"
           @click="startEditingTitle"
         >
@@ -476,29 +514,36 @@ const tabItems = computed(() => [
           </span>
           <UIcon
             name="i-lucide-pencil"
-            class="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-muted"
+            class="h-4 w-4 text-muted opacity-60 flex-shrink-0"
           />
         </button>
       </div>
 
-      <div v-if="audio" class="flex items-center gap-2">
-        <UButton
-          icon="i-lucide-share-2"
-          color="primary"
-          variant="ghost"
-          @click="shareModalOpen = true"
-        />
-        <UButton
-          icon="i-lucide-trash-2"
-          color="error"
-          variant="ghost"
-          @click="deleteModalOpen = true"
-        />
+      <div v-if="audio" class="flex items-center gap-2 shrink-0">
+        <!-- Mobile: three-dot menu -->
+        <UDropdownMenu :items="headerActions" class="sm:hidden">
+          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" />
+        </UDropdownMenu>
+        <!-- Desktop: individual buttons -->
+        <div class="hidden sm:flex items-center gap-2">
+          <UButton
+            icon="i-lucide-share-2"
+            color="primary"
+            variant="ghost"
+            @click="shareModalOpen = true"
+          />
+          <UButton
+            icon="i-lucide-trash-2"
+            color="error"
+            variant="ghost"
+            @click="deleteModalOpen = true"
+          />
+        </div>
       </div>
     </div>
 
     <!-- Content (scrollable) -->
-    <div class="flex-1 overflow-y-auto p-6">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6">
       <!-- Loading state -->
       <div v-if="audioStore.loading && !audio" class="space-y-6">
         <USkeleton class="h-24 rounded-lg" />
@@ -526,12 +571,12 @@ const tabItems = computed(() => [
         <UPageCard variant="subtle">
           <div class="flex items-start gap-4 mb-4">
             <div
-              class="shrink-0 w-16 h-16 rounded-lg flex items-center justify-center"
+              class="shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center"
               :class="isCompleted ? 'bg-primary/10' : 'bg-elevated'"
             >
               <UIcon
                 :name="isProcessing ? 'i-lucide-loader-2' : 'i-lucide-music'"
-                class="w-8 h-8"
+                class="w-6 h-6 sm:w-8 sm:h-8"
                 :class="[
                   isProcessing ? 'animate-spin text-primary' : '',
                   isCompleted ? 'text-primary' : 'text-muted',
@@ -543,7 +588,7 @@ const tabItems = computed(() => [
               <h2 class="text-xl font-semibold text-highlighted mb-2">
                 {{ audio.title || audio.fileName }}
               </h2>
-              <div class="flex items-center gap-4 text-sm text-muted">
+              <div class="flex flex-wrap items-center gap-4 text-sm text-muted">
                 <span class="flex items-center gap-1">
                   <UIcon name="i-lucide-clock" class="w-4 h-4" />
                   {{ formatDuration(audio.duration) }}
@@ -580,57 +625,91 @@ const tabItems = computed(() => [
 
         <!-- Transcription/Analysis tabs -->
         <UPageCard v-if="isCompleted && audio.transcription" variant="subtle">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
             <UTabs v-model="activeTab" :items="tabItems" :disabled="isEditing" />
 
-            <div v-if="activeTab !== 'questions'" class="flex items-center gap-2">
-              <!-- Edit button (only on analysis tab, transcription is read-only) -->
-              <UButton
-                v-if="!isEditingAnalysis && activeTab === 'analysis'"
-                icon="i-lucide-pencil"
-                color="primary"
-                variant="ghost"
-                size="sm"
-                :label="t('common.buttons.edit')"
-                :disabled="!audio.transcription?.analysis"
-                @click="startEditingAnalysis"
-              />
+            <div v-if="activeTab !== 'questions'" class="flex items-center justify-end gap-1.5 sm:gap-2">
+              <!-- Mobile: compact actions -->
+              <div class="flex items-center gap-1.5 sm:hidden">
+                <!-- TTS player on mobile (analysis tab only) -->
+                <WorkshopAnalysisTtsPlayer
+                  v-if="!isEditing && activeTab === 'analysis'"
+                  :key="`tts-mobile-${audio.transcription?.analysisVersion}`"
+                  :audio-id="audio.id"
+                  :disabled="!audio.transcription?.analysis"
+                />
 
-              <!-- TTS player (only on analysis tab, not editing) -->
-              <WorkshopAnalysisTtsPlayer
-                v-if="!isEditing && activeTab === 'analysis'"
-                :key="`tts-${audio.transcription?.analysisVersion}`"
-                :audio-id="audio.id"
-                :disabled="!audio.transcription?.analysis"
-              />
+                <UButton
+                  v-if="!isEditing"
+                  icon="i-lucide-copy"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="!canCopy"
+                  @click="copyContent"
+                />
+                <WorkshopExportDropdown
+                  v-if="!isEditing"
+                  :audio-id="audio.id"
+                  :audio-title="audio.title || audio.fileName"
+                  :has-transcription="!!audio.transcription?.rawText"
+                  :has-analysis="!!audio.transcription?.analysis"
+                />
+                <UDropdownMenu v-if="!isEditing" :items="tabActions">
+                  <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="sm" />
+                </UDropdownMenu>
+              </div>
 
-              <!-- History button -->
-              <UButton
-                v-if="!isEditing"
-                icon="i-lucide-history"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                :title="t('pages.dashboard.workshop.detail.viewHistory')"
-                @click="openHistory(activeTab === 'transcription' ? 'raw_text' : 'analysis')"
-              />
+              <!-- Desktop: all buttons inline -->
+              <div class="hidden sm:flex items-center gap-2">
+                <!-- Edit button (only on analysis tab, transcription is read-only) -->
+                <UButton
+                  v-if="!isEditingAnalysis && activeTab === 'analysis'"
+                  icon="i-lucide-pencil"
+                  color="primary"
+                  variant="ghost"
+                  size="sm"
+                  :label="t('common.buttons.edit')"
+                  :disabled="!audio.transcription?.analysis"
+                  @click="startEditingAnalysis"
+                />
 
-              <UButton
-                v-if="!isEditing"
-                icon="i-lucide-copy"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                :disabled="!canCopy"
-                @click="copyContent"
-              />
-              <WorkshopExportDropdown
-                v-if="!isEditing"
-                :audio-id="audio.id"
-                :audio-title="audio.title || audio.fileName"
-                :has-transcription="!!audio.transcription?.rawText"
-                :has-analysis="!!audio.transcription?.analysis"
-              />
+                <!-- TTS player (only on analysis tab, not editing) -->
+                <WorkshopAnalysisTtsPlayer
+                  v-if="!isEditing && activeTab === 'analysis'"
+                  :key="`tts-${audio.transcription?.analysisVersion}`"
+                  :audio-id="audio.id"
+                  :disabled="!audio.transcription?.analysis"
+                />
+
+                <!-- History button -->
+                <UButton
+                  v-if="!isEditing"
+                  icon="i-lucide-history"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  :title="t('pages.dashboard.workshop.detail.viewHistory')"
+                  @click="openHistory(activeTab === 'transcription' ? 'raw_text' : 'analysis')"
+                />
+
+                <UButton
+                  v-if="!isEditing"
+                  icon="i-lucide-copy"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="!canCopy"
+                  @click="copyContent"
+                />
+                <WorkshopExportDropdown
+                  v-if="!isEditing"
+                  :audio-id="audio.id"
+                  :audio-title="audio.title || audio.fileName"
+                  :has-transcription="!!audio.transcription?.rawText"
+                  :has-analysis="!!audio.transcription?.analysis"
+                />
+              </div>
             </div>
           </div>
 
@@ -664,7 +743,7 @@ const tabItems = computed(() => [
 
             <!-- Metadata -->
             <div
-              class="mt-4 pt-4 border-t border-default flex items-center gap-4 text-sm text-muted"
+              class="mt-4 pt-4 border-t border-default flex flex-wrap items-center gap-4 text-sm text-muted"
             >
               <span v-if="audio.transcription.language">
                 {{ t('pages.dashboard.workshop.detail.language') }}:

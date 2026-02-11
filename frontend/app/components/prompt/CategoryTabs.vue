@@ -50,7 +50,7 @@ function isSelected (categoryId: number | null) {
       {{ t('pages.dashboard.prompts.favorites') }}
     </UButton>
 
-    <UDivider orientation="vertical" class="h-6" />
+    <USeparator orientation="vertical" class="h-6" />
 
     <!-- Category tabs -->
     <UButton

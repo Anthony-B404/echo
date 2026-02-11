@@ -211,22 +211,22 @@ const tabItems = computed(() => [
 <template>
   <div class="w-full space-y-6">
     <!-- Header Section - toujours visible -->
-    <div class="w-full flex items-center justify-between mb-8">
+    <div class="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-2xl sm:text-3xl font-bold text-highlighted">
           {{ t('pages.dashboard.workshop.title') }}
         </h1>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">
+        <p class="mt-2 text-muted">
           {{ t('pages.dashboard.workshop.subtitle') }}
         </p>
       </div>
     </div>
 
-    <div class="w-full grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div class="w-full grid grid-cols-1 gap-4 lg:gap-8 lg:grid-cols-2">
       <!-- Left: Upload/Record section - toujours visible -->
       <div class="space-y-6">
         <UCard
-          class="transition-all duration-300 hover:-translate-y-1 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-2 hover:ring-primary-500/50 dark:hover:ring-primary-400/50 shadow-lg hover:shadow-xl dark:shadow-none"
+          class="transition-all duration-300 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-2 hover:ring-primary-500/50 dark:hover:ring-primary-400/50 shadow-lg hover:shadow-xl dark:shadow-none"
         >
           <template #header>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">

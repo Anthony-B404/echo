@@ -262,19 +262,19 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 class="text-2xl sm:text-3xl font-bold text-highlighted">
             {{ t('pages.dashboard.credits.title') }}
           </h1>
-          <p class="mt-1 text-gray-500 dark:text-gray-400">
+          <p class="mt-1 text-muted">
             {{ t('pages.dashboard.credits.subtitle') }}
           </p>
         </div>
         <CreditsCreditModeBadge :mode="creditMode" />
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <!-- Request Credits Button (Member in individual mode) -->
         <UButton
           v-if="canRequestCredits"
@@ -282,7 +282,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
           icon="i-lucide-hand-coins"
           @click="openRequestCreditsModal('member_to_owner')"
         >
-          {{ t('pages.dashboard.credits.requests.requestCredits') }}
+          <span class="hidden sm:inline">{{ t('pages.dashboard.credits.requests.requestCredits') }}</span>
         </UButton>
         <!-- Request from Reseller Button (Owner only) -->
         <UButton
@@ -292,7 +292,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
           icon="i-lucide-hand-coins"
           @click="openRequestCreditsModal('owner_to_reseller')"
         >
-          {{ t('pages.dashboard.credits.requests.requestFromReseller') }}
+          <span class="hidden sm:inline">{{ t('pages.dashboard.credits.requests.requestFromReseller') }}</span>
         </UButton>
         <UButton
           :to="localePath('/dashboard')"
@@ -300,7 +300,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
           variant="ghost"
           icon="i-lucide-arrow-left"
         >
-          {{ t('pages.dashboard.library.backToWorkshop') }}
+          <span class="hidden sm:inline">{{ t('pages.dashboard.library.backToWorkshop') }}</span>
         </UButton>
       </div>
     </div>
@@ -312,11 +312,11 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
         v-if="showOrganizationPool"
         class="relative overflow-hidden border-none bg-gray-50/50 dark:bg-slate-800/50"
       >
-        <div class="relative z-10 flex items-center gap-5">
+        <div class="relative z-10 flex items-center gap-4 sm:gap-5">
           <div
-            class="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-indigo-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
+            class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-indigo-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
           >
-            <UIcon name="i-lucide-building" class="h-8 w-8" />
+            <UIcon name="i-lucide-building" class="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -324,7 +324,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
             </p>
             <div class="mt-0.5 flex items-baseline gap-2">
               <span
-                class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
+                class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
               >
                 {{ organizationCredits }}
               </span>
@@ -347,11 +347,11 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
         v-if="showPersonalBalance"
         class="relative overflow-hidden border-none bg-gray-50/50 dark:bg-slate-800/50"
       >
-        <div class="relative z-10 flex items-center gap-5">
+        <div class="relative z-10 flex items-center gap-4 sm:gap-5">
           <div
-            class="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-emerald-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
+            class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-emerald-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
           >
-            <UIcon name="i-lucide-coins" class="h-8 w-8" />
+            <UIcon name="i-lucide-coins" class="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -359,7 +359,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
             </p>
             <div class="mt-0.5 flex items-baseline gap-2">
               <span
-                class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
+                class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
               >
                 {{ credits }}
               </span>
@@ -388,11 +388,11 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
         v-if="!isIndividualMode && !isOwner"
         class="relative overflow-hidden border-none bg-gray-50/50 dark:bg-slate-800/50"
       >
-        <div class="relative z-10 flex items-center gap-5">
+        <div class="relative z-10 flex items-center gap-4 sm:gap-5">
           <div
-            class="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-indigo-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
+            class="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white text-indigo-500 shadow-sm dark:border-gray-800 dark:bg-slate-900"
           >
-            <UIcon name="i-lucide-coins" class="h-8 w-8" />
+            <UIcon name="i-lucide-coins" class="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -400,7 +400,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
             </p>
             <div class="mt-0.5 flex items-baseline gap-2">
               <span
-                class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
+                class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
               >
                 {{ credits }}
               </span>
@@ -426,7 +426,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
     </div>
 
     <!-- Tabs: History | Members Management -->
-    <UTabs v-model="activeTab" :items="tabs">
+    <UTabs v-model="activeTab" :items="tabs" :ui="{ list: 'overflow-x-auto' }">
       <template #content="{ item }">
         <!-- History Tab -->
         <UCard v-if="item.value === 'history'" class="mt-4">
@@ -446,7 +446,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
             <div
               v-for="tx in transactions"
               :key="tx.id"
-              class="group -mx-2 flex items-center justify-between rounded-lg px-2 py-4 transition-colors hover:bg-gray-50/50 dark:hover:bg-slate-800/30"
+              class="group -mx-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-lg px-2 py-4 transition-colors hover:bg-gray-50/50 dark:hover:bg-slate-800/30"
             >
               <div class="flex items-center gap-4">
                 <div
@@ -465,7 +465,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
                     {{ t(`pages.dashboard.credits.transactionTypes.${tx.type}`) }}
                   </p>
                   <p
-                    class="line-clamp-1 max-w-md text-sm text-gray-500 dark:text-gray-400"
+                    class="line-clamp-1 max-w-full sm:max-w-md text-sm text-gray-500 dark:text-gray-400"
                   >
                     {{ tx.description || '-' }}
                   </p>
@@ -483,7 +483,7 @@ function getPerformedByName(tx: (typeof transactions.value)[0]) {
                   </p>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 pl-14 sm:pl-0 sm:text-right">
                 <p
                   :class="[
                     'text-lg font-bold',

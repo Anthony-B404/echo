@@ -11,6 +11,12 @@ const colorMode = useColorMode()
 const { isNotificationsSlideoverOpen } = useDashboard()
 const { unreadCount } = useNotifications()
 
+const notificationAriaLabel = computed(() =>
+  unreadCount.value > 0
+    ? t('components.notifications.ariaLabelWithCount', { count: unreadCount.value })
+    : t('components.notifications.ariaLabel')
+)
+
 // Sidebar collapsed state (persisted in localStorage)
 const collapsed = useCookie<boolean>('reseller-sidebar-collapsed', {
   default: () => false
@@ -131,11 +137,12 @@ async function handleLogout () {
           <!-- Expanded: Bell + Collapse button -->
           <div v-if="!isCollapsed" class="flex items-center gap-1">
             <UButton
-              icon="i-heroicons-bell"
+              icon="i-lucide-bell"
               color="neutral"
               variant="ghost"
               size="sm"
               class="relative"
+              :aria-label="notificationAriaLabel"
               @click="isNotificationsSlideoverOpen = true"
             >
               <span
@@ -160,11 +167,12 @@ async function handleLogout () {
           <!-- Collapsed: Bell + Collapse button at bottom -->
           <div v-if="isCollapsed" class="mx-auto mt-auto mb-4 flex flex-col items-center gap-2">
             <UButton
-              icon="i-heroicons-bell"
+              icon="i-lucide-bell"
               color="neutral"
               variant="ghost"
               size="sm"
               class="relative"
+              :aria-label="notificationAriaLabel"
               @click="isNotificationsSlideoverOpen = true"
             >
               <span

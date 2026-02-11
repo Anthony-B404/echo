@@ -183,12 +183,12 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-2xl sm:text-3xl font-bold text-highlighted">
           {{ t('pages.dashboard.library.title') }}
         </h1>
-        <p class="mt-1 text-gray-500 dark:text-gray-400">
+        <p class="mt-1 text-muted">
           {{ t('pages.dashboard.library.description') }}
         </p>
       </div>
@@ -197,6 +197,7 @@ onMounted(() => {
         color="neutral"
         variant="ghost"
         icon="i-lucide-arrow-left"
+        class="self-start sm:self-auto"
       >
         {{ t('pages.dashboard.library.backToWorkshop') }}
       </UButton>
@@ -204,9 +205,9 @@ onMounted(() => {
 
     <!-- Filters bar -->
     <UCard class="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-      <div class="flex flex-wrap items-center gap-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <!-- Search input -->
-        <div class="flex-1 min-w-[200px]">
+        <div class="w-full sm:flex-1 sm:min-w-[200px]">
           <UInput
             v-model="searchQuery"
             :placeholder="t('pages.dashboard.library.search')"
@@ -216,13 +217,13 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Sort dropdown -->
-        <div class="flex items-center gap-2">
+        <!-- Sort + Status row -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
           <USelect
             :model-value="sortBy"
             :items="sortOptions"
             size="md"
-            class="w-32"
+            class="flex-1 sm:flex-initial sm:w-32"
             @update:model-value="handleSortChange"
           />
           <UButton
@@ -232,24 +233,22 @@ onMounted(() => {
             size="md"
             @click="toggleSortOrder"
           />
+          <USelect
+            :model-value="statusFilter"
+            :items="statusOptions"
+            :placeholder="t('components.workshop.filters.all')"
+            size="md"
+            class="flex-1 sm:flex-initial sm:w-36"
+            @update:model-value="handleStatusChange"
+          />
         </div>
-
-        <!-- Status filter -->
-        <USelect
-          :model-value="statusFilter"
-          :items="statusOptions"
-          :placeholder="t('components.workshop.filters.all')"
-          size="md"
-          class="w-36"
-          @update:model-value="handleStatusChange"
-        />
       </div>
     </UCard>
 
     <!-- Selection bar -->
     <div
       v-if="selectedIds.length > 0"
-      class="flex items-center justify-between bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg px-4 py-3"
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg px-4 py-3"
     >
       <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
         {{ t('pages.dashboard.library.selected', { count: selectedIds.length }) }}
@@ -282,7 +281,7 @@ onMounted(() => {
       <!-- Pagination -->
       <div
         v-if="audioStore.audios.length > 0"
-        class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4 mt-4"
+        class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t border-gray-200 dark:border-gray-700 pt-4 mt-4"
       >
         <span class="text-sm text-gray-500 dark:text-gray-400">
           {{ t('pages.dashboard.library.showing', {

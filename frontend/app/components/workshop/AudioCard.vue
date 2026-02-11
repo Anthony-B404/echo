@@ -18,6 +18,15 @@ const emit = defineEmits<{
 const { t, locale } = useI18n()
 const audioStore = useAudioStore()
 
+const actionItems = computed(() => [
+  [{
+    label: t('common.buttons.delete'),
+    icon: 'i-lucide-trash-2',
+    color: 'error' as const,
+    onSelect: () => emit('delete')
+  }]
+])
+
 const dateLocale = computed(() => (locale.value === 'fr' ? fr : enUS))
 
 const isProcessing = computed(
@@ -116,7 +125,7 @@ function formatDuration (seconds: number | null): string {
           </UBadge>
         </div>
 
-        <div class="flex items-center gap-3 text-sm text-muted">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
           <span class="flex items-center gap-1">
             <UIcon name="i-lucide-clock" class="w-3.5 h-3.5" />
             {{ formatDuration(audio.duration) }}
@@ -157,15 +166,17 @@ function formatDuration (seconds: number | null): string {
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <UButton
-          icon="i-lucide-trash-2"
-          color="error"
-          variant="ghost"
-          size="xs"
-          @click.stop="emit('delete')"
-        />
+      <!-- Actions menu -->
+      <div class="flex-shrink-0">
+        <UDropdownMenu :items="actionItems">
+          <UButton
+            icon="i-lucide-ellipsis-vertical"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            @click.stop
+          />
+        </UDropdownMenu>
       </div>
     </div>
   </div>

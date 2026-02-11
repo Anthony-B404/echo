@@ -167,16 +167,16 @@ async function handleDeleteCategory (id: number) {
 <template>
   <div class="w-full min-w-0 space-y-6">
     <!-- Header - toujours visible -->
-    <div class="w-full flex items-center justify-between">
+    <div class="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-2xl sm:text-3xl font-bold text-highlighted">
           {{ t('pages.dashboard.prompts.title') }}
         </h1>
-        <p class="mt-1 text-gray-500 dark:text-gray-400">
+        <p class="mt-1 text-muted">
           {{ t('pages.dashboard.prompts.subtitle') }}
         </p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <UButton
           icon="i-lucide-plus"
           color="primary"
@@ -199,7 +199,7 @@ async function handleDeleteCategory (id: number) {
     <UCard class="w-full bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
       <div class="flex flex-wrap items-center gap-4">
         <!-- Search input -->
-        <div class="flex-1 min-w-[200px]">
+        <div class="w-full sm:flex-1 sm:min-w-[200px]">
           <UInput
             v-model="searchQuery"
             :placeholder="t('pages.dashboard.prompts.search')"

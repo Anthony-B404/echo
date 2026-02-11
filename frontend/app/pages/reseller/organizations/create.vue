@@ -710,7 +710,7 @@ function handleCancel () {
                   </div>
                 </UFormField>
 
-                <UDivider />
+                <USeparator />
 
                 <!-- One-time mode: Initial credits only -->
                 <div
@@ -902,7 +902,7 @@ function handleCancel () {
                     </template>
                   </UFormField>
 
-                  <UDivider />
+                  <USeparator />
 
                   <!-- Initial Credits (optional for subscription) -->
                   <UFormField name="initialCredits">

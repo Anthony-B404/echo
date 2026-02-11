@@ -30,18 +30,9 @@ watch(open, (isOpen) => {
   <UModal
     v-model:open="open"
     :title="t('components.workshop.deleteModal.title')"
+    :description="t('components.workshop.deleteModal.description', { name: audio?.title || audio?.fileName })"
     :ui="{ footer: 'justify-end' }"
   >
-    <template #body>
-      <p class="text-muted">
-        {{
-          t('components.workshop.deleteModal.description', {
-            name: audio?.title || audio?.fileName,
-          })
-        }}
-      </p>
-    </template>
-
     <template #footer>
       <UButton
         :label="t('common.buttons.cancel')"
