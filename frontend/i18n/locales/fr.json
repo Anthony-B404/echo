@@ -747,7 +747,10 @@
           },
           "tts": {
             "button": "Écouter l'analyse",
-            "error": "Erreur lors de la génération audio"
+            "error": "Erreur lors de la génération audio",
+            "speed": "Vitesse",
+            "skipBack": "Reculer de 10s",
+            "skipForward": "Avancer de 10s"
           },
           "chat": {
             "emptyState": "Posez des questions sur le contenu de la transcription. L'IA répondra en se basant uniquement sur ce qui a été dit.",

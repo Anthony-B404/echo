@@ -2,12 +2,15 @@
 type ExportFormat = 'pdf' | 'docx' | 'txt' | 'md'
 type ExportContent = 'transcription' | 'analysis' | 'both'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   audioId: number
   audioTitle?: string | null
   hasTranscription: boolean
   hasAnalysis: boolean
-}>()
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+}>(), {
+  size: 'sm',
+})
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -156,7 +159,7 @@ async function exportDocument (format: ExportFormat) {
       icon="i-lucide-download"
       color="neutral"
       variant="ghost"
-      size="sm"
+      :size="props.size"
       :loading="loading"
       :disabled="!hasTranscription && !hasAnalysis"
     />

@@ -630,21 +630,13 @@ const tabItems = computed(() => [
 
             <div v-if="activeTab !== 'questions'" class="flex items-center justify-end gap-1.5 sm:gap-2">
               <!-- Mobile: compact actions -->
-              <div class="flex items-center gap-1.5 sm:hidden">
-                <!-- TTS player on mobile (analysis tab only) -->
-                <WorkshopAnalysisTtsPlayer
-                  v-if="!isEditing && activeTab === 'analysis'"
-                  :key="`tts-mobile-${audio.transcription?.analysisVersion}`"
-                  :audio-id="audio.id"
-                  :disabled="!audio.transcription?.analysis"
-                />
-
+              <div class="flex items-center gap-3 sm:hidden">
                 <UButton
                   v-if="!isEditing"
                   icon="i-lucide-copy"
                   color="neutral"
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   :disabled="!canCopy"
                   @click="copyContent"
                 />
@@ -654,9 +646,10 @@ const tabItems = computed(() => [
                   :audio-title="audio.title || audio.fileName"
                   :has-transcription="!!audio.transcription?.rawText"
                   :has-analysis="!!audio.transcription?.analysis"
+                  size="md"
                 />
                 <UDropdownMenu v-if="!isEditing" :items="tabActions">
-                  <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="sm" />
+                  <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="md" />
                 </UDropdownMenu>
               </div>
 
@@ -672,14 +665,6 @@ const tabItems = computed(() => [
                   :label="t('common.buttons.edit')"
                   :disabled="!audio.transcription?.analysis"
                   @click="startEditingAnalysis"
-                />
-
-                <!-- TTS player (only on analysis tab, not editing) -->
-                <WorkshopAnalysisTtsPlayer
-                  v-if="!isEditing && activeTab === 'analysis'"
-                  :key="`tts-${audio.transcription?.analysisVersion}`"
-                  :audio-id="audio.id"
-                  :disabled="!audio.transcription?.analysis"
                 />
 
                 <!-- History button -->
@@ -711,6 +696,15 @@ const tabItems = computed(() => [
                 />
               </div>
             </div>
+          </div>
+
+          <!-- TTS player: below tabs, aligned right (analysis tab only) -->
+          <div v-if="!isEditing && activeTab === 'analysis' && audio.transcription" class="flex justify-end mb-4">
+            <WorkshopAnalysisTtsPlayer
+              :key="`tts-${audio.transcription?.analysisVersion}`"
+              :audio-id="audio.id"
+              :disabled="!audio.transcription?.analysis"
+            />
           </div>
 
           <!-- Last edited info -->

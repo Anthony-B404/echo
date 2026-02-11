@@ -742,7 +742,10 @@
           },
           "tts": {
             "button": "Listen to analysis",
-            "error": "Error generating audio"
+            "error": "Error generating audio",
+            "speed": "Speed",
+            "skipBack": "Back 10s",
+            "skipForward": "Forward 10s"
           },
           "chat": {
             "emptyState": "Ask questions about the transcription content. The AI will answer based only on what was said.",
