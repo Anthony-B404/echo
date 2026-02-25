@@ -26,6 +26,7 @@ export default class MistralService {
   constructor() {
     this.client = new Mistral({
       apiKey: env.get('MISTRAL_API_KEY'),
+      timeoutMs: 10 * 60 * 1000, // 10 minutes for large audio uploads
     })
   }
 
@@ -34,7 +35,7 @@ export default class MistralService {
    */
   async transcribe(filePath: string, fileName: string): Promise<TranscriptionResult> {
     const fileBuffer = await readFile(filePath)
-    const blob = new Blob([fileBuffer], { type: 'audio/mpeg' })
+    const blob = new Blob([fileBuffer], { type: 'audio/mp4' })
     const file = new File([blob], fileName)
 
     const result = await this.client.audio.transcriptions.complete({

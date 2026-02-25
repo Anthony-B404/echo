@@ -559,7 +559,6 @@
         "pending": "En attente de traitement...",
         "starting": "Démarrage...",
         "converting": "Conversion audio...",
-        "analyzing_metadata": "Analyse des métadonnées...",
         "transcribing": "Transcription en cours... {progress}%",
         "analyzing": "Analyse du contenu...",
         "finalizing": "Finalisation...",

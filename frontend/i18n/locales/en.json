@@ -554,7 +554,6 @@
         "pending": "Waiting for processing...",
         "starting": "Starting...",
         "converting": "Converting audio...",
-        "analyzing_metadata": "Analyzing metadata...",
         "transcribing": "Transcribing... {progress}%",
         "analyzing": "Analyzing content...",
         "finalizing": "Finalizing...",

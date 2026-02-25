@@ -19,7 +19,6 @@ const progressLabel = computed(() => {
       // Dynamic labels based on progress stage
       if (progress < 2) { return t('components.workshop.processing.starting') }
       if (progress < 12) { return t('components.workshop.processing.converting') }
-      if (progress < 17) { return t('components.workshop.processing.analyzing_metadata') }
       if (progress < 72) { return t('components.workshop.processing.transcribing', { progress }) }
       if (progress < 92) { return t('components.workshop.processing.analyzing') }
       return t('components.workshop.processing.finalizing')

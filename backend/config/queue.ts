@@ -57,7 +57,7 @@ const queueConfig: QueueConfig = {
     attempts: 3,
     backoff: {
       type: 'exponential',
-      delay: 5000, // 5 seconds initial delay
+      delay: 60_000, // 60 seconds initial delay (handles Mistral 429 capacity limits)
     },
     removeOnComplete: false, // Keep for status tracking
     removeOnFail: false, // Keep for debugging
