@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { audioProcessValidator, ALLOWED_AUDIO_EXTENSIONS, MAX_AUDIO_SIZE } from '#validators/audio'
+import { audioProcessValidator, ALLOWED_MEDIA_EXTENSIONS, MAX_AUDIO_SIZE } from '#validators/audio'
 import QueueService from '#services/queue_service'
 import storageService from '#services/storage_service'
 import Audio, { AudioStatus } from '#models/audio'
@@ -22,7 +22,7 @@ export default class AudioController {
       // Get uploaded file
       const audioFile = request.file('audio', {
         size: `${MAX_AUDIO_SIZE / (1024 * 1024)}mb`,
-        extnames: ALLOWED_AUDIO_EXTENSIONS,
+        extnames: ALLOWED_MEDIA_EXTENSIONS,
       })
 
       if (!audioFile) {

@@ -526,7 +526,7 @@
       "upload": {
         "title": "Glissez-déposez votre fichier audio ici",
         "description": "ou cliquez pour sélectionner",
-        "formats": "MP3, WAV, M4A, OGG, FLAC - Max {maxSize}",
+        "formats": "MP3, WAV, M4A, OGG, FLAC, MP4, MOV, WebM, AVI, MKV - Max {maxSize}",
         "uploading": "Import en cours...",
         "invalidFile": "Fichier invalide"
       },

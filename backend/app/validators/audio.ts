@@ -27,14 +27,40 @@ export const ALLOWED_AUDIO_TYPES = [
 ]
 
 /**
+ * Allowed video mime types (audio will be extracted via ffmpeg)
+ */
+export const ALLOWED_VIDEO_TYPES = [
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'video/x-msvideo',
+  'video/x-matroska',
+]
+
+/**
+ * All allowed media mime types (audio + video)
+ */
+export const ALLOWED_MEDIA_TYPES = [...ALLOWED_AUDIO_TYPES, ...ALLOWED_VIDEO_TYPES]
+
+/**
  * Allowed audio file extensions
  */
 export const ALLOWED_AUDIO_EXTENSIONS = ['mp3', 'wav', 'm4a', 'ogg', 'flac']
 
 /**
- * Maximum file size in bytes (512MB)
+ * Allowed video file extensions
  */
-export const MAX_AUDIO_SIZE = 512 * 1024 * 1024
+export const ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'mov', 'webm', 'avi', 'mkv']
+
+/**
+ * All allowed media file extensions (audio + video)
+ */
+export const ALLOWED_MEDIA_EXTENSIONS = [...ALLOWED_AUDIO_EXTENSIONS, ...ALLOWED_VIDEO_EXTENSIONS]
+
+/**
+ * Maximum file size in bytes (2GB)
+ */
+export const MAX_AUDIO_SIZE = 2 * 1024 * 1024 * 1024
 
 /**
  * Validator for audio list (index) request with pagination and filters

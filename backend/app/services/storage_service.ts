@@ -164,6 +164,11 @@ class StorageService {
       '.flac': 'audio/flac',
       '.opus': 'audio/opus',
       '.webm': 'audio/webm',
+      // Video
+      '.mp4': 'video/mp4',
+      '.mov': 'video/quicktime',
+      '.avi': 'video/x-msvideo',
+      '.mkv': 'video/x-matroska',
     }
     return mimeTypes[ext.toLowerCase()] || 'application/octet-stream'
   }

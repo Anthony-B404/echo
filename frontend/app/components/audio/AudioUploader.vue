@@ -14,8 +14,8 @@ const { t } = useI18n()
 const isDragging = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
-const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/m4a', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/flac', 'audio/x-flac']
-const MAX_SIZE = 512 * 1024 * 1024 // 512MB
+const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/m4a', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/flac', 'audio/x-flac', 'video/mp4', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/x-matroska']
+const MAX_SIZE = 2 * 1024 * 1024 * 1024 // 2GB
 
 function formatFileSize (bytes: number): string {
   if (bytes < 1024) { return `${bytes} B` }
@@ -24,7 +24,7 @@ function formatFileSize (bytes: number): string {
 }
 
 function validateFile (file: File): boolean {
-  if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(mp3|wav|m4a|ogg|flac)$/i)) {
+  if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(mp3|wav|m4a|ogg|flac|mp4|mov|webm|avi|mkv)$/i)) {
     return false
   }
   if (file.size > MAX_SIZE) {
@@ -95,7 +95,7 @@ function removeFile () {
       <input
         ref="fileInput"
         type="file"
-        accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac"
+        accept="audio/*,video/*,.mp3,.wav,.m4a,.ogg,.flac,.mp4,.mov,.webm,.avi,.mkv"
         class="hidden"
         :disabled="disabled"
         @change="handleInputChange"
