@@ -31,19 +31,36 @@ export default class MistralService {
   }
 
   /**
-   * Transcribe audio file using Voxtral model with timestamps and speaker diarization
+   * Transcribe audio file using Voxtral model with timestamps and speaker diarization.
+   * Timeout scales with audio duration to handle large files (upload + server processing).
    */
-  async transcribe(filePath: string, fileName: string): Promise<TranscriptionResult> {
+  async transcribe(
+    filePath: string,
+    fileName: string,
+    audioDurationSeconds?: number
+  ): Promise<TranscriptionResult> {
+    const MIN_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+    const timeoutMs = audioDurationSeconds
+      ? Math.max(MIN_TIMEOUT_MS, Math.round(audioDurationSeconds * 1.5) * 1000)
+      : MIN_TIMEOUT_MS
+
+    console.log(
+      `[Transcription] Mistral transcribe: file=${fileName}, duration=${audioDurationSeconds ?? 'unknown'}s, timeout=${Math.round(timeoutMs / 1000)}s`
+    )
+
     const fileBuffer = await readFile(filePath)
     const blob = new Blob([fileBuffer], { type: 'audio/mp4' })
     const file = new File([blob], fileName)
 
-    const result = await this.client.audio.transcriptions.complete({
-      model: 'voxtral-mini-latest',
-      file: file,
-      timestampGranularities: ['segment'],
-      diarize: true,
-    })
+    const result = await this.client.audio.transcriptions.complete(
+      {
+        model: 'voxtral-mini-latest',
+        file: file,
+        timestampGranularities: ['segment'],
+        diarize: true,
+      },
+      { timeoutMs }
+    )
 
     const segments: TranscriptionTimestamp[] = (result.segments || []).map((seg) => ({
       start: seg.start,

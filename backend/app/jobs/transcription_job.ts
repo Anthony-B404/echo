@@ -1,4 +1,4 @@
-import { Worker, Job } from 'bullmq'
+import { Worker, Job, UnrecoverableError } from 'bullmq'
 import queueConfig from '#config/queue'
 import MistralService, { type TranscriptionResult } from '#services/mistral_service'
 import AudioConverterService from '#services/audio_converter_service'
@@ -17,6 +17,50 @@ import { join } from 'node:path'
 import { writeFile, unlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import i18nManager from '@adonisjs/i18n/services/main'
+import { RequestTimeoutError, ConnectionError } from '@mistralai/mistralai/models/errors/httpclienterrors.js'
+import { SDKError } from '@mistralai/mistralai/models/errors/sdkerror.js'
+
+/**
+ * Classify whether an error is retriable by BullMQ.
+ * Non-retriable errors are wrapped in UnrecoverableError to skip remaining attempts.
+ */
+function isRetriableError(error: unknown): boolean {
+  // Mistral timeout / connection → retry
+  if (error instanceof RequestTimeoutError || error instanceof ConnectionError) {
+    return true
+  }
+
+  // Mistral SDK HTTP errors → check status code
+  if (error instanceof SDKError) {
+    const msg = error.message || ''
+    // Rate limit (429) or server errors (5xx) → retry
+    if (msg.includes('Status 429') || /Status 5\d\d/.test(msg)) {
+      return true
+    }
+    // Client errors (400, 401, 403) → non-retriable
+    if (msg.includes('Status 400') || msg.includes('Status 401') || msg.includes('Status 403')) {
+      return false
+    }
+  }
+
+  if (error instanceof Error) {
+    const msg = error.message || ''
+    // Business logic errors → non-retriable
+    if (
+      msg.includes('INSUFFICIENT_CREDITS') ||
+      msg.includes('insufficient_credits') ||
+      msg.includes('User not found') ||
+      msg.includes('Organization not found') ||
+      msg.includes('no current organization') ||
+      msg.includes('empty result')
+    ) {
+      return false
+    }
+  }
+
+  // Unknown errors → retry by default
+  return true
+}
 
 /**
  * Process transcription jobs (one-shot, no chunking).
@@ -33,6 +77,11 @@ async function processTranscriptionJob(
   job: Job<TranscriptionJobData, TranscriptionJobResult>
 ): Promise<TranscriptionJobResult> {
   const { audioId, audioFilePath, audioFileName, prompt } = job.data
+  const maxAttempts = job.opts.attempts ?? 1
+
+  console.log(
+    `[Transcription] Job ${job.id} started (attempt ${job.attemptsMade + 1}/${maxAttempts}, audioId: ${audioId})`
+  )
 
   // Load audio record and set status to processing
   // Restore currentJobId on retry (cleared by error handler on previous attempt)
@@ -56,6 +105,7 @@ async function processTranscriptionJob(
   try {
     if (alreadyConverted) {
       // Retry: conversion was completed in a previous attempt, skip to transcription
+      console.log(`[Transcription] Job ${job.id} retry detected, skipping conversion (audioId: ${audioId})`)
       await job.updateProgress(12)
 
       audioDuration = audio.duration || 0
@@ -137,12 +187,20 @@ async function processTranscriptionJob(
 
       audioDuration = conversionResult.duration
 
+      console.log(
+        `[Transcription] Job ${job.id} conversion done (duration: ${Math.round(audioDuration)}s, audioId: ${audioId})`
+      )
+
       await job.updateProgress(12)
     }
 
     // Credit check: Calculate credits needed (1 credit = 1 minute, rounded up)
     const durationMinutes = Math.ceil(audioDuration / 60)
     const creditsNeeded = Math.max(1, durationMinutes) // Minimum 1 credit
+
+    console.log(
+      `[Transcription] Job ${job.id} credit check (needed: ${creditsNeeded}, audioId: ${audioId})`
+    )
 
     // Load user and their organization to check credits
     const user = await User.find(job.data.userId)
@@ -223,7 +281,7 @@ async function processTranscriptionJob(
     }, 1000)
 
     try {
-      transcriptionResult = await mistralService.transcribe(tempPath, audioFileName)
+      transcriptionResult = await mistralService.transcribe(tempPath, audioFileName, audioDuration)
     } finally {
       clearInterval(transcriptionInterval)
     }
@@ -300,18 +358,27 @@ async function processTranscriptionJob(
 
     await job.updateProgress(100)
 
+    console.log(`[Transcription] Job ${job.id} completed successfully (audioId: ${audioId})`)
+
     return {
       transcription: transcriptionResult.text,
       analysis: analysisResult.analysis,
     }
   } catch (error) {
+    const retriable = isRetriableError(error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+    console.log(
+      `[Transcription] Job ${job.id} failed (attempt ${job.attemptsMade + 1}/${maxAttempts}, retriable: ${retriable}, audioId: ${audioId}): ${errorMessage}`
+    )
+
     // Update audio status to failed
-    // Only clear currentJobId on final attempt (no more retries)
+    // Clear currentJobId if non-retriable (no point waiting) or on final attempt
     const isFinalAttempt = job.attemptsMade >= (job.opts.attempts ?? 1)
     if (audio) {
       audio.status = AudioStatus.Failed
-      audio.errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      if (isFinalAttempt) {
+      audio.errorMessage = errorMessage
+      if (!retriable || isFinalAttempt) {
         audio.currentJobId = null
       }
       await audio.save()
@@ -323,6 +390,11 @@ async function processTranscriptionJob(
     }
     if (tempPath) {
       await unlink(tempPath).catch(() => {})
+    }
+
+    // Non-retriable: wrap in UnrecoverableError to skip remaining BullMQ attempts
+    if (!retriable) {
+      throw new UnrecoverableError(errorMessage)
     }
 
     throw error
@@ -342,13 +414,21 @@ export function createTranscriptionWorker(): Worker<TranscriptionJobData, Transc
     }
   )
 
-  worker.on('completed', () => {})
+  worker.on('completed', (_job) => {
+    const audioId = _job.data?.audioId
+    console.log(`[Transcription] Worker: job ${_job.id} completed (audioId: ${audioId})`)
+  })
 
-  worker.on('failed', () => {})
+  worker.on('failed', (_job, err) => {
+    const audioId = _job?.data?.audioId
+    console.log(
+      `[Transcription] Worker: job ${_job?.id} failed (audioId: ${audioId}): ${err.message}`
+    )
+  })
 
-  worker.on('progress', () => {})
-
-  worker.on('error', () => {})
+  worker.on('error', (err) => {
+    console.log(`[Transcription] Worker error: ${err.message}`)
+  })
 
   return worker
 }

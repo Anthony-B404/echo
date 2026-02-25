@@ -54,10 +54,10 @@ const queueConfig: QueueConfig = {
    * Default options for all jobs.
    */
   defaultJobOptions: {
-    attempts: 3,
+    attempts: 2,
     backoff: {
       type: 'exponential',
-      delay: 60_000, // 60 seconds initial delay (handles Mistral 429 capacity limits)
+      delay: 30_000, // 30 seconds initial delay (handles Mistral 429 capacity limits)
     },
     removeOnComplete: false, // Keep for status tracking
     removeOnFail: false, // Keep for debugging
