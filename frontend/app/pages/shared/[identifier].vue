@@ -289,7 +289,7 @@ useSeoMeta({
           </div>
 
           <!-- Analysis content -->
-          <div v-show="activeTab === 'analysis'">
+          <div v-show="activeTab === 'analysis'" class="min-w-0 overflow-x-hidden">
             <div
               v-if="audio.transcription?.analysis"
               class="markdown-content text-sm"

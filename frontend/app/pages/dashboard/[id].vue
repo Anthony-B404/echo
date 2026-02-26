@@ -754,7 +754,7 @@ const tabItems = computed(() => [
           </div>
 
           <!-- Analysis content -->
-          <div v-show="activeTab === 'analysis'">
+          <div v-show="activeTab === 'analysis'" class="min-w-0 overflow-x-hidden">
             <!-- Edit mode -->
             <WorkshopTranscriptionEditor
               v-if="isEditingAnalysis"

@@ -10,6 +10,9 @@
 /* Markdown content styling */
 .markdown-content {
   @apply text-default leading-relaxed;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .markdown-content h1 {
@@ -81,6 +84,8 @@
 
 .markdown-content table {
   @apply w-full mb-4 border-collapse;
+  display: block;
+  overflow-x: auto;
 }
 
 .markdown-content th {
