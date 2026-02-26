@@ -50,7 +50,7 @@ const {
   }
 })
 
-const { startPolling, stopAllPolling } = useAudioPolling({
+const { startPolling, stopAllPolling } = useAudioSSE({
   onComplete: () => {
     toast.add({
       title: t('pages.dashboard.workshop.processingComplete'),

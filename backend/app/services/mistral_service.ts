@@ -48,7 +48,8 @@ export default class MistralService {
   async transcribe(
     filePath: string,
     fileName: string,
-    audioDurationSeconds?: number
+    audioDurationSeconds?: number,
+    mimeType: string = 'audio/mp4'
   ): Promise<TranscriptionResult> {
     const MIN_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
     const timeoutMs = audioDurationSeconds
@@ -60,7 +61,7 @@ export default class MistralService {
     )
 
     const fileBuffer = await readFile(filePath)
-    const blob = new Blob([fileBuffer], { type: 'audio/mp4' })
+    const blob = new Blob([fileBuffer], { type: mimeType })
     const file = new File([blob], fileName)
 
     const result = await this.client.audio.transcriptions.complete(

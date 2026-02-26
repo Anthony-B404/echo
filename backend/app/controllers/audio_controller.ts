@@ -153,4 +153,129 @@ export default class AudioController {
 
     return response.ok(jobStatus)
   }
+
+  /**
+   * SSE endpoint for real-time job progress.
+   * Streams progress/completed/failed events to the client.
+   *
+   * GET /audio/events/:jobId
+   */
+  async events({ params, request, response, auth, bouncer, i18n }: HttpContext) {
+    const { jobId } = params
+    const user = auth.user!
+
+    // 1. Verify user has an active organization
+    if (!user.currentOrganizationId) {
+      return response.badRequest({
+        message: i18n.t('messages.errors.no_current_organization'),
+      })
+    }
+
+    // 2. Find the Audio record associated with this jobId
+    const audio = await Audio.findBy('currentJobId', jobId)
+
+    if (!audio) {
+      return response.notFound({
+        message: i18n.t('messages.audio.job_not_found'),
+      })
+    }
+
+    // 3. Verify access via existing policy
+    if (await bouncer.with(AudioPolicy).denies('viewAudio', audio)) {
+      return response.forbidden({
+        message: i18n.t('messages.audio.access_denied'),
+      })
+    }
+
+    // 4. Get current job status to check if already finished
+    const queueService = QueueService.getInstance()
+    const currentStatus = await queueService.getJobStatus(jobId)
+
+    // 5. Set up SSE response using raw Node.js ServerResponse
+    // Manually set CORS headers (writeHead bypasses CORS middleware, same pattern as TTS)
+    const origin = request.header('origin')
+    const nodeRes = response.response
+    nodeRes.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      ...(origin
+        ? {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Credentials': 'true',
+          }
+        : {}),
+    })
+
+    // Helper to write SSE events
+    const sendEvent = (event: string, data: object) => {
+      nodeRes.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+    }
+
+    // 6. If job is already finished, send final event and close
+    if (currentStatus?.status === 'completed') {
+      sendEvent('completed', {
+        jobId,
+        progress: 100,
+        result: currentStatus.result,
+      })
+      nodeRes.end()
+      return
+    }
+
+    if (currentStatus?.status === 'failed') {
+      sendEvent('failed', {
+        jobId,
+        error: currentStatus.error || 'Unknown error',
+      })
+      nodeRes.end()
+      return
+    }
+
+    // 7. Send current progress as initial event
+    if (currentStatus) {
+      sendEvent('progress', {
+        jobId,
+        progress: currentStatus.progress,
+        status: currentStatus.status,
+      })
+    }
+
+    // 8. Subscribe to BullMQ events for this job
+    const unsubscribe = queueService.subscribeToJob(jobId, {
+      onProgress: (progress) => {
+        sendEvent('progress', { jobId, progress, status: 'processing' })
+      },
+      onCompleted: (result) => {
+        sendEvent('completed', { jobId, progress: 100, result })
+        cleanup()
+        nodeRes.end()
+      },
+      onFailed: (error) => {
+        sendEvent('failed', { jobId, error })
+        cleanup()
+        nodeRes.end()
+      },
+    })
+
+    // 9. Keepalive every 15s to prevent proxy/browser timeout
+    const keepaliveInterval = setInterval(() => {
+      nodeRes.write(': keepalive\n\n')
+    }, 15000)
+
+    // 10. Cleanup function
+    let cleaned = false
+    const cleanup = () => {
+      if (cleaned) return
+      cleaned = true
+      clearInterval(keepaliveInterval)
+      unsubscribe()
+    }
+
+    // 11. Handle client disconnect
+    nodeRes.on('close', () => {
+      cleanup()
+    })
+  }
 }

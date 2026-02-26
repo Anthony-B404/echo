@@ -26,7 +26,7 @@ const currentJobStatus = computed(() =>
   currentJobId.value ? audioStore.getJobStatus(currentJobId.value) : null
 )
 
-const { startPolling, stopAllPolling, polling } = useAudioPolling({
+const { startPolling, stopAllPolling, polling } = useAudioSSE({
   onComplete: () => {
     currentJobId.value = null
     toast.add({

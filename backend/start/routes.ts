@@ -132,6 +132,7 @@ router
     // Audio analysis routes
     router.post('/audio/process', [AudioController, 'process'])
     router.get('/audio/status/:jobId', [AudioController, 'status'])
+    router.get('/audio/events/:jobId', [AudioController, 'events'])
 
     // Audio CRUD routes
     router.get('/audios', [AudiosController, 'index'])

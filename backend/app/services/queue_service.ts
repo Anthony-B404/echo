@@ -29,6 +29,15 @@ export interface TranscriptionJobResult {
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
 /**
+ * Callbacks for real-time job event subscription (SSE).
+ */
+export interface JobEventCallbacks {
+  onProgress: (progress: number) => void
+  onCompleted: (result?: TranscriptionJobResult) => void
+  onFailed: (error: string) => void
+}
+
+/**
  * Response structure for job status queries.
  */
 export interface JobStatusResponse {
@@ -144,6 +153,53 @@ class QueueService {
         return 'failed'
       default:
         return 'pending'
+    }
+  }
+
+  /**
+   * Subscribe to real-time events for a specific job.
+   * Returns an unsubscribe function to clean up listeners.
+   */
+  subscribeToJob(jobId: string, callbacks: JobEventCallbacks): () => void {
+    const onProgress = (
+      args: { jobId: string; data: string | boolean | number | object },
+      _id: string
+    ) => {
+      if (args.jobId !== jobId) return
+      const progress = typeof args.data === 'number' ? args.data : 0
+      callbacks.onProgress(progress)
+    }
+
+    const onCompleted = (
+      args: { jobId: string; returnvalue: string },
+      _id: string
+    ) => {
+      if (args.jobId !== jobId) return
+      let result: TranscriptionJobResult | undefined
+      try {
+        result = JSON.parse(args.returnvalue) as TranscriptionJobResult
+      } catch {
+        // returnvalue may be empty or invalid
+      }
+      callbacks.onCompleted(result)
+    }
+
+    const onFailed = (
+      args: { jobId: string; failedReason: string },
+      _id: string
+    ) => {
+      if (args.jobId !== jobId) return
+      callbacks.onFailed(args.failedReason || 'Unknown error')
+    }
+
+    this.queueEvents.on('progress', onProgress)
+    this.queueEvents.on('completed', onCompleted)
+    this.queueEvents.on('failed', onFailed)
+
+    return () => {
+      this.queueEvents.off('progress', onProgress)
+      this.queueEvents.off('completed', onCompleted)
+      this.queueEvents.off('failed', onFailed)
     }
   }
 

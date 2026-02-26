@@ -66,11 +66,17 @@ function isRetriableError(error: unknown): boolean {
  * Process transcription jobs (one-shot, no chunking).
  * Voxtral Transcribe V2 supports up to 3 hours / 1 GB per request.
  *
- * Progress stages:
- * - 0-2%: Downloading file from storage
- * - 2-12%: Converting audio to AAC/M4A format
- * - 12-72%: Transcribing audio with Mistral
- * - 72-92%: Analyzing with AI
+ * Progress stages (first attempt — parallel):
+ * - 0-5%: Downloading file from storage
+ * - 5-10%: ffprobe duration + credit check
+ * - 10-75%: Parallel conversion + transcription
+ * - 75-92%: Store converted file + AI analysis
+ * - 92-100%: Cleanup and completion
+ *
+ * Progress stages (retry — sequential):
+ * - 0-12%: Download converted file
+ * - 12-72%: Transcription on converted file
+ * - 72-92%: AI analysis
  * - 92-100%: Cleanup and completion
  */
 async function processTranscriptionJob(
@@ -101,6 +107,8 @@ async function processTranscriptionJob(
   // Detect retry: if Audio record's filePath differs from job data, conversion already happened
   const alreadyConverted = audio && audio.filePath !== audioFilePath
   let audioDuration: number
+  let skipToAnalysis = false
+  let analysisTranscriptionResult!: TranscriptionResult
 
   try {
     if (alreadyConverted) {
@@ -115,9 +123,9 @@ async function processTranscriptionJob(
       const convertedBuffer = await storageService.getFileBuffer(audio.filePath)
       await writeFile(tempPath, convertedBuffer)
     } else {
-      // First attempt: full pipeline
+      // First attempt: full pipeline with parallel conversion + transcription
 
-      // Stage 1: Download file from storage (0-2%)
+      // Stage 1: Download file from storage (0-5%)
       await job.updateProgress(1)
 
       const fileBuffer = await storageService.getFileBuffer(audioFilePath)
@@ -126,32 +134,136 @@ async function processTranscriptionJob(
       tempOriginalPath = join(tempDir, `${randomUUID()}-original-${audioFileName}`)
       await writeFile(tempOriginalPath, fileBuffer)
 
-      await job.updateProgress(2)
-
-      // Stage 2: Convert to AAC/M4A format for universal browser playback (2-12%)
-      // Use simulated progress during ffmpeg conversion
       await job.updateProgress(3)
 
-      // Start simulated progress during conversion (3% to 7%)
-      let conversionProgress = 3
-      const conversionInterval = setInterval(async () => {
-        if (conversionProgress < 7) {
-          conversionProgress++
-          await job.updateProgress(conversionProgress).catch(() => {})
-        }
-      }, 500)
+      // Stage 2: Get duration with ffprobe (5-8%) — fast (~100ms)
+      await job.updateProgress(5)
+      audioDuration = await converter.getDuration(tempOriginalPath)
 
-      let conversionResult
-      try {
-        conversionResult = await converter.convertToAac(tempOriginalPath, 'voice')
-      } finally {
-        clearInterval(conversionInterval)
-      }
+      console.log(
+        `[Transcription] Job ${job.id} ffprobe duration: ${Math.round(audioDuration)}s (audioId: ${audioId})`
+      )
 
       await job.updateProgress(8)
 
-      // Store converted file in persistent storage
-      await job.updateProgress(9)
+      // Stage 3: Credit check (8-10%) — needs duration, must happen before parallel work
+      const durationMinutes = Math.ceil(audioDuration / 60)
+      const creditsNeeded = Math.max(1, durationMinutes)
+
+      console.log(
+        `[Transcription] Job ${job.id} credit check (needed: ${creditsNeeded}, audioId: ${audioId})`
+      )
+
+      const user = await User.find(job.data.userId)
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      if (!user.currentOrganizationId) {
+        throw new Error('User has no current organization')
+      }
+
+      const organization = await Organization.find(user.currentOrganizationId)
+      if (!organization) {
+        throw new Error('Organization not found')
+      }
+
+      const existingOrgDeduction = await CreditTransaction.query()
+        .where('audioId', audioId)
+        .where('type', 'usage')
+        .first()
+      const existingUserDeduction = await UserCreditTransaction.query()
+        .where('audioId', audioId)
+        .where('type', 'usage')
+        .first()
+      const creditsAlreadyDeducted = !!(existingOrgDeduction || existingUserDeduction)
+
+      if (!creditsAlreadyDeducted) {
+        const hasCredits = await creditService.hasEnoughCreditsForProcessing(
+          user,
+          organization,
+          creditsNeeded
+        )
+
+        if (!hasCredits) {
+          const effectiveBalance = await creditService.getEffectiveBalance(user, organization)
+          const i18n = i18nManager.locale('fr')
+          const errorMessage = i18n.t('messages.audio.insufficient_credits_details', {
+            creditsNeeded,
+            creditsAvailable: effectiveBalance,
+          })
+
+          if (audio) {
+            audio.status = AudioStatus.Failed
+            audio.errorMessage = errorMessage
+            audio.currentJobId = null
+            await audio.save()
+          }
+          throw new Error(errorMessage)
+        }
+
+        const fileNameWithoutExt = audioFileName.replace(/\.[^/.]+$/, '')
+        await creditService.deductForAudioProcessing(
+          user,
+          organization,
+          creditsNeeded,
+          `Analyse audio: ${fileNameWithoutExt} (${Math.round(audioDuration)}s)`,
+          audioId
+        )
+      }
+
+      await job.updateProgress(10)
+
+      // Stage 4: Parallel conversion + transcription (10-75%)
+      // Guard to prevent progress going backward when two branches update concurrently
+      let currentProgress = 10
+      const safeUpdateProgress = async (value: number) => {
+        if (value > currentProgress) {
+          currentProgress = value
+          await job.updateProgress(value).catch(() => {})
+        }
+      }
+
+      const mistralService = new MistralService()
+
+      // Determine MIME type for Mistral (use original file's MIME type)
+      const originalMimeType = audio?.mimeType || 'audio/mpeg'
+
+      // Asymptotic progress for parallel phase (10→70%)
+      // Formula: progress += (cap - progress) * factor
+      // Never stalls — always moves, just slower as it approaches the cap
+      const PARALLEL_CAP = 70
+      const parallelInterval = setInterval(async () => {
+        const increment = (PARALLEL_CAP - currentProgress) * 0.035
+        if (increment > 0.3) {
+          await safeUpdateProgress(Math.round(currentProgress + increment))
+        }
+      }, 1000)
+
+      let conversionResult: Awaited<ReturnType<typeof converter.convertToAac>>
+      let transcriptionResult: TranscriptionResult
+
+      try {
+        ;[conversionResult, transcriptionResult] = await Promise.all([
+          converter.convertToAac(tempOriginalPath, 'voice'),
+          mistralService.transcribe(
+            tempOriginalPath,
+            audioFileName,
+            audioDuration,
+            originalMimeType
+          ),
+        ])
+      } finally {
+        clearInterval(parallelInterval)
+      }
+
+      console.log(
+        `[Transcription] Job ${job.id} parallel phase done — conversion: ${Math.round(conversionResult.duration)}s, transcription: ${transcriptionResult.text.length} chars (audioId: ${audioId})`
+      )
+
+      await job.updateProgress(72)
+
+      // Stage 5: Store converted file + update Audio record (72-80%)
       const convertedFile = await storageService.storeAudioFromPath(
         conversionResult.path,
         job.data.organizationId,
@@ -161,8 +273,6 @@ async function processTranscriptionJob(
         }
       )
 
-      // Update Audio record with converted file info
-      await job.updateProgress(10)
       if (audio) {
         audio.filePath = convertedFile.path
         audio.fileSize = convertedFile.size
@@ -174,141 +284,146 @@ async function processTranscriptionJob(
       // Delete original file from storage
       await storageService.deleteFile(audioFilePath).catch(() => {})
 
-      // Cleanup temp files from conversion
-      await job.updateProgress(11)
+      // Cleanup temp files
       await unlink(tempOriginalPath).catch(() => {})
-      tempOriginalPath = null // Mark as cleaned
+      tempOriginalPath = null
       await converter.cleanup(conversionResult.path)
 
-      // Write converted file to temp for subsequent processing
-      tempPath = join(tempDir, `${randomUUID()}-converted.m4a`)
-      const convertedBuffer = await storageService.getFileBuffer(convertedFile.path)
-      await writeFile(tempPath, convertedBuffer)
+      // tempPath not needed — transcription already done on original file
+      // Set tempPath to null since we don't need a converted temp file anymore
+      tempPath = null
 
-      audioDuration = conversionResult.duration
+      await job.updateProgress(75)
 
-      console.log(
-        `[Transcription] Job ${job.id} conversion done (duration: ${Math.round(audioDuration)}s, audioId: ${audioId})`
-      )
-
-      await job.updateProgress(12)
-    }
-
-    // Credit check: Calculate credits needed (1 credit = 1 minute, rounded up)
-    const durationMinutes = Math.ceil(audioDuration / 60)
-    const creditsNeeded = Math.max(1, durationMinutes) // Minimum 1 credit
-
-    console.log(
-      `[Transcription] Job ${job.id} credit check (needed: ${creditsNeeded}, audioId: ${audioId})`
-    )
-
-    // Load user and their organization to check credits
-    const user = await User.find(job.data.userId)
-    if (!user) {
-      throw new Error('User not found')
-    }
-
-    if (!user.currentOrganizationId) {
-      throw new Error('User has no current organization')
-    }
-
-    const organization = await Organization.find(user.currentOrganizationId)
-    if (!organization) {
-      throw new Error('Organization not found')
-    }
-
-    // Check if credits were already deducted for this audio (idempotent on retry)
-    const existingOrgDeduction = await CreditTransaction.query()
-      .where('audioId', audioId)
-      .where('type', 'usage')
-      .first()
-    const existingUserDeduction = await UserCreditTransaction.query()
-      .where('audioId', audioId)
-      .where('type', 'usage')
-      .first()
-    const creditsAlreadyDeducted = !!(existingOrgDeduction || existingUserDeduction)
-
-    if (!creditsAlreadyDeducted) {
-      // Check credits based on organization's credit mode (shared vs individual)
-      const hasCredits = await creditService.hasEnoughCreditsForProcessing(
-        user,
-        organization,
-        creditsNeeded
-      )
-
-      if (!hasCredits) {
-        // Set audio status to failed with specific error
-        const effectiveBalance = await creditService.getEffectiveBalance(user, organization)
-        const i18n = i18nManager.locale('fr')
-        const errorMessage = i18n.t('messages.audio.insufficient_credits_details', {
-          creditsNeeded,
-          creditsAvailable: effectiveBalance,
-        })
-
-        if (audio) {
-          audio.status = AudioStatus.Failed
-          audio.errorMessage = errorMessage
-          audio.currentJobId = null
-          await audio.save()
-        }
-        throw new Error(errorMessage)
+      if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
+        throw new Error('Transcription returned empty result')
       }
 
-      // Deduct credits based on organization's credit mode (shared vs individual)
-      const fileNameWithoutExt = audioFileName.replace(/\.[^/.]+$/, '')
-      await creditService.deductForAudioProcessing(
-        user,
-        organization,
-        creditsNeeded,
-        `Analyse audio: ${fileNameWithoutExt} (${Math.round(audioDuration)}s)`,
-        audioId
-      )
+      // Jump to analysis (skip retry-only block)
+      skipToAnalysis = true
+      analysisTranscriptionResult = transcriptionResult
     }
 
-    // Stage 3: Transcribe audio one-shot (12-72%)
-    const mistralService = new MistralService()
-    let transcriptionResult: TranscriptionResult
+    // Retry path: transcription on already-converted file (12-72%)
+    if (!skipToAnalysis) {
+      const mistralService = new MistralService()
+      let transcriptionResult: TranscriptionResult
 
-    // Use simulated progress during Mistral API call (12% to 70%)
-    await job.updateProgress(15)
+      // Credit check for retry path
+      const durationMinutes = Math.ceil(audioDuration / 60)
+      const creditsNeeded = Math.max(1, durationMinutes)
 
-    let transcriptionProgress = 15
-    const transcriptionInterval = setInterval(async () => {
-      if (transcriptionProgress < 68) {
-        transcriptionProgress += 3
-        await job.updateProgress(transcriptionProgress).catch(() => {})
+      console.log(
+        `[Transcription] Job ${job.id} credit check (needed: ${creditsNeeded}, audioId: ${audioId})`
+      )
+
+      const user = await User.find(job.data.userId)
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      if (!user.currentOrganizationId) {
+        throw new Error('User has no current organization')
+      }
+
+      const organization = await Organization.find(user.currentOrganizationId)
+      if (!organization) {
+        throw new Error('Organization not found')
+      }
+
+      const existingOrgDeduction = await CreditTransaction.query()
+        .where('audioId', audioId)
+        .where('type', 'usage')
+        .first()
+      const existingUserDeduction = await UserCreditTransaction.query()
+        .where('audioId', audioId)
+        .where('type', 'usage')
+        .first()
+      const creditsAlreadyDeducted = !!(existingOrgDeduction || existingUserDeduction)
+
+      if (!creditsAlreadyDeducted) {
+        const hasCredits = await creditService.hasEnoughCreditsForProcessing(
+          user,
+          organization,
+          creditsNeeded
+        )
+
+        if (!hasCredits) {
+          const effectiveBalance = await creditService.getEffectiveBalance(user, organization)
+          const i18n = i18nManager.locale('fr')
+          const errorMessage = i18n.t('messages.audio.insufficient_credits_details', {
+            creditsNeeded,
+            creditsAvailable: effectiveBalance,
+          })
+
+          if (audio) {
+            audio.status = AudioStatus.Failed
+            audio.errorMessage = errorMessage
+            audio.currentJobId = null
+            await audio.save()
+          }
+          throw new Error(errorMessage)
+        }
+
+        const fileNameWithoutExt = audioFileName.replace(/\.[^/.]+$/, '')
+        await creditService.deductForAudioProcessing(
+          user,
+          organization,
+          creditsNeeded,
+          `Analyse audio: ${fileNameWithoutExt} (${Math.round(audioDuration)}s)`,
+          audioId
+        )
+      }
+
+      // Transcribe on converted file (retry path) — asymptotic progress 15→70%
+      let retryProgress = 15
+      const RETRY_TRANSCRIPTION_CAP = 70
+      const transcriptionInterval = setInterval(async () => {
+        const increment = (RETRY_TRANSCRIPTION_CAP - retryProgress) * 0.035
+        if (increment > 0.3) {
+          retryProgress = Math.round(retryProgress + increment)
+          await job.updateProgress(retryProgress).catch(() => {})
+        }
+      }, 1000)
+
+      try {
+        transcriptionResult = await mistralService.transcribe(
+          tempPath!,
+          audioFileName,
+          audioDuration
+        )
+      } finally {
+        clearInterval(transcriptionInterval)
+      }
+      await job.updateProgress(72)
+
+      if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
+        throw new Error('Transcription returned empty result')
+      }
+
+      analysisTranscriptionResult = transcriptionResult
+    }
+
+    // Stage: Analyze with AI (75-92%) — asymptotic progress
+    const analysisMistralService = new MistralService()
+    await job.updateProgress(77)
+
+    let analysisProgress = 77
+    const ANALYSIS_CAP = 91
+    const analysisInterval = setInterval(async () => {
+      const increment = (ANALYSIS_CAP - analysisProgress) * 0.04
+      if (increment > 0.3) {
+        analysisProgress = Math.round(analysisProgress + increment)
+        await job.updateProgress(analysisProgress).catch(() => {})
       }
     }, 1000)
 
-    try {
-      transcriptionResult = await mistralService.transcribe(tempPath, audioFileName, audioDuration)
-    } finally {
-      clearInterval(transcriptionInterval)
-    }
-    await job.updateProgress(72)
-
-    if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
-      throw new Error('Transcription returned empty result')
-    }
-
-    // Stage 4: Analyze with AI (72-92%)
-    // Use simulated progress during Mistral API call
-    await job.updateProgress(74)
-
-    let analysisProgress = 74
-    const analysisInterval = setInterval(async () => {
-      if (analysisProgress < 90) {
-        analysisProgress += 2
-        await job.updateProgress(analysisProgress).catch(() => {})
-      }
-    }, 500)
-
     let analysisResult
     try {
-      analysisResult = await mistralService.analyze(
-        transcriptionResult.text,
+      analysisResult = await analysisMistralService.analyze(
+        analysisTranscriptionResult.text,
         prompt,
-        transcriptionResult.segments
+        analysisTranscriptionResult.segments
       )
     } finally {
       clearInterval(analysisInterval)
@@ -316,7 +431,7 @@ async function processTranscriptionJob(
 
     // Apply speaker name mapping to segments
     if (Object.keys(analysisResult.speakers).length > 0) {
-      for (const seg of transcriptionResult.segments) {
+      for (const seg of analysisTranscriptionResult.segments) {
         if (seg.speaker && analysisResult.speakers[seg.speaker]) {
           seg.speaker = analysisResult.speakers[seg.speaker]
         }
@@ -329,9 +444,9 @@ async function processTranscriptionJob(
     if (audio) {
       const transcription = await Transcription.create({
         audioId: audio.id,
-        rawText: transcriptionResult.text,
-        timestamps: transcriptionResult.segments,
-        language: transcriptionResult.language || 'fr',
+        rawText: analysisTranscriptionResult.text,
+        timestamps: analysisTranscriptionResult.segments,
+        language: analysisTranscriptionResult.language || 'fr',
         analysis: analysisResult.analysis,
       })
 
@@ -339,14 +454,16 @@ async function processTranscriptionJob(
       await transcriptionVersionService.createInitialVersions(transcription, audio.userId)
     }
 
-    // Stage 5: Cleanup and finalize (92-100%)
+    // Stage: Cleanup and finalize (92-100%)
     await job.updateProgress(96)
 
-    // Cleanup converted temp file
-    try {
-      await unlink(tempPath)
-    } catch {
-      // Ignore cleanup errors
+    // Cleanup temp files
+    if (tempPath) {
+      try {
+        await unlink(tempPath)
+      } catch {
+        // Ignore cleanup errors
+      }
     }
 
     // Update audio status to completed and clear job ID
@@ -361,7 +478,7 @@ async function processTranscriptionJob(
     console.log(`[Transcription] Job ${job.id} completed successfully (audioId: ${audioId})`)
 
     return {
-      transcription: transcriptionResult.text,
+      transcription: analysisTranscriptionResult.text,
       analysis: analysisResult.analysis,
     }
   } catch (error) {
