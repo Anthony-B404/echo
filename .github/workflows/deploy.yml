@@ -256,7 +256,7 @@ jobs:
 
             # Create .env file from secrets with secure permissions
             umask 077
-            cat > .env << ENVEOF
+            cat > .env << 'ENVEOF'
             # Application
             APP_KEY=${{ secrets.APP_KEY }}
             LOG_LEVEL=info
