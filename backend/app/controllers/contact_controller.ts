@@ -29,7 +29,7 @@ export default class ContactController {
     await mail.send((msg) => {
       msg
         .to('betteanthony73@gmail.com')
-        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
         .replyTo(user.email)
         .subject(i18n.t('emails.contact_support.subject', { subject }))
         .htmlView('emails/contact_support', {

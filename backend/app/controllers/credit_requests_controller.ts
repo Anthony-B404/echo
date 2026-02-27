@@ -69,7 +69,7 @@ export default class CreditRequestsController {
         await mail.send((message) => {
           message
             .to(owner.email)
-            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
             .subject(i18n.t('emails.credit_request_created.subject'))
             .htmlView('emails/credit_request_created', {
               requesterName: user.fullName || user.email,
@@ -152,7 +152,7 @@ export default class CreditRequestsController {
           await mail.send((message) => {
             message
               .to(admin.email)
-              .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+              .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
               .subject(
                 i18n.t('emails.credit_request_owner_created.subject', {
                   organizationName: organization.name,
@@ -319,7 +319,7 @@ export default class CreditRequestsController {
         await mail.send((message) => {
           message
             .to(requester.email)
-            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
             .subject(i18n.t('emails.credit_request_approved.subject'))
             .htmlView('emails/credit_request_approved', {
               amount: result.creditsDistributed,
@@ -402,7 +402,7 @@ export default class CreditRequestsController {
         await mail.send((message) => {
           message
             .to(requester.email)
-            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
             .subject(i18n.t('emails.credit_request_rejected.subject'))
             .htmlView('emails/credit_request_rejected', {
               amount: creditRequest.amount,

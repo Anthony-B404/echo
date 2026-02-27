@@ -155,7 +155,7 @@ export default class ResellerUsersController {
         await mail.send((message) => {
           message
             .to(existingUser.email)
-            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
             .subject(
               i18n.t('emails.reseller_user_added.subject', {
                 organization: organization.name,
@@ -226,7 +226,7 @@ export default class ResellerUsersController {
       await mail.send((message) => {
         message
           .to(newUser.email)
-          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
           .subject(
             i18n.t('emails.reseller_user_invitation.subject', {
               organization: organization.name,
@@ -424,7 +424,7 @@ export default class ResellerUsersController {
     await mail.send((message) => {
       message
         .to(user.email)
-        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
         .subject(
           i18n.t('emails.reseller_user_invitation.subject', {
             organization: organization.name,

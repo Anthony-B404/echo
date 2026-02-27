@@ -496,7 +496,7 @@ class GdprService {
     await mail.send((message) => {
       message
         .to(user.email)
-        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
         .subject(i18n.t('emails.gdpr_deletion_requested.subject'))
         .htmlView('emails/gdpr_deletion_requested', {
           user,
@@ -519,7 +519,7 @@ class GdprService {
     await mail.send((message) => {
       message
         .to(email)
-        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
         .subject(i18n.t('emails.gdpr_deletion_completed.subject'))
         .htmlView('emails/gdpr_deletion_completed', {
           summary,
@@ -548,7 +548,7 @@ class GdprService {
     await mail.send((message) => {
       message
         .to(user.email)
-        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+        .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
         .subject(
           i18n.t('emails.gdpr_deletion_reminder.subject', {
             daysRemaining: daysRemaining.toString(),

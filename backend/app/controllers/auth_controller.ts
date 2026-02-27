@@ -46,7 +46,7 @@ export default class AuthController {
           await mail.send((message) => {
             message
               .to(existingUser.email)
-              .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+              .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
               .subject(i18n.t('emails.registration_magic_link.subject'))
               .htmlView('emails/registration_magic_link', {
                 token: existingUser.magicLinkToken,
@@ -76,7 +76,7 @@ export default class AuthController {
         await mail.send((message) => {
           message
             .to(existingUser.email)
-            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+            .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
             .subject(i18n.t('emails.registration_magic_link.subject'))
             .htmlView('emails/registration_magic_link', {
               token: existingUser.magicLinkToken,
@@ -122,7 +122,7 @@ export default class AuthController {
       await mail.send((message) => {
         message
           .to(user.email)
-          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
           .subject(i18n.t('emails.registration_magic_link.subject'))
           .htmlView('emails/registration_magic_link', {
             token: magicLinkToken,
@@ -387,7 +387,7 @@ export default class AuthController {
       await mail.send((message) => {
         message
           .to(user.email)
-          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
           .subject(i18n.t('emails.login_magic_link.subject'))
           .htmlView('emails/login_magic_link', {
             token: user.magicLinkToken,

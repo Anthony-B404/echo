@@ -67,7 +67,7 @@ export default class InvitationsController {
       await mail.send((message) => {
         message
           .to(payload.email)
-          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
           .subject(i18n.t('emails.invitation.subject', { organization: organization.name }))
           .htmlView('emails/invitation', {
             identifier: invitation.identifier,
@@ -387,7 +387,7 @@ export default class InvitationsController {
       await mail.send((message) => {
         message
           .to(invitation.email)
-          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.cloud>'))
+          .from(env.get('MAIL_FROM', 'Novika <noreply@dh-echo.com>'))
           .subject(i18n.t('emails.invitation.subject', { organization: organization.name }))
           .htmlView('emails/invitation', {
             identifier: invitation.identifier,
