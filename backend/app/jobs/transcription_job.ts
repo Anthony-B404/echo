@@ -2,12 +2,14 @@ import { Worker, Job, UnrecoverableError } from 'bullmq'
 import queueConfig from '#config/queue'
 import MistralService, { type TranscriptionResult } from '#services/mistral_service'
 import AudioConverterService from '#services/audio_converter_service'
+import AudioChunkingService from '#services/audio_chunking_service'
 import storageService from '#services/storage_service'
 import creditService from '#services/credit_service'
 import Audio, { AudioStatus } from '#models/audio'
 import User from '#models/user'
 import Organization from '#models/organization'
 import Transcription from '#models/transcription'
+import type { TranscriptionTimestamp } from '#models/transcription'
 import CreditTransaction from '#models/credit_transaction'
 import UserCreditTransaction from '#models/user_credit_transaction'
 import transcriptionVersionService from '#services/transcription_version_service'
@@ -22,10 +24,173 @@ import { SDKError } from '@mistralai/mistralai/models/errors/sdkerror.js'
 
 /**
  * Speed factor applied to audio before transcription.
- * Reduces Mistral API cost by ~43% with no measurable quality loss.
+ * Reduces Mistral API cost by ~33% while preserving transcription quality.
  * Timestamps are corrected back to original speed after transcription.
  */
-const TRANSCRIPTION_SPEED_FACTOR = 1.75
+const TRANSCRIPTION_SPEED_FACTOR = 1.5
+
+/**
+ * Context for merging transcription chunks
+ */
+interface MergeContext {
+  lastEndTime: number
+  segments: TranscriptionTimestamp[]
+  fullText: string
+  language: string | null
+}
+
+/**
+ * Calculate progress percentage for chunk processing.
+ * Transcription phase: 17% to 72% (55% range distributed across chunks)
+ */
+function calculateChunkProgress(currentChunk: number, totalChunks: number): number {
+  const TRANSCRIPTION_START = 17
+  const TRANSCRIPTION_END = 72
+  const TRANSCRIPTION_RANGE = TRANSCRIPTION_END - TRANSCRIPTION_START
+
+  const perChunkRange = TRANSCRIPTION_RANGE / totalChunks
+  return Math.round(TRANSCRIPTION_START + (currentChunk + 1) * perChunkRange)
+}
+
+/**
+ * Deduplicate segments in overlap zone.
+ * Filters out segments from the next chunk that start before the previous chunk ended.
+ */
+function deduplicateOverlap(
+  prevSegments: TranscriptionTimestamp[],
+  nextSegments: TranscriptionTimestamp[]
+): TranscriptionTimestamp[] {
+  if (prevSegments.length === 0 || nextSegments.length === 0) {
+    return nextSegments
+  }
+
+  const prevEnd = prevSegments[prevSegments.length - 1]?.end || 0
+  return nextSegments.filter((seg) => seg.start >= prevEnd)
+}
+
+/**
+ * Merge chunk transcription into context with timestamp adjustment.
+ * Each chunk's segments are offset by the chunk's start time in the original sped-up audio.
+ *
+ * Speaker IDs are disambiguated per chunk (suffix `_c1`, `_c2`, etc.) because
+ * Mistral assigns IDs independently per transcription call — `speaker_0` in chunk 1
+ * may be a different person than `speaker_0` in chunk 2.
+ */
+function mergeChunkTranscription(
+  context: MergeContext,
+  chunkResult: TranscriptionResult,
+  chunkIndex: number,
+  chunkStartTime: number
+): MergeContext {
+  if (chunkIndex === 0) {
+    const lastSegment = chunkResult.segments[chunkResult.segments.length - 1]
+    return {
+      lastEndTime: lastSegment?.end || 0,
+      segments: [...chunkResult.segments],
+      fullText: chunkResult.text,
+      language: chunkResult.language,
+    }
+  }
+
+  // Disambiguate speaker IDs for chunks > 0 to avoid cross-chunk conflicts
+  const adjustedSegments = chunkResult.segments.map((seg) => ({
+    start: seg.start + chunkStartTime,
+    end: seg.end + chunkStartTime,
+    text: seg.text,
+    speaker: seg.speaker ? `${seg.speaker}_c${chunkIndex}` : seg.speaker,
+  }))
+
+  const deduplicatedSegments = deduplicateOverlap(context.segments, adjustedSegments)
+
+  const newLastEndTime =
+    deduplicatedSegments[deduplicatedSegments.length - 1]?.end || context.lastEndTime
+
+  return {
+    lastEndTime: newLastEndTime,
+    segments: [...context.segments, ...deduplicatedSegments],
+    fullText: context.fullText + ' ' + chunkResult.text.trim(),
+    language: context.language || chunkResult.language,
+  }
+}
+
+/**
+ * Transcribe audio with chunking support for long files.
+ * Files > 20 min (after speed-up) are split into 20-min chunks with 5s overlap.
+ * Each chunk is transcribed sequentially and results are merged with deduplication.
+ */
+async function transcribeWithChunking(
+  filePath: string,
+  audioFileName: string,
+  spedUpDuration: number,
+  job: Job<TranscriptionJobData, TranscriptionJobResult>
+): Promise<TranscriptionResult> {
+  const chunkingService = new AudioChunkingService()
+  const chunkingResult = await chunkingService.splitIntoChunks(filePath)
+
+  if (!chunkingResult.needsChunking) {
+    // No chunking needed — one-shot transcription with asymptotic progress
+    const mistralService = new MistralService()
+
+    let transcriptionProgress = 17
+    const TRANSCRIPTION_CAP = 70
+    const transcriptionInterval = setInterval(async () => {
+      const increment = (TRANSCRIPTION_CAP - transcriptionProgress) * 0.035
+      if (increment > 0.3) {
+        transcriptionProgress = Math.round(transcriptionProgress + increment)
+        await job.updateProgress(transcriptionProgress).catch(() => {})
+      }
+    }, 1000)
+
+    try {
+      return await mistralService.transcribe(filePath, audioFileName, spedUpDuration, 'audio/mp4')
+    } finally {
+      clearInterval(transcriptionInterval)
+    }
+  }
+
+  // Chunked transcription
+  console.log(
+    `[Transcription] Job ${job.id} chunking: ${chunkingResult.chunks.length} chunks (audioId: ${job.data.audioId})`
+  )
+
+  let mergeContext: MergeContext = {
+    lastEndTime: 0,
+    segments: [],
+    fullText: '',
+    language: null,
+  }
+
+  try {
+    for (let i = 0; i < chunkingResult.chunks.length; i++) {
+      const chunk = chunkingResult.chunks[i]
+      const mistralService = new MistralService()
+
+      console.log(
+        `[Transcription] Job ${job.id} transcribing chunk ${i + 1}/${chunkingResult.chunks.length} (start: ${Math.round(chunk.startTime)}s, duration: ${Math.round(chunk.duration)}s, audioId: ${job.data.audioId})`
+      )
+
+      const chunkResult = await mistralService.transcribe(
+        chunk.path,
+        `chunk_${i}_${audioFileName}`,
+        chunk.duration,
+        'audio/mp4'
+      )
+
+      mergeContext = mergeChunkTranscription(mergeContext, chunkResult, i, chunk.startTime)
+
+      const progress = calculateChunkProgress(i, chunkingResult.chunks.length)
+      await job.updateProgress(progress).catch(() => {})
+    }
+  } finally {
+    await chunkingService.cleanupChunks(chunkingResult.chunks)
+  }
+
+  return {
+    text: mergeContext.fullText.trim(),
+    segments: mergeContext.segments,
+    language: mergeContext.language,
+  }
+}
 
 /**
  * Classify whether an error is retriable by BullMQ.
@@ -70,19 +235,23 @@ function isRetriableError(error: unknown): boolean {
 }
 
 /**
- * Process transcription jobs (one-shot, no chunking).
- * Voxtral Transcribe V2 supports up to 3 hours / 1 GB per request.
+ * Process transcription jobs with chunking support for long audio files.
+ * Files > 20 min (after 1.75x speed-up) are automatically chunked.
  *
  * Progress stages (first attempt — parallel):
  * - 0-5%: Downloading file from storage
  * - 5-10%: ffprobe duration + credit check
- * - 10-75%: Parallel conversion + transcription
- * - 75-92%: Store converted file + AI analysis
+ * - 10-15%: Speed up audio 1.75x
+ * - 15-17%: Parallel conversion start + chunking check
+ * - 17-72%: Transcription (one-shot or chunked)
+ * - 72-75%: Store converted file
+ * - 75-92%: AI analysis
  * - 92-100%: Cleanup and completion
  *
  * Progress stages (retry — sequential):
  * - 0-12%: Download converted file
- * - 12-72%: Transcription on converted file
+ * - 12-17%: Speed up + chunking check
+ * - 17-72%: Transcription (one-shot or chunked)
  * - 72-92%: AI analysis
  * - 92-100%: Cleanup and completion
  */
@@ -223,16 +392,6 @@ async function processTranscriptionJob(
       await job.updateProgress(10)
 
       // Stage 4: Speed up + parallel conversion + transcription (10-75%)
-      // Guard to prevent progress going backward when two branches update concurrently
-      let currentProgress = 10
-      const safeUpdateProgress = async (value: number) => {
-        if (value > currentProgress) {
-          currentProgress = value
-          await job.updateProgress(value).catch(() => {})
-        }
-      }
-
-      const mistralService = new MistralService()
       const spedUpDuration = audioDuration / TRANSCRIPTION_SPEED_FACTOR
 
       // Speed up audio for cheaper/faster transcription (10-15%)
@@ -242,31 +401,20 @@ async function processTranscriptionJob(
       tempSpeedUpPath = await converter.speedUp(tempOriginalPath, TRANSCRIPTION_SPEED_FACTOR)
       await job.updateProgress(15)
 
-      // Asymptotic progress for parallel phase (15→70%)
-      const PARALLEL_CAP = 70
-      const parallelInterval = setInterval(async () => {
-        const increment = (PARALLEL_CAP - currentProgress) * 0.035
-        if (increment > 0.3) {
-          await safeUpdateProgress(Math.round(currentProgress + increment))
-        }
-      }, 1000)
+      // Start AAC conversion in parallel with transcription
+      const conversionPromise = converter.convertToAac(tempOriginalPath, 'voice')
 
-      let conversionResult: Awaited<ReturnType<typeof converter.convertToAac>>
-      let transcriptionResult: TranscriptionResult
+      // Transcribe sped-up file (with chunking if > 20 min)
+      await job.updateProgress(17)
+      const transcriptionResult = await transcribeWithChunking(
+        tempSpeedUpPath,
+        audioFileName,
+        spedUpDuration,
+        job
+      )
 
-      try {
-        ;[conversionResult, transcriptionResult] = await Promise.all([
-          converter.convertToAac(tempOriginalPath, 'voice'),
-          mistralService.transcribe(
-            tempSpeedUpPath,
-            audioFileName,
-            spedUpDuration,
-            'audio/mp4'
-          ),
-        ])
-      } finally {
-        clearInterval(parallelInterval)
-      }
+      // Wait for conversion to finish
+      const conversionResult = await conversionPromise
 
       // Correct timestamps back to original speed
       for (const seg of transcriptionResult.segments) {
@@ -280,7 +428,7 @@ async function processTranscriptionJob(
 
       await job.updateProgress(72)
 
-      // Stage 5: Store converted file + update Audio record (72-80%)
+      // Stage 5: Store converted file + update Audio record (72-75%)
       const convertedFile = await storageService.storeAudioFromPath(
         conversionResult.path,
         job.data.organizationId,
@@ -325,9 +473,6 @@ async function processTranscriptionJob(
 
     // Retry path: transcription on already-converted file (12-72%)
     if (!skipToAnalysis) {
-      const mistralService = new MistralService()
-      let transcriptionResult: TranscriptionResult
-
       // Credit check for retry path
       const durationMinutes = Math.ceil(audioDuration / 60)
       const creditsNeeded = Math.max(1, durationMinutes)
@@ -400,35 +545,27 @@ async function processTranscriptionJob(
         `[Transcription] Job ${job.id} retry: speeding up ${TRANSCRIPTION_SPEED_FACTOR}x (${Math.round(audioDuration)}s → ${Math.round(spedUpDuration)}s, audioId: ${audioId})`
       )
       tempSpeedUpPath = await converter.speedUp(tempPath!, TRANSCRIPTION_SPEED_FACTOR)
-      await job.updateProgress(18)
+      await job.updateProgress(17)
 
-      // Transcribe on sped-up file (retry path) — asymptotic progress 18→70%
-      let retryProgress = 18
-      const RETRY_TRANSCRIPTION_CAP = 70
-      const transcriptionInterval = setInterval(async () => {
-        const increment = (RETRY_TRANSCRIPTION_CAP - retryProgress) * 0.035
-        if (increment > 0.3) {
-          retryProgress = Math.round(retryProgress + increment)
-          await job.updateProgress(retryProgress).catch(() => {})
-        }
-      }, 1000)
-
-      try {
-        transcriptionResult = await mistralService.transcribe(
-          tempSpeedUpPath,
-          audioFileName,
-          spedUpDuration,
-          'audio/mp4'
-        )
-      } finally {
-        clearInterval(transcriptionInterval)
-      }
+      // Transcribe sped-up file with chunking support (retry path)
+      const transcriptionResult = await transcribeWithChunking(
+        tempSpeedUpPath,
+        audioFileName,
+        spedUpDuration,
+        job
+      )
       await job.updateProgress(72)
 
       // Correct timestamps back to original speed
       for (const seg of transcriptionResult.segments) {
         seg.start = seg.start * TRANSCRIPTION_SPEED_FACTOR
         seg.end = seg.end * TRANSCRIPTION_SPEED_FACTOR
+      }
+
+      // Cleanup speed-up temp file
+      if (tempSpeedUpPath) {
+        await unlink(tempSpeedUpPath).catch(() => {})
+        tempSpeedUpPath = null
       }
 
       if (!transcriptionResult.text || transcriptionResult.text.trim() === '') {
@@ -438,7 +575,7 @@ async function processTranscriptionJob(
       analysisTranscriptionResult = transcriptionResult
     }
 
-    // Stage: Analyze with AI (75-92%) — skip if no prompt
+    // Stage: Analyze with AI (75-92%)
     let analysisText: string | null = null
 
     if (prompt) {
@@ -476,6 +613,32 @@ async function processTranscriptionJob(
       }
 
       analysisText = analysisResult.analysis
+    } else {
+      // No prompt: still identify speaker names from diarized segments
+      const hasSpeakers = analysisTranscriptionResult.segments.some((seg) => seg.speaker)
+      if (hasSpeakers) {
+        await job.updateProgress(77)
+        const speakerService = new MistralService()
+        const speakers = await speakerService.identifySpeakers(
+          analysisTranscriptionResult.segments
+        )
+
+        if (Object.keys(speakers).length > 0) {
+          for (const seg of analysisTranscriptionResult.segments) {
+            if (seg.speaker && speakers[seg.speaker]) {
+              seg.speaker = speakers[seg.speaker]
+            }
+          }
+        }
+      }
+    }
+
+    // Strip chunk disambiguation suffixes (_c1, _c2, etc.) from any remaining raw speaker IDs.
+    // e.g. "speaker_0_c1" → "speaker_0"
+    for (const seg of analysisTranscriptionResult.segments) {
+      if (seg.speaker && /_c\d+$/.test(seg.speaker)) {
+        seg.speaker = seg.speaker.replace(/_c\d+$/, '')
+      }
     }
 
     await job.updateProgress(92)

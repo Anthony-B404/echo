@@ -146,10 +146,14 @@ export default class MistralService {
   ): Promise<{ analysis: string; speakers: Record<string, string> }> {
     const hasSpeakers = segments.some((seg) => seg.speaker)
 
+    const speakerIds = hasSpeakers
+      ? [...new Set(segments.filter((s) => s.speaker).map((s) => s.speaker!))]
+      : []
+
     const speakerInstruction = hasSpeakers
-      ? `\nLa transcription contient des identifiants de locuteurs (Speaker 1, Speaker 2, etc.).
-Si tu peux identifier les vrais noms des locuteurs à partir du contenu de la conversation (présentations, interpellations par le nom, etc.), inclus un mapping dans le champ "speakers".
-Si tu ne peux pas identifier un locuteur, ne l'inclus pas dans le mapping.`
+      ? `\nLa transcription contient des identifiants de locuteurs : ${speakerIds.join(', ')}.
+Si tu peux identifier les vrais prénoms ou noms des locuteurs à partir du contenu de la conversation (présentations, interpellations par le nom, etc.), inclus un mapping dans le champ "speakers".
+N'inclus un locuteur QUE si tu as trouvé son vrai nom. N'invente jamais de nom.`
       : ''
 
     const systemPrompt = `Tu es un assistant expert en analyse de conversations audio.
@@ -158,8 +162,8 @@ Réponds toujours en français de manière claire et structurée.${speakerInstru
 
 Tu DOIS répondre en JSON valide avec cette structure exacte:
 {
-  "analysis": "ton analyse complète ici en texte lisible avec des retours à la ligne, du markdown, etc.",
-  "speakers": {"Speaker 1": "Prénom identifié", "Speaker 2": "Prénom identifié"}
+  "analysis": "ton analyse complète ici",
+  "speakers": {"speaker_0": "Jean", "speaker_1": "Marie"}
 }
 IMPORTANT: Le champ "analysis" doit contenir du texte formaté lisible (markdown avec titres, listes, paragraphes), PAS du JSON ou des données structurées. Écris l'analyse exactement comme si tu répondais en texte libre.
 Le champ "speakers" peut être un objet vide {} si aucun nom n'est identifiable.`
@@ -205,6 +209,60 @@ ${prompt}`
         analysis: this.extractFieldFromPartialJson(raw, 'analysis'),
         speakers: this.extractSpeakersFromPartialJson(raw),
       }
+    }
+  }
+
+  /**
+   * Identify speaker names from a diarized transcription.
+   * Lightweight call using mistral-small — used when no analysis prompt is provided.
+   */
+  async identifySpeakers(
+    segments: TranscriptionTimestamp[]
+  ): Promise<Record<string, string>> {
+    const hasSpeakers = segments.some((seg) => seg.speaker)
+    if (!hasSpeakers) return {}
+
+    // Collect all unique speaker IDs to list them explicitly in the prompt
+    const speakerIds = [...new Set(segments.filter((s) => s.speaker).map((s) => s.speaker!))]
+
+    const diarizedTranscription = segments
+      .map((seg) => (seg.speaker ? `[${seg.speaker}] ${seg.text.trim()}` : seg.text.trim()))
+      .join('\n')
+
+    const systemPrompt = `Tu es un assistant expert en identification de locuteurs dans des transcriptions audio.
+À partir de la transcription diarisée ci-dessous, identifie les vrais prénoms ou noms des locuteurs si possible (présentations, interpellations par le nom, etc.).
+
+Les identifiants de locuteurs présents sont : ${speakerIds.join(', ')}
+
+Tu DOIS répondre en JSON valide avec cette structure:
+{"speakers": {"identifiant_du_locuteur": "Vrai nom ou prénom"}}
+
+Exemple: si la transcription contient "[speaker_0] Salut Marc" et "[speaker_1] Salut Julie", tu réponds:
+{"speakers": {"speaker_0": "Julie", "speaker_1": "Marc"}}
+
+IMPORTANT:
+- N'inclus un locuteur dans le mapping QUE si tu as trouvé son vrai nom dans la conversation.
+- Si tu ne peux identifier aucun nom, réponds {"speakers": {}}.
+- N'invente JAMAIS de nom. Utilise uniquement les noms mentionnés dans la conversation.`
+
+    const response = await this.client.chat.complete({
+      model: 'mistral-small-2506',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: diarizedTranscription },
+      ],
+      responseFormat: { type: 'json_object' },
+      maxTokens: 1024,
+    })
+
+    const content = response.choices?.[0]?.message?.content
+    const raw = typeof content === 'string' ? content : ''
+
+    try {
+      const parsed = JSON.parse(raw) as { speakers?: Record<string, string> }
+      return parsed.speakers && typeof parsed.speakers === 'object' ? parsed.speakers : {}
+    } catch {
+      return this.extractSpeakersFromPartialJson(raw)
     }
   }
 
