@@ -1,5 +1,6 @@
 import { Queue, Job, QueueEvents } from 'bullmq'
 import queueConfig from '#config/queue'
+import Audio from '#models/audio'
 
 /**
  * Data structure for transcription jobs.
@@ -46,6 +47,7 @@ export interface JobStatusResponse {
   progress: number
   result?: TranscriptionJobResult
   error?: string
+  isChunked?: boolean
   createdAt?: Date
   processedAt?: Date
   completedAt?: Date
@@ -109,10 +111,14 @@ class QueueService {
     const state = await job.getState()
     const progress = (job.progress as number) || 0
 
+    // Load audio to include isChunked flag
+    const audio = job.data?.audioId ? await Audio.find(job.data.audioId) : null
+
     const response: JobStatusResponse = {
       jobId: job.id!,
       status: this.mapState(state),
       progress,
+      isChunked: audio?.isChunked ?? false,
       createdAt: job.timestamp ? new Date(job.timestamp) : undefined,
       processedAt: job.processedOn ? new Date(job.processedOn) : undefined,
     }

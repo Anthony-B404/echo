@@ -559,7 +559,9 @@
         "finalizing": "Finalizing...",
         "completed": "Processing complete",
         "failed": "Processing failed",
-        "errorTitle": "Processing error"
+        "errorTitle": "Processing error",
+        "chunkingWarningTitle": "Long file",
+        "chunkingWarning": "This audio file is long and was split into multiple parts for processing. Speaker identification (diarization) is not available for split files."
       },
       "deleteModal": {
         "title": "Delete audio",

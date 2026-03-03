@@ -60,6 +60,7 @@ const progressValue = computed(() => {
 const isProcessing = computed(() => props.status.status === AudioStatus.Processing)
 const isUploading = computed(() => props.status.status === 'uploading')
 const isFailed = computed(() => props.status.status === AudioStatus.Failed)
+const isChunked = computed(() => props.status.isChunked === true)
 </script>
 
 <template>
@@ -75,6 +76,15 @@ const isFailed = computed(() => props.status.status === AudioStatus.Failed)
       :model-value="progressValue"
       :color="progressColor"
       :animation="isUploading || isProcessing ? 'carousel' : undefined"
+    />
+
+    <UAlert
+      v-if="isChunked && (isProcessing || status.status === AudioStatus.Completed)"
+      color="info"
+      variant="subtle"
+      :title="t('components.workshop.processing.chunkingWarningTitle')"
+      :description="t('components.workshop.processing.chunkingWarning')"
+      icon="i-lucide-info"
     />
 
     <UAlert

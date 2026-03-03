@@ -103,12 +103,13 @@ export function useAudioSSE (options: UseAudioSSEOptions = {}) {
       conn.errorCount = 0
 
       try {
-        const data = JSON.parse(event.data) as { jobId: string; progress: number; status: string }
+        const data = JSON.parse(event.data) as { jobId: string; progress: number; status: string; isChunked?: boolean }
 
         const status: JobStatus = {
           jobId: data.jobId,
           status: data.status as JobStatus['status'],
-          progress: data.progress
+          progress: data.progress,
+          isChunked: data.isChunked
         }
 
         audioStore.updateJobStatus(jobId, status)
@@ -127,13 +128,15 @@ export function useAudioSSE (options: UseAudioSSEOptions = {}) {
           jobId: string
           progress: number
           result?: { transcription: string; analysis?: string }
+          isChunked?: boolean
         }
 
         const status: JobStatus = {
           jobId: data.jobId,
           status: AudioStatus.Completed,
           progress: 100,
-          result: data.result
+          result: data.result,
+          isChunked: data.isChunked
         }
 
         // Close SSE connection

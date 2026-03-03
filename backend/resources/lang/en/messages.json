@@ -174,7 +174,8 @@
     "analysis_generated": "Analysis generated successfully",
     "analysis_error": "An error occurred while generating the analysis",
     "no_transcription": "No transcription available for this audio",
-    "analysis_credit_description": "AI Analysis: {title}"
+    "analysis_credit_description": "AI Analysis: {title}",
+    "chunking_no_diarization": "This audio file is long and was split into multiple parts. Speaker identification is not available."
   },
   "transcription": {
     "not_found": "Transcription not found",

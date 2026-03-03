@@ -564,7 +564,9 @@
         "finalizing": "Finalisation...",
         "completed": "Traitement terminé",
         "failed": "Traitement échoué",
-        "errorTitle": "Erreur de traitement"
+        "errorTitle": "Erreur de traitement",
+        "chunkingWarningTitle": "Fichier long",
+        "chunkingWarning": "Ce fichier audio est long et a été découpé en plusieurs parties pour le traitement. L'identification des locuteurs (diarization) n'est pas disponible pour les fichiers découpés."
       },
       "deleteModal": {
         "title": "Supprimer l'audio",

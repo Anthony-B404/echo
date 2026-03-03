@@ -213,12 +213,16 @@ export default class AudioController {
       nodeRes.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
     }
 
+    // Track isChunked from audio record for SSE events
+    const isChunked = audio.isChunked ?? false
+
     // 6. If job is already finished, send final event and close
     if (currentStatus?.status === 'completed') {
       sendEvent('completed', {
         jobId,
         progress: 100,
         result: currentStatus.result,
+        isChunked,
       })
       nodeRes.end()
       return
@@ -239,16 +243,20 @@ export default class AudioController {
         jobId,
         progress: currentStatus.progress,
         status: currentStatus.status,
+        isChunked,
       })
     }
 
     // 8. Subscribe to BullMQ events for this job
     const unsubscribe = queueService.subscribeToJob(jobId, {
-      onProgress: (progress) => {
-        sendEvent('progress', { jobId, progress, status: 'processing' })
+      onProgress: async (progress) => {
+        // Reload audio to get latest isChunked value (set during transcription)
+        await audio.refresh()
+        sendEvent('progress', { jobId, progress, status: 'processing', isChunked: audio.isChunked ?? false })
       },
-      onCompleted: (result) => {
-        sendEvent('completed', { jobId, progress: 100, result })
+      onCompleted: async (result) => {
+        await audio.refresh()
+        sendEvent('completed', { jobId, progress: 100, result, isChunked: audio.isChunked ?? false })
         cleanup()
         nodeRes.end()
       },

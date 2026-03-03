@@ -174,7 +174,8 @@
     "analysis_generated": "Analyse générée avec succès",
     "analysis_error": "Une erreur est survenue lors de la génération de l'analyse",
     "no_transcription": "Aucune transcription disponible pour cet audio",
-    "analysis_credit_description": "Analyse IA : {title}"
+    "analysis_credit_description": "Analyse IA : {title}",
+    "chunking_no_diarization": "Ce fichier audio est long et a été découpé en plusieurs parties. L'identification des locuteurs n'est pas disponible."
   },
   "transcription": {
     "not_found": "Transcription introuvable",

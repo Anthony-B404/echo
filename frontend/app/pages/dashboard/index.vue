@@ -117,6 +117,25 @@ function removeFile () {
   prompt.value = ''
 }
 
+// Detect if selected file will require chunking (duration > 85 min * 1.5 speed = 127.5 min)
+const CHUNKING_THRESHOLD_SECONDS = 85 * 60 * 1.5 // ~7650s = 127.5 min
+const selectedFileDuration = ref<number | null>(null)
+const willBeChunked = computed(() =>
+  selectedFileDuration.value !== null && selectedFileDuration.value > CHUNKING_THRESHOLD_SECONDS
+)
+
+watch(selectedFile, async (file) => {
+  if (!file) {
+    selectedFileDuration.value = null
+    return
+  }
+  try {
+    selectedFileDuration.value = await getAudioDuration(file)
+  } catch {
+    selectedFileDuration.value = null
+  }
+})
+
 // Computed: has a prompt been entered
 const hasPrompt = computed(() => prompt.value.trim().length > 0)
 
@@ -240,6 +259,17 @@ const tabItems = computed(() => [
 
           <!-- Tabs for Upload/Record -->
           <UTabs v-model="activeTab" :items="tabItems" class="mb-6" />
+
+          <!-- Chunking warning: no diarization for long files -->
+          <UAlert
+            v-if="willBeChunked"
+            color="info"
+            variant="subtle"
+            :title="t('components.workshop.processing.chunkingWarningTitle')"
+            :description="t('components.workshop.processing.chunkingWarning')"
+            icon="i-lucide-info"
+            class="mb-4"
+          />
 
           <!-- Upload tab -->
           <div v-show="activeTab === 'upload'">

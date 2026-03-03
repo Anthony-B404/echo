@@ -24,7 +24,7 @@ import { SDKError } from '@mistralai/mistralai/models/errors/sdkerror.js'
 
 /**
  * Speed factor applied to audio before transcription.
- * Reduces Mistral API cost by ~33% while preserving transcription quality.
+ * Lower values preserve transcription quality (especially diarization).
  * Timestamps are corrected back to original speed after transcription.
  */
 const TRANSCRIPTION_SPEED_FACTOR = 1.5
@@ -53,28 +53,12 @@ function calculateChunkProgress(currentChunk: number, totalChunks: number): numb
 }
 
 /**
- * Deduplicate segments in overlap zone.
- * Filters out segments from the next chunk that start before the previous chunk ended.
- */
-function deduplicateOverlap(
-  prevSegments: TranscriptionTimestamp[],
-  nextSegments: TranscriptionTimestamp[]
-): TranscriptionTimestamp[] {
-  if (prevSegments.length === 0 || nextSegments.length === 0) {
-    return nextSegments
-  }
-
-  const prevEnd = prevSegments[prevSegments.length - 1]?.end || 0
-  return nextSegments.filter((seg) => seg.start >= prevEnd)
-}
-
-/**
  * Merge chunk transcription into context with timestamp adjustment.
  * Each chunk's segments are offset by the chunk's start time in the original sped-up audio.
+ * Segments in the overlap zone (starting before the previous chunk ended) are filtered out.
  *
- * Speaker IDs are disambiguated per chunk (suffix `_c1`, `_c2`, etc.) because
- * Mistral assigns IDs independently per transcription call — `speaker_0` in chunk 1
- * may be a different person than `speaker_0` in chunk 2.
+ * Diarization is disabled for chunked transcriptions because Mistral assigns
+ * speaker IDs independently per call, making them inconsistent across chunks.
  */
 function mergeChunkTranscription(
   context: MergeContext,
@@ -92,22 +76,22 @@ function mergeChunkTranscription(
     }
   }
 
-  // Disambiguate speaker IDs for chunks > 0 to avoid cross-chunk conflicts
   const adjustedSegments = chunkResult.segments.map((seg) => ({
     start: seg.start + chunkStartTime,
     end: seg.end + chunkStartTime,
     text: seg.text,
-    speaker: seg.speaker ? `${seg.speaker}_c${chunkIndex}` : seg.speaker,
+    speaker: seg.speaker,
   }))
 
-  const deduplicatedSegments = deduplicateOverlap(context.segments, adjustedSegments)
+  // Filter out segments in the overlap zone
+  const filteredSegments = adjustedSegments.filter((seg) => seg.start >= context.lastEndTime)
 
   const newLastEndTime =
-    deduplicatedSegments[deduplicatedSegments.length - 1]?.end || context.lastEndTime
+    filteredSegments[filteredSegments.length - 1]?.end || context.lastEndTime
 
   return {
     lastEndTime: newLastEndTime,
-    segments: [...context.segments, ...deduplicatedSegments],
+    segments: [...context.segments, ...filteredSegments],
     fullText: context.fullText + ' ' + chunkResult.text.trim(),
     language: context.language || chunkResult.language,
   }
@@ -115,15 +99,15 @@ function mergeChunkTranscription(
 
 /**
  * Transcribe audio with chunking support for long files.
- * Files > 20 min (after speed-up) are split into 20-min chunks with 5s overlap.
- * Each chunk is transcribed sequentially and results are merged with deduplication.
+ * Files > 85 min (after speed-up) are split into 85-min chunks with 5s overlap.
+ * Each chunk is transcribed sequentially without diarization and results are merged.
  */
 async function transcribeWithChunking(
   filePath: string,
   audioFileName: string,
   spedUpDuration: number,
   job: Job<TranscriptionJobData, TranscriptionJobResult>
-): Promise<TranscriptionResult> {
+): Promise<TranscriptionResult & { isChunked: boolean }> {
   const chunkingService = new AudioChunkingService()
   const chunkingResult = await chunkingService.splitIntoChunks(filePath)
 
@@ -142,7 +126,8 @@ async function transcribeWithChunking(
     }, 1000)
 
     try {
-      return await mistralService.transcribe(filePath, audioFileName, spedUpDuration, 'audio/mp4')
+      const result = await mistralService.transcribe(filePath, audioFileName, spedUpDuration, 'audio/mp4')
+      return { ...result, isChunked: false }
     } finally {
       clearInterval(transcriptionInterval)
     }
@@ -173,7 +158,8 @@ async function transcribeWithChunking(
         chunk.path,
         `chunk_${i}_${audioFileName}`,
         chunk.duration,
-        'audio/mp4'
+        'audio/mp4',
+        false
       )
 
       mergeContext = mergeChunkTranscription(mergeContext, chunkResult, i, chunk.startTime)
@@ -189,6 +175,7 @@ async function transcribeWithChunking(
     text: mergeContext.fullText.trim(),
     segments: mergeContext.segments,
     language: mergeContext.language,
+    isChunked: true,
   }
 }
 
@@ -236,14 +223,14 @@ function isRetriableError(error: unknown): boolean {
 
 /**
  * Process transcription jobs with chunking support for long audio files.
- * Files > 20 min (after 1.75x speed-up) are automatically chunked.
+ * Files > 85 min (after 1.5x speed-up) are automatically chunked.
  *
  * Progress stages (first attempt — parallel):
  * - 0-5%: Downloading file from storage
  * - 5-10%: ffprobe duration + credit check
  * - 10-15%: Speed up audio 1.75x
  * - 15-17%: Parallel conversion start + chunking check
- * - 17-72%: Transcription (one-shot or chunked)
+ * - 17-72%: Transcription (one-shot with diarization, or chunked without)
  * - 72-75%: Store converted file
  * - 75-92%: AI analysis
  * - 92-100%: Cleanup and completion
@@ -443,6 +430,7 @@ async function processTranscriptionJob(
         audio.fileSize = convertedFile.size
         audio.mimeType = 'audio/mp4'
         audio.duration = Math.round(conversionResult.duration)
+        audio.isChunked = transcriptionResult.isChunked
         await audio.save()
       }
 
@@ -562,6 +550,12 @@ async function processTranscriptionJob(
         seg.end = seg.end * TRANSCRIPTION_SPEED_FACTOR
       }
 
+      // Update isChunked flag on retry path
+      if (audio) {
+        audio.isChunked = transcriptionResult.isChunked
+        await audio.save()
+      }
+
       // Cleanup speed-up temp file
       if (tempSpeedUpPath) {
         await unlink(tempSpeedUpPath).catch(() => {})
@@ -630,14 +624,6 @@ async function processTranscriptionJob(
             }
           }
         }
-      }
-    }
-
-    // Strip chunk disambiguation suffixes (_c1, _c2, etc.) from any remaining raw speaker IDs.
-    // e.g. "speaker_0_c1" → "speaker_0"
-    for (const seg of analysisTranscriptionResult.segments) {
-      if (seg.speaker && /_c\d+$/.test(seg.speaker)) {
-        seg.speaker = seg.speaker.replace(/_c\d+$/, '')
       }
     }
 

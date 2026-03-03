@@ -53,12 +53,12 @@ export interface ChunkingResult {
 }
 
 export const CHUNKING_CONFIG = {
-  /** Duration of each chunk in seconds (60 minutes) */
-  CHUNK_DURATION_SECONDS: 60 * 60,
+  /** Duration of each chunk in seconds (85 minutes) */
+  CHUNK_DURATION_SECONDS: 85 * 60,
   /** Overlap between chunks to avoid mid-sentence cuts (5 seconds) */
   OVERLAP_SECONDS: 5,
-  /** Minimum duration that triggers chunking (60 minutes) */
-  MIN_DURATION_FOR_CHUNKING: 60 * 60,
+  /** Minimum duration that triggers chunking (85 minutes) */
+  MIN_DURATION_FOR_CHUNKING: 85 * 60,
 }
 
 export default class AudioChunkingService {

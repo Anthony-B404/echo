@@ -69,7 +69,8 @@ export default class MistralService {
     filePath: string,
     fileName: string,
     audioDurationSeconds?: number,
-    mimeType: string = 'audio/mp4'
+    mimeType: string = 'audio/mp4',
+    diarize: boolean = true
   ): Promise<TranscriptionResult> {
     const MIN_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
     const timeoutMs = audioDurationSeconds
@@ -112,7 +113,7 @@ export default class MistralService {
           model: 'voxtral-mini-latest',
           fileUrl,
           timestampGranularities: ['segment'],
-          diarize: true,
+          diarize,
         },
         { timeoutMs }
       )

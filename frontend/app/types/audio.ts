@@ -69,6 +69,7 @@ export interface Audio {
   status: AudioStatus
   errorMessage: string | null
   currentJobId: string | null
+  isChunked?: boolean
   createdAt: string
   updatedAt: string
   transcription?: Transcription | null
@@ -113,6 +114,7 @@ export interface JobStatus {
     analysis?: string
   }
   error?: string
+  isChunked?: boolean
   createdAt?: string
   processedAt?: string
   completedAt?: string

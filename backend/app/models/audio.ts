@@ -53,6 +53,9 @@ export default class Audio extends BaseModel {
   declare currentJobId: string | null
 
   @column()
+  declare isChunked: boolean
+
+  @column()
   declare chatCostAccumulated: number
 
   @column()
