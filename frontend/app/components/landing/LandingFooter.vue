@@ -25,7 +25,7 @@ const currentYear = new Date().getFullYear()
             <li><a href="#fonctionnalites" class="hover:text-purple-600 transition-colors">Fonctionnalités</a></li>
             <li><a href="#metiers" class="hover:text-purple-600 transition-colors">Cas d'usage métier</a></li>
             <li><a href="#comment-ca-marche" class="hover:text-purple-600 transition-colors">Comment ça marche</a></li>
-            <li><a href="#contact" class="hover:text-purple-600 transition-colors">Sécurité & confidentialité</a></li>
+            <li><a href="#securite" class="hover:text-purple-600 transition-colors">Sécurité & confidentialité</a></li>
           </ul>
         </div>
 

@@ -7,20 +7,20 @@ const professions = [
     icon: 'i-lucide-scale',
     title: 'Dictez après l\'audience, vos conclusions sont prêtes',
     description: 'Vous dictez 20 minutes après votre audience. Novika produit un projet de conclusions structuré, prêt à être relu et classé au dossier.',
-    stats: 'Jusqu\'à 4h gagnées par semaine',
+    stats: 'Des heures de rédaction économisées chaque semaine',
   },
   {
     role: 'Professionnels de santé',
     icon: 'i-lucide-heart-pulse',
     title: 'Le CR est prêt avant le patient suivant',
     description: 'Dictez entre deux consultations. Novika génère un compte-rendu médical formaté selon vos habitudes, sans erreur de terminologie.',
-    stats: 'Temps administratif divisé par 3',
+    stats: 'Le temps administratif chute drastiquement',
   },
   {
     role: 'Consultants & commerciaux',
     icon: 'i-lucide-briefcase',
     title: 'L\'appel client devient un plan d\'action',
-    description: 'Enregistrez un mémo vocal après votre rendez-vous. Novika en extrait les points clés, les objections et les prochaines étapes.',
+    description: 'Enregistrez un mémo vocal après votre rendez-vous. Novika en extrait les points clés, les décisions et les prochaines étapes.',
     stats: 'Suivi client toujours à jour',
   },
 ]

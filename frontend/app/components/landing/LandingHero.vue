@@ -24,7 +24,7 @@
           </h1>
 
           <p class="text-lg sm:text-xl text-slate-600 mb-10 max-w-2xl mx-auto lg:mx-0 animate-fade-in-up animation-delay-200">
-            Vous passez vos soirées à rédiger des comptes-rendus ? Déposez votre audio, Novika le transforme en document structuré prêt à l'emploi en 2 minutes. Adapté aux avocats, médecins et consultants.
+            Déposez votre enregistrement, récupérez un document structuré en 2 minutes. Conçu pour les avocats, médecins et consultants qui n'ont plus le temps de rédiger.
           </p>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in-up animation-delay-400">
@@ -33,7 +33,7 @@
               class="inline-flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-full text-base font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-1"
             >
               <UIcon name="i-lucide-calendar" class="w-5 h-5" />
-              Voir Novika en action
+              Réserver ma démo
             </a>
             <a
               href="#comment-ca-marche"

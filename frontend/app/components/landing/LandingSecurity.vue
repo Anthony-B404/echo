@@ -9,8 +9,8 @@ const securityFeatures = [
     color: 'bg-blue-100 text-blue-600',
   },
   {
-    title: 'Technologie française',
-    description: 'Novika s\'appuie sur une technologie de traitement du langage conçue en France. Vos documents restent soumis à la législation européenne.',
+    title: 'IA conçue en France',
+    description: 'Novika utilise Mistral, une IA française. Vos données sont traitées et hébergées en Europe, sous législation européenne.',
     icon: 'i-lucide-shield-check',
     color: 'bg-indigo-100 text-indigo-600',
   },
@@ -30,7 +30,7 @@ const securityFeatures = [
 </script>
 
 <template>
-  <section class="py-24 bg-slate-900 overflow-hidden relative">
+  <section id="securite" class="py-24 bg-slate-900 overflow-hidden relative">
     <!-- Glow effects -->
     <div class="absolute top-0 right-1/4 w-[40rem] h-[40rem] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-0 left-1/4 w-[40rem] h-[40rem] bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -57,7 +57,7 @@ const securityFeatures = [
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3 text-slate-200 bg-white/5 p-4 rounded-xl border border-white/10">
               <UIcon name="i-lucide-shield-check" class="w-6 h-6 text-green-400 shrink-0" />
-              <span class="font-medium">Conforme RGPD — audité et vérifié</span>
+              <span class="font-medium">Conforme RGPD — par conception</span>
             </div>
             <div class="flex items-center gap-3 text-slate-200 bg-white/5 p-4 rounded-xl border border-white/10">
               <UIcon name="i-lucide-lock" class="w-6 h-6 text-blue-400 shrink-0" />

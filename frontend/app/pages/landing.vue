@@ -3,6 +3,12 @@ definePageMeta({
   layout: false,
 })
 
+useHead({
+  script: [
+    { src: 'https://player.vimeo.com/api/player.js', defer: true },
+  ],
+})
+
 useSeoMeta({
   title: 'Novika — Dictez, votre document est prêt',
   description: 'Transformez vos enregistrements audio en documents structurés prêts à l\'emploi en 2 minutes. Adapté aux avocats, médecins et consultants. Hébergé en France, conforme RGPD.',
@@ -16,10 +22,11 @@ useSeoMeta({
     <LandingNavbar />
     <main>
       <LandingHero />
-      <LandingFeatures />
-      <LandingSecurity />
-      <LandingTargetAudience />
+      <LandingVideoDemo />
       <LandingHowItWorks />
+      <LandingFeatures />
+      <LandingTargetAudience />
+      <LandingSecurity />
       <LandingCTA />
     </main>
     <LandingFooter />

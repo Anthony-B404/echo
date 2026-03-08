@@ -11,6 +11,11 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#7c3aed' },
         { property: 'og:site_name', content: 'Novika' },
         { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: 'Novika — Dictez, votre document est prêt' },
+        { property: 'og:description', content: 'De l\'audio brut au document professionnel en 2 minutes. Adapté aux avocats, médecins et consultants.' },
+        { property: 'og:image', content: 'https://novika.fr/og-image.png' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' },
@@ -51,7 +56,9 @@ export default defineNuxtConfig({
     '@formkit/auto-animate/nuxt'
   ],
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/landing': { prerender: true },
+    '/fr/landing': { prerender: true },
   },
   i18n: {
     strategy: 'prefix_and_default',

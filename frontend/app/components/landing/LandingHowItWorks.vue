@@ -24,7 +24,7 @@ const steps = [
 </script>
 
 <template>
-  <section id="comment-ca-marche" class="py-24 bg-white overflow-hidden">
+  <section class="py-24 bg-white overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="text-center max-w-3xl mx-auto mb-20">
         <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
